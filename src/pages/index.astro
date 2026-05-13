@@ -1,0 +1,209 @@
+---
+import Map from '../components/Map.astro';
+import FacilityCard from '../components/FacilityCard.astro';
+import { loadFacilities } from '../lib/loadFacilities.js';
+import { formatDate } from '../lib/formatters.js';
+import '../styles/global.css';
+
+const facilities = loadFacilities();
+
+// Summary stats
+const totalMw = facilities
+  .filter(f => f.capacity?.it_load_mw != null)
+  .reduce((sum, f) => sum + f.capacity.it_load_mw, 0);
+const countries = [...new Set(facilities.map(f => f.country))].length;
+const statusGroups = {
+  operational: facilities.filter(f => f.status === 'operational').length,
+  expanded:    facilities.filter(f => f.status === 'expanded').length,
+  announced:   facilities.filter(f => f.status === 'announced').length,
+  under_construction: facilities.filter(f => f.status === 'under_construction').length,
+};
+
+// Recently added — last 5 by first_tracked
+const recentlyAdded = [...facilities]
+  .filter(f => f.first_tracked)
+  .sort((a, b) => new Date(b.first_tracked) - new Date(a.first_tracked))
+  .slice(0, 5);
+
+const allStatuses = [...new Set(facilities.map(f => f.status))];
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Africa AI Datacenter Tracker</title>
+    <meta
+      name="description"
+      content="Open-source tracker and research publication for AI-relevant datacenters across Africa. Every data point is sourced and dated."
+    />
+  </head>
+  <body class="bg-gray-50 text-gray-900 font-sans">
+
+    <header class="bg-white border-b border-gray-200">
+      <div class="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between gap-4">
+        <div>
+          <span class="text-base font-bold tracking-tight">Africa AI Datacenter Tracker</span>
+          <span class="hidden sm:inline text-sm text-gray-400 ml-2">open dataset + research</span>
+        </div>
+        <nav class="flex gap-4 text-sm text-gray-500">
+          <a href="/glossary" class="hover:text-gray-900">Glossary</a>
+          <a href="/methodology" class="hover:text-gray-900">Methodology</a>
+          <a href="https://github.com" class="hover:text-gray-900">GitHub ↗</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="max-w-5xl mx-auto px-4 py-8">
+
+      <section class="mb-8">
+        <h1 class="text-2xl font-bold text-gray-900 mb-2">AI Datacenter Infrastructure in Africa</h1>
+        <p class="text-gray-600 max-w-2xl mb-6">
+          A version-controlled, open dataset tracking hyperscaler, carrier-neutral colocation, and
+          AI cloud infrastructure across Africa. Every data point is sourced, dated, and assigned a
+          confidence level. Scope: announced, under construction, or operational within the last
+          three years.
+        </p>
+
+        <Map facilities={facilities} />
+
+        <!-- Map legend -->
+        <div class="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1 text-xs text-gray-500">
+          <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block"></span>Operational</span>
+          <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-blue-500 inline-block"></span>Under construction</span>
+          <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-amber-500 inline-block"></span>Announced</span>
+          <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-teal-500 inline-block"></span>Expanding</span>
+        </div>
+      </section>
+
+      <!-- Stats bar -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+        <div class="bg-white border border-gray-200 rounded-lg px-4 py-3">
+          <p class="text-2xl font-bold text-gray-900">{facilities.length}</p>
+          <p class="text-xs text-gray-400 mt-0.5">facilities tracked</p>
+        </div>
+        <div class="bg-white border border-gray-200 rounded-lg px-4 py-3">
+          <p class="text-2xl font-bold text-gray-900">{totalMw.toLocaleString()} <span class="text-base font-medium text-gray-500">MW</span></p>
+          <p class="text-xs text-gray-400 mt-0.5">total capacity tracked</p>
+        </div>
+        <div class="bg-white border border-gray-200 rounded-lg px-4 py-3">
+          <p class="text-2xl font-bold text-gray-900">{countries}</p>
+          <p class="text-xs text-gray-400 mt-0.5">{countries === 1 ? 'country' : 'countries'}</p>
+        </div>
+        <div class="bg-white border border-gray-200 rounded-lg px-4 py-3">
+          <p class="text-2xl font-bold text-gray-900">{statusGroups.operational + statusGroups.expanded}</p>
+          <p class="text-xs text-gray-400 mt-0.5">operational / expanding</p>
+        </div>
+      </div>
+
+      <!-- Status filter -->
+      <div class="flex flex-wrap items-center gap-2 mb-4">
+        <span class="text-xs text-gray-400 mr-1">Filter:</span>
+        <button
+          data-filter="all"
+          class="filter-btn active-filter text-xs px-3 py-1.5 rounded-full border font-medium transition-colors border-gray-900 bg-gray-900 text-white"
+        >
+          All <span class="filter-count ml-1 opacity-70">{facilities.length}</span>
+        </button>
+        {allStatuses.includes('operational') && (
+          <button data-filter="operational" class="filter-btn text-xs px-3 py-1.5 rounded-full border font-medium transition-colors border-gray-200 bg-white text-gray-600 hover:border-emerald-400">
+            Operational <span class="filter-count ml-1 opacity-70">{statusGroups.operational}</span>
+          </button>
+        )}
+        {allStatuses.includes('expanded') && (
+          <button data-filter="expanded" class="filter-btn text-xs px-3 py-1.5 rounded-full border font-medium transition-colors border-gray-200 bg-white text-gray-600 hover:border-teal-400">
+            Expanding <span class="filter-count ml-1 opacity-70">{statusGroups.expanded}</span>
+          </button>
+        )}
+        {allStatuses.includes('announced') && (
+          <button data-filter="announced" class="filter-btn text-xs px-3 py-1.5 rounded-full border font-medium transition-colors border-gray-200 bg-white text-gray-600 hover:border-amber-400">
+            Announced <span class="filter-count ml-1 opacity-70">{statusGroups.announced}</span>
+          </button>
+        )}
+        {allStatuses.includes('under_construction') && (
+          <button data-filter="under_construction" class="filter-btn text-xs px-3 py-1.5 rounded-full border font-medium transition-colors border-gray-200 bg-white text-gray-600 hover:border-blue-400">
+            Under Construction <span class="filter-count ml-1 opacity-70">{statusGroups.under_construction}</span>
+          </button>
+        )}
+      </div>
+
+      <!-- Facility grid -->
+      <section>
+        <h2 class="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">
+          Tracked Facilities
+        </h2>
+        <div id="facility-grid" class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {facilities.map(f => (
+            <div data-card data-status={f.status}>
+              <FacilityCard facility={f} />
+            </div>
+          ))}
+        </div>
+        <p id="no-results" class="hidden text-sm text-gray-400 mt-4">No facilities match this filter.</p>
+        <p class="text-xs text-gray-400 mt-4">
+          More facilities coming. Want to contribute?{' '}
+          <a href="https://github.com" class="underline hover:text-gray-600">Open a PR on GitHub.</a>
+        </p>
+      </section>
+
+      <!-- Recently added -->
+      {recentlyAdded.length > 0 && (
+        <section class="mt-12 border-t border-gray-200 pt-8">
+          <h2 class="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-4">Recently Added</h2>
+          <ol class="space-y-2">
+            {recentlyAdded.map(f => (
+              <li class="flex items-center justify-between gap-4 text-sm">
+                <a href={`/facilities/${f.id}`} class="text-gray-900 hover:text-blue-600 hover:underline font-medium truncate">
+                  {f.name}
+                </a>
+                <span class="shrink-0 text-xs text-gray-400">{formatDate(f.first_tracked)}</span>
+              </li>
+            ))}
+          </ol>
+        </section>
+      )}
+
+    </main>
+
+    <footer class="border-t border-gray-200 mt-16">
+      <div class="max-w-5xl mx-auto px-4 py-6 flex flex-wrap items-center justify-between gap-4 text-sm text-gray-400">
+        <span>Africa AI Datacenter Tracker — open data, CC-BY 4.0</span>
+        <div class="flex gap-4">
+          <a href="/glossary" class="hover:text-gray-600">Glossary</a>
+          <a href="/methodology" class="hover:text-gray-600">Methodology</a>
+          <a href="https://github.com" class="hover:text-gray-600">GitHub ↗</a>
+        </div>
+      </div>
+    </footer>
+
+    <script>
+      const filterBtns = document.querySelectorAll<HTMLButtonElement>('[data-filter]');
+      const cards = document.querySelectorAll<HTMLElement>('[data-card]');
+      const noResults = document.getElementById('no-results');
+
+      filterBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const filter = btn.dataset.filter!;
+
+          filterBtns.forEach(b => {
+            b.classList.remove('active-filter', 'border-gray-900', 'bg-gray-900', 'text-white');
+            b.classList.add('border-gray-200', 'bg-white', 'text-gray-600');
+          });
+          btn.classList.add('active-filter', 'border-gray-900', 'bg-gray-900', 'text-white');
+          btn.classList.remove('border-gray-200', 'bg-white', 'text-gray-600');
+
+          let visible = 0;
+          cards.forEach(card => {
+            const show = filter === 'all' || card.dataset.status === filter;
+            card.classList.toggle('hidden', !show);
+            if (show) visible++;
+          });
+
+          if (noResults) noResults.classList.toggle('hidden', visible > 0);
+        });
+      });
+    </script>
+
+  </body>
+</html>

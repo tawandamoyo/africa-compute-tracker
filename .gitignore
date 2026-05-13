@@ -1,0 +1,14 @@
+node_modules/
+dist/
+.astro/
+.env
+.env.*
+.DS_Store
+*.log
+
+
+// markdown stuff
+PROJECT.md
+intend.md
+
+

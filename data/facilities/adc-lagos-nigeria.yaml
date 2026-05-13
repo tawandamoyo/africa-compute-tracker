@@ -1,0 +1,73 @@
+id: adc-lagos-nigeria
+name: Africa Data Centres Nigeria
+aliases:
+  - ADC Nigeria
+  - Cassava Technologies Nigeria
+country: NG
+city: Lagos
+region: Lagos State
+location:
+  lat: 6.5244
+  lng: 3.3792
+  precision: city
+status: announced
+status_history:
+  - status: announced
+    date: "2026-05-11"
+    note: Expansion to Nigeria announced in Cassava press release alongside Egypt, Kenya, Morocco. No site details given.
+operators:
+  - Africa Data Centres
+owners:
+  - Africa Data Centres
+infrastructure:
+  connectivity:
+    - Cassava Technologies pan-African fibre-optic network (high-speed, ultra-low-latency)
+workload_profile:
+  ai_training: true
+  ai_inference: true
+  general_cloud: true
+  notes: >
+    Planned AI Factory expansion. Workload profile inferred from the SA deployment model — NVIDIA Cloud Partner (NCP)
+    accelerated computing for training and inference. No Nigeria-specific capacity or timeline disclosed in the source.
+claims: []
+claim_history: []
+constraints: []
+sources:
+  - id: s1
+    url: https://example.com/todo-cassava-nvidia-ai-factory-press-release
+    title: Cassava Technologies announces Africa's first AI Factory powered by NVIDIA
+    publisher: Cassava Technologies
+    retrieved: "2026-05-11"
+    trust_tier: company_official
+sourced_fields:
+  operators:
+    source_ids:
+      - s1
+    confidence: confirmed
+  status:
+    source_ids:
+      - s1
+    confidence: confirmed
+    note: Named as an expansion target alongside Egypt, Kenya, Morocco. No date given.
+  infrastructure.connectivity:
+    source_ids:
+      - s1
+    confidence: confirmed
+  workload_profile.ai_training:
+    source_ids:
+      - s1
+    confidence: reported
+    note: Inferred from the NCP AI Factory model described for SA; Nigeria-specific workload not stated.
+last_verified: "2026-05-11"
+first_tracked: "2026-05-11"
+notes: |
+  Skeleton record. Cassava Technologies' press release names Nigeria as one of four countries
+  earmarked for AI Factory expansion beyond South Africa (alongside Egypt, Kenya, Morocco).
+  No site address, capacity, or timeline is given for Nigeria specifically.
+
+  City set to Lagos as Nigeria's primary commercial and technology hub; Abuja (capital) is a
+  possible alternative — not confirmed in the source.
+
+  Update this record when Cassava publishes a country-specific announcement.
+
+  **Source URL:** Placeholder — replace with the actual Cassava press release URL.

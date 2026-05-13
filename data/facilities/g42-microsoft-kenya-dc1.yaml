@@ -1,0 +1,150 @@
+id: g42-microsoft-kenya-dc1
+name: G42 / Microsoft Azure East Africa Data Centre
+aliases:
+  - Microsoft Azure East Africa Region
+  - G42 Kenya Data Centre
+country: KE
+city: Nairobi
+region: Nairobi County
+location:
+  lat: -1.2921
+  lng: 36.8219
+  precision: city
+status: announced
+status_history:
+  - status: announced
+    date: "2024-05-22"
+    note: >-
+      Letter of intent signed between Microsoft, G42, and Kenya's Ministry of Information at President Ruto's US state
+      visit. Operational within 2 years of signing definitive agreements.
+timeline:
+  expected_operational: "2026-12-31"
+operators:
+  - G42
+owners:
+  - G42
+tenants:
+  - Microsoft Azure
+infrastructure:
+  cooling_adequacy_for_ai: unknown
+  connectivity:
+    - Submarine cable access (East African coast)
+power:
+  grid_connected: true
+  utility: Kenya Power
+  grid_carbon_intensity_gco2_per_kwh: 70
+  backup_type:
+    - diesel
+water:
+  source: unknown
+  water_stress_region: medium
+financials:
+  announced_capex_usd_millions: 1000
+  investors:
+    - Microsoft
+    - G42
+  government_incentives:
+    - Supported by Kenya government under Ministry of Information, Communications and the Digital Economy
+governance:
+  jurisdiction: Kenya
+  foreign_capital_origin:
+    - United Arab Emirates (G42)
+    - United States (Microsoft)
+  known_government_contracts:
+    - Strategic partnership with Kenya government signed at President Ruto's US state visit (2024-05-24)
+workload_profile:
+  ai_inference: true
+  general_cloud: true
+  notes: >
+    Purpose-built Azure cloud region for East Africa, providing access to Microsoft's full Azure cloud portfolio. G42
+    (Abu Dhabi-based, Microsoft-backed) is the developer and operator. G42 was simultaneously training an open-source
+    LLM in Swahili and English at time of announcement. AI inference workloads confirmed by Microsoft Azure cloud region
+    designation.
+claims: []
+claim_history: []
+constraints: []
+sources:
+  - id: s1
+    url: https://example.com/todo-reuters-microsoft-g42-kenya-data-center
+    title: Microsoft, G42 to invest $1 billion in Kenya data center
+    publisher: Reuters
+    retrieved: "2026-05-12"
+    trust_tier: trade_press
+sourced_fields:
+  operators:
+    source_ids:
+      - s1
+    confidence: reported
+    note: G42 named as developer and builder; Microsoft is investor and cloud tenant.
+  owners:
+    source_ids:
+      - s1
+    confidence: reported
+    note: G42 builds and operates; ownership structure post-construction not disclosed.
+  tenants:
+    source_ids:
+      - s1
+    confidence: confirmed
+    note: Microsoft Azure East Africa cloud region explicitly confirmed in source.
+  financials.announced_capex_usd_millions:
+    source_ids:
+      - s1
+    confidence: confirmed
+    note: $1 billion investment figure explicitly stated in Reuters article.
+  power.grid_carbon_intensity_gco2_per_kwh:
+    source_ids:
+      - s1
+    confidence: estimated
+    note: >-
+      Kenya grid is geothermal and hydro dominant (~93% renewable). IEA/IRENA estimate ~60-80 gCO₂/kWh; 70 used here.
+      Article explicitly states geothermal power. Grid-level figure, not facility-specific.
+  infrastructure.cooling_adequacy_for_ai:
+    source_ids:
+      - s1
+    confidence: estimated
+    note: >-
+      Cooling type not disclosed. AI inference confirmed via Azure cloud region. Rated unknown pending direct
+      disclosure.
+  timeline.expected_operational:
+    source_ids:
+      - s1
+    confidence: estimated
+    note: "'Within 2 years of signing definitive agreements' from LOI date ~May 2024. 2026-12-31 is a conservative estimate."
+  workload_profile.ai_inference:
+    source_ids:
+      - s1
+    confidence: confirmed
+    note: Azure cloud region designation confirms cloud AI inference capability.
+  governance.foreign_capital_origin:
+    source_ids:
+      - s1
+    confidence: confirmed
+  governance.known_government_contracts:
+    source_ids:
+      - s1
+    confidence: confirmed
+last_verified: "2026-05-12"
+first_tracked: "2026-05-12"
+notes: |
+  G42 (Abu Dhabi-based AI and cloud company, backed by Microsoft's $1.5B investment in April 2024)
+  is developing a $1 billion data centre in Kenya, which will host Microsoft's Azure East Africa
+  cloud region.
+
+  The facility was announced via a letter of intent (LOI) signed on 24 May 2024 between Microsoft,
+  G42, and Kenya's Ministry of Information, Communications and the Digital Economy — coinciding with
+  President William Ruto's state visit to the United States.
+
+  **Power:** The facility will be powered by geothermal energy — Kenya's primary renewable source
+  (Kenya is the 8th largest geothermal producer globally). Kenya's grid carbon intensity is
+  approximately 60–70 gCO₂/kWh, making this one of the lowest-carbon data centres on the continent.
+
+  **Status note:** The source article is from May 2024. As of May 2026, definitive agreements may
+  have been signed and construction may be underway. This record should be verified against more
+  recent sources — update status to `under_construction` or `operational` as appropriate.
+
+  **G42 context:** G42 is building a Swahili/English open-source LLM at time of announcement.
+  Microsoft's $1.5B investment in G42 (April 2024) includes a commitment to cloud interoperability.
+  The Kenya facility is part of Microsoft's broader African cloud expansion alongside its
+  South Africa Azure regions.
+
+  **Source URL:** The Reuters article URL is a placeholder — replace with the actual article URL.

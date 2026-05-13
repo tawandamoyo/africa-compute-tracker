@@ -1,0 +1,144 @@
+id: adc-midrand
+name: "Africa Data Centres Midrand"
+aliases:
+  - "ADC Midrand"
+  - "Cassava Technologies Midrand"
+
+country: ZA
+city: Midrand
+region: Gauteng
+location:
+  # Old Pretoria Road, Midrand — city-level centroid, exact site not confirmed
+  lat: -25.9999
+  lng: 28.1281
+  precision: city
+
+status: expanded
+status_history:
+  - status: operational
+    date: "2020-01-01"
+    note: "Founding year approximate — ADC entered South Africa circa 2020."
+  - status: expanded
+    date: "2025-06-01"
+    note: "NVIDIA Cloud Partner (NCP) accelerated computing platform deployed at SA data centres by June 2025; AI training and inference workloads activated."
+  - status: expanded
+    date: "2026-01-31"
+    note: "Stanlib Infrastructure Fund II acquired major stake in ADC SA operations; approved end-January 2026."
+
+operators:
+  - "Africa Data Centres"
+owners:
+  - "Africa Data Centres"
+  - "Stanlib Infrastructure Fund II"
+
+infrastructure:
+  cooling_adequacy_for_ai: unknown
+  connectivity:
+    - "Cassava Technologies pan-African fibre-optic network (high-speed, ultra-low-latency)"
+
+power:
+  grid_connected: true
+  utility: "Eskom"
+  grid_carbon_intensity_gco2_per_kwh: 900
+  ppa_partners:
+    - "Distributed Power Africa"
+
+water:
+  cooling_uses_water: true
+  source: municipal
+  water_stress_region: high
+
+governance:
+  jurisdiction: "South Africa"
+  data_residency_commitments:
+    - "Data physically resident in South Africa under POPIA jurisdiction"
+
+workload_profile:
+  ai_training: true
+  ai_inference: true
+  general_cloud: true
+  colocation: true
+  notes: >
+    AI training and inference capacity confirmed. Cassava/ADC is an NVIDIA Cloud Partner (NCP),
+    deploying NVIDIA accelerated computing and AI software using NCP reference architectures.
+    NVIDIA GPU supercomputers enable model training, fine-tuning, and advanced inference.
+    The press release targets SA deployment by June 2025; site-specific allocation between
+    Midrand and CPT1 is not publicly disclosed.
+
+sources:
+  - id: s1
+    url: "https://ai.uct.ac.za/articles/2026-02-13-wheeling-and-dealing-behind-south-africas-ai-factories"
+    title: "Wheeling and dealing behind South Africa's AI factories"
+    publisher: "UCT AI Initiative"
+    retrieved: "2026-05-11"
+    trust_tier: trade_press
+  - id: s2
+    # TODO: replace with the actual Cassava press release URL
+    url: "https://example.com/todo-cassava-nvidia-ai-factory-press-release"
+    title: "Cassava Technologies announces Africa's first AI Factory powered by NVIDIA"
+    publisher: "Cassava Technologies"
+    retrieved: "2026-05-11"
+    trust_tier: company_official
+
+sourced_fields:
+  operators:
+    source_ids: ["s1"]
+    confidence: reported
+  owners:
+    source_ids: ["s1"]
+    confidence: reported
+    note: "Stanlib Infrastructure Fund II acquired a major stake in ADC's SA operations, approved end-January 2026."
+  infrastructure.connectivity:
+    source_ids: ["s2"]
+    confidence: confirmed
+    note: "Pan-African fibre network owned by Cassava Technologies, described as high-speed ultra-low-latency."
+  power.ppa_partners:
+    source_ids: ["s1"]
+    confidence: reported
+    note: "12MW solar farm near Bloemfontein with Distributed Power Africa, powering ADC SA portfolio under wheeling."
+  workload_profile.ai_training:
+    source_ids: ["s2"]
+    confidence: confirmed
+    note: "Cassava press release explicitly states training capability: 'train AI models, fine-tuning and advanced inference'."
+  workload_profile.ai_inference:
+    source_ids: ["s1", "s2"]
+    confidence: confirmed
+    note: "Confirmed by both UCT article (Nvidia GPU deployment) and Cassava company press release (NCP designation)."
+  status:
+    source_ids: ["s1", "s2"]
+    confidence: confirmed
+  power.grid_carbon_intensity_gco2_per_kwh:
+    source_ids: ["s1"]
+    confidence: estimated
+    note: "Eskom grid average ~900 gCO₂/kWh per Eskom Integrated Reports (2022-23). Grid-level figure, not facility-specific."
+  infrastructure.cooling_adequacy_for_ai:
+    source_ids: ["s1"]
+    confidence: estimated
+    note: "Cooling type not disclosed in source. NVIDIA NCP deployment confirmed but rack-level liquid cooling not specified. Rated unknown pending direct disclosure."
+
+last_verified: "2026-05-11"
+first_tracked: "2026-05-11"
+notes: |
+  Africa Data Centres (ADC) Midrand is the Gauteng campus of ADC, a subsidiary of Cassava
+  Technologies (chairman: Strive Masiyiwa, CEO: Adil El Youssefi). Located on Old Pretoria Road
+  in Midrand, it sits in the same corridor as the Vantage Data Centers Waterfall City facility.
+
+  Cassava is an NVIDIA Cloud Partner (NCP), deploying NVIDIA accelerated computing platforms
+  and AI software using NCP reference architectures. The SA deployment was targeted by June 2025.
+  This formally confirms AI model training capability — not just inference — at ADC's South
+  African facilities.
+
+  The Midrand campus is served by the Eskom grid. ADC uses wheeling arrangements via a 12MW
+  solar farm near Bloemfontein (with Distributed Power Africa) to offset grid consumption
+  across its South African portfolio.
+
+  Stanlib Infrastructure Fund II (co-head: Andy Louw) acquired a major stake in ADC's South
+  African operations in approximately January 2026, introducing domestic institutional capital
+  into what had been a foreign-owned infrastructure play.
+
+  The press release does not distinguish between Midrand and CPT1 for GPU allocation — both SA
+  facilities are part of the NCP deployment.
+
+  **Capacity:** Not stated in source — requires a primary source (ADC press releases, company filings).
+
+  **Source URL s2:** The Cassava press release URL is a placeholder — replace with the actual URL.

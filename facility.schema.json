@@ -1,0 +1,489 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://africa-ai-datacenters.example/schemas/facility.v2.json",
+  "title": "African AI Datacenter Facility",
+  "description": "v2 schema. Every substantive field is optional except the required core. Non-obvious fields are sourced via the `sources` array and referenced by id in `sourced_fields`. Field paths in `sourced_fields` use dot notation for objects (e.g. `capacity.it_load_mw`) and bracket notation for arrays (e.g. `operators[0]`, `claims[0].entity`).",
+  "type": "object",
+  "required": ["id", "name", "country", "status", "last_verified", "sources"],
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]+$",
+      "description": "Stable slug, e.g. 'adc-cpt1-cape-town'. Never change after publish."
+    },
+    "name": {
+      "type": "string",
+      "description": "Facility's public name."
+    },
+    "aliases": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Alternative names seen in press or filings."
+    },
+
+    "country": {
+      "type": "string",
+      "description": "ISO 3166-1 alpha-2 country code.",
+      "pattern": "^[A-Z]{2}$"
+    },
+    "city": { "type": "string" },
+    "region": { "type": "string", "description": "Province/state/admin region." },
+    "location": {
+      "type": "object",
+      "properties": {
+        "lat": { "type": "number", "minimum": -90, "maximum": 90 },
+        "lng": { "type": "number", "minimum": -180, "maximum": 180 },
+        "precision": {
+          "type": "string",
+          "enum": ["exact", "city", "region"],
+          "description": "How precise the coordinates are. 'exact' = verified site, 'city' = city centroid, 'region' = regional centroid."
+        }
+      },
+      "required": ["lat", "lng", "precision"]
+    },
+
+    "status": {
+      "type": "string",
+      "enum": ["announced", "under_construction", "operational", "expanded", "cancelled", "paused"],
+      "description": "Current status. 'expanded' means operational with known additional phases underway."
+    },
+    "status_history": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["status", "date"],
+        "properties": {
+          "status": { "type": "string" },
+          "date": { "type": "string", "format": "date" },
+          "note": { "type": "string" }
+        }
+      }
+    },
+
+    "scale_tier": {
+      "type": "string",
+      "enum": ["hyperscale", "large", "medium", "small"],
+      "description": "Power scale at full buildout. hyperscale ≥500 MW IT load; large 100–499 MW; medium 30–99 MW; small <30 MW. Leave absent if IT load is unknown."
+    },
+
+    "timeline": {
+      "type": "object",
+      "description": "Key construction and operational dates.",
+      "properties": {
+        "construction_start": { "type": "string", "format": "date" },
+        "expected_operational": { "type": "string", "format": "date", "description": "Announced or estimated date facility comes online." },
+        "actual_operational": { "type": "string", "format": "date", "description": "Confirmed date facility began operations." }
+      }
+    },
+
+    "operators": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Entities operating the facility day-to-day."
+    },
+    "owners": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Entities with ownership stake. May differ from operators."
+    },
+    "tenants": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Known major tenants (hyperscalers, government, etc.)."
+    },
+
+    "capacity": {
+      "type": "object",
+      "properties": {
+        "it_load_mw": { "type": "number", "minimum": 0, "description": "IT load in megawatts at full buildout." },
+        "it_load_mw_current": { "type": "number", "minimum": 0, "description": "IT load operational today, if phased." },
+        "it_load_mw_as_of": {
+          "type": "string",
+          "format": "date",
+          "description": "Date on which `it_load_mw_current` was measured/reported."
+        },
+        "total_facility_mw": { "type": "number", "minimum": 0 },
+        "power_density_kw_per_rack": {
+          "type": "number", "minimum": 0,
+          "description": "Kilowatts per server rack. Conventional DCs ~10 kW/rack; AI DCs ~100 kW/rack. Key differentiator."
+        },
+        "gpu_count_known": { "type": "integer", "minimum": 0, "description": "Only populate if publicly disclosed." },
+        "h100_equivalent_gpus": {
+          "type": "number", "minimum": 0,
+          "description": "Compute capacity normalised to H100-equivalent GPUs. Enables cross-facility comparison regardless of GPU generation."
+        },
+        "building_sqm": { "type": "number", "minimum": 0 },
+        "land_area_hectares": { "type": "number", "minimum": 0, "description": "Total site land area in hectares." },
+        "hall_count": { "type": "integer", "minimum": 0 },
+        "phases_planned": { "type": "integer", "minimum": 1 },
+        "phases_operational": { "type": "integer", "minimum": 0 }
+      }
+    },
+
+    "infrastructure": {
+      "type": "object",
+      "properties": {
+        "cooling": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["air", "evaporative", "chilled_water", "direct_liquid", "immersion", "free_air", "unknown"]
+          }
+        },
+        "cooling_adequacy_for_ai": {
+          "type": "string",
+          "enum": ["inference_only", "ai_capable", "frontier_training", "unknown"],
+          "description": "inference_only: air/standard cooling, <50 kW/rack, no confirmed liquid cooling at rack level. ai_capable: liquid cooling confirmed, 50–200 kW/rack, GPU clusters present. frontier_training: liquid cooling confirmed, 200+ MW, H100-class or newer. unknown: not yet assessed."
+        },
+        "tier_certification": {
+          "type": "string",
+          "enum": ["tier_i", "tier_ii", "tier_iii", "tier_iv", "none", "unknown"]
+        },
+        "connectivity": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "E.g., subsea cables landing nearby, IXP membership."
+        }
+      }
+    },
+
+    "power": {
+      "type": "object",
+      "properties": {
+        "grid_connected": { "type": "boolean" },
+        "utility": { "type": "string", "description": "Primary utility provider." },
+        "grid_carbon_intensity_gco2_per_kwh": {
+          "type": "number", "minimum": 0,
+          "description": "Carbon intensity of the primary grid supply in grams CO₂ per kWh. Grid-level figure, not facility-specific. Global avg ~436 g/kWh (IEA 2022); South Africa (Eskom) ~900 g/kWh."
+        },
+        "on_site_generation_mw": { "type": "number", "minimum": 0 },
+        "ppa_partners": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "renewable_pct_reported": { "type": "number", "minimum": 0, "maximum": 100 },
+        "backup_type": {
+          "type": "array",
+          "items": { "type": "string", "enum": ["diesel", "gas", "battery", "other"] }
+        }
+      }
+    },
+
+    "water": {
+      "type": "object",
+      "properties": {
+        "cooling_uses_water": { "type": "boolean" },
+        "cooling_is_consumptive": {
+          "type": "boolean",
+          "description": "true = evaporative cooling towers (water lost to atmosphere). false = closed-loop / air-cooled chillers (water recirculated). Consumptive use matters most in high water-stress regions."
+        },
+        "source": {
+          "type": "string",
+          "enum": ["municipal", "groundwater", "surface_water", "recycled", "seawater", "none", "unknown"]
+        },
+        "annual_use_megaliters_estimated": { "type": "number", "minimum": 0 },
+        "water_stress_region": {
+          "type": "string",
+          "enum": ["low", "medium", "high", "extreme", "unknown"],
+          "description": "Per WRI Aqueduct or equivalent."
+        }
+      }
+    },
+
+    "financials": {
+      "type": "object",
+      "properties": {
+        "announced_capex_usd_millions": { "type": "number", "minimum": 0 },
+        "capex_currency_year": {
+          "type": "integer",
+          "description": "Year of USD purchasing power that `announced_capex_usd_millions` is normalised to. Default convention: 2025."
+        },
+        "capex_source_currency": {
+          "type": "string",
+          "description": "ISO 4217 code of the originally reported currency, e.g. 'ZAR', 'USD'."
+        },
+        "capex_source_value": {
+          "type": "number",
+          "description": "Raw value before currency conversion / inflation normalisation."
+        },
+        "investors": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "government_incentives": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Tax breaks, land grants, SEZ designation, etc."
+        }
+      }
+    },
+
+    "governance": {
+      "type": "object",
+      "properties": {
+        "jurisdiction": { "type": "string", "description": "Primary regulatory jurisdiction." },
+        "data_residency_commitments": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "known_government_contracts": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "foreign_capital_origin": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Country of origin for major non-domestic investors."
+        },
+        "operator_jurisdictions": {
+          "type": "array",
+          "items": { "type": "string", "pattern": "^[A-Z]{2}$" },
+          "description": "ISO 3166-1 alpha-2 codes for each operator's HQ jurisdiction, in same order as the operators array."
+        },
+        "owner_jurisdictions": {
+          "type": "array",
+          "items": { "type": "string", "pattern": "^[A-Z]{2}$" },
+          "description": "ISO 3166-1 alpha-2 codes for each owner's HQ jurisdiction, in same order as the owners array."
+        },
+        "compute_access": {
+          "type": "object",
+          "properties": {
+            "access_model": {
+              "type": "string",
+              "enum": ["open_market", "hyperscaler_tenanted", "sovereign_mandate", "private_enterprise", "unknown"]
+            },
+            "local_access_commitment": {
+              "type": "string",
+              "enum": ["none_known", "government_mou", "regulatory_requirement", "voluntary_commitment", "unknown"]
+            },
+            "local_access_note": { "type": "string" }
+          }
+        }
+      }
+    },
+
+    "workload_profile": {
+      "type": "object",
+      "description": "What this facility actually does. Most facilities are mixed; capture what's publicly claimed.",
+      "properties": {
+        "ai_training": { "type": "boolean" },
+        "ai_inference": { "type": "boolean" },
+        "general_cloud": { "type": "boolean" },
+        "colocation": { "type": "boolean" },
+        "notes": { "type": "string" }
+      }
+    },
+
+    "claims": {
+      "type": "array",
+      "description": "First-class assertions with their own status, evidence, and history. Use for contested or evolving claims (anchor tenants, GPU clusters, hyperscaler involvement) that should not be asserted as plain sourced facts.",
+      "items": {
+        "type": "object",
+        "required": ["id", "type", "status", "source_ids"],
+        "properties": {
+          "id": { "type": "string", "description": "Stable id within this facility, e.g. 'c1'." },
+          "type": {
+            "type": "string",
+            "enum": [
+              "anchor_tenant",
+              "hyperscaler_presence",
+              "gpu_cluster",
+              "liquid_cooling",
+              "sovereign_ai_project",
+              "government_contract",
+              "foreign_investment",
+              "capacity_expansion",
+              "other"
+            ]
+          },
+          "entity": {
+            "type": "string",
+            "description": "The entity the claim is about, if applicable (e.g., 'Microsoft' for an anchor_tenant claim)."
+          },
+          "status": {
+            "type": "string",
+            "enum": ["confirmed", "reported", "disputed", "denied", "withdrawn"]
+          },
+          "denial_status": {
+            "type": "string",
+            "enum": ["unaddressed", "denied_by_one_party", "denied_by_both", "confirmed_since", "n_a"],
+            "description": "Use 'n_a' for claims where denial doesn't apply (e.g., confirmed capacity)."
+          },
+          "source_ids": {
+            "type": "array",
+            "items": { "type": "string" },
+            "minItems": 1
+          },
+          "first_observed": { "type": "string", "format": "date" },
+          "last_reviewed": { "type": "string", "format": "date" },
+          "note": { "type": "string" }
+        }
+      }
+    },
+
+    "claim_history": {
+      "type": "array",
+      "description": "Preserves prior values of structured fields when they change. Each entry records what was observed and when, enabling temporal tracking without overwriting.",
+      "items": {
+        "type": "object",
+        "required": ["field", "value", "observed", "source_ids"],
+        "properties": {
+          "field": {
+            "type": "string",
+            "description": "Dot-path of the field, e.g. 'capacity.it_load_mw'."
+          },
+          "value": {
+            "description": "The previous value (any type matching the field).",
+            "anyOf": [
+              { "type": "string" },
+              { "type": "number" },
+              { "type": "boolean" },
+              { "type": "array" }
+            ]
+          },
+          "observed": { "type": "string", "format": "date" },
+          "source_ids": {
+            "type": "array",
+            "items": { "type": "string" },
+            "minItems": 1
+          },
+          "superseded_on": { "type": "string", "format": "date" },
+          "reason": { "type": "string" }
+        }
+      }
+    },
+
+    "constraints": {
+      "type": "array",
+      "description": "Limiting factors that affect build-out feasibility, scale, or timeline.",
+      "items": {
+        "type": "object",
+        "required": ["dimension", "severity"],
+        "properties": {
+          "dimension": {
+            "type": "string",
+            "enum": ["grid_capacity", "transmission", "water_stress", "connectivity", "land_use", "regulatory", "skilled_labour", "other"]
+          },
+          "severity": {
+            "type": "string",
+            "enum": ["low", "medium", "high", "critical", "unknown"]
+          },
+          "rationale": { "type": "string" },
+          "source_ids": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        }
+      }
+    },
+
+    "analysis": {
+      "type": "object",
+      "description": "Editorial interpretation by the maintainer. Explicitly separated from sourced facts. Anything here is the maintainer's assessment, not a claim backed by a primary source.",
+      "required": ["is_editorial"],
+      "properties": {
+        "strategic_significance": {
+          "type": "object",
+          "properties": {
+            "level": { "type": "string", "enum": ["low", "medium", "high", "critical"] },
+            "rationale": { "type": "string" }
+          }
+        },
+        "significance_summary": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "2–4 short bullets: 'why this matters'. For journalists and policymakers."
+        },
+        "assessed_by": { "type": "string" },
+        "assessed_on": { "type": "string", "format": "date" },
+        "is_editorial": {
+          "const": true,
+          "description": "Must be true. Marks this block as maintainer interpretation, not sourced fact."
+        }
+      }
+    },
+
+    "project": {
+      "type": "object",
+      "description": "Cross-facility grouping. A project can span multiple facilities (e.g., Epoch's 'Project Rainier' pattern).",
+      "properties": {
+        "name": { "type": "string" },
+        "confidence": {
+          "type": "string",
+          "enum": ["confirmed", "reported", "speculative"]
+        }
+      }
+    },
+
+    "external_ids": {
+      "type": "object",
+      "additionalProperties": { "type": "string" },
+      "description": "IDs in external datasets. Recognised keys: epoch_ai, wikidata, dgtl_infra, datacentermap, baxtel."
+    },
+
+    "verification": {
+      "type": "object",
+      "description": "Satellite and OSINT verification status. Scaffolding for future work — do not populate yet.",
+      "properties": {
+        "satellite_reviewed": { "type": "boolean" },
+        "last_satellite_check": { "type": "string", "format": "date" },
+        "satellite_note": { "type": "string" }
+      }
+    },
+
+    "sources": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "url", "retrieved", "trust_tier"],
+        "properties": {
+          "id": { "type": "string", "description": "Short id used in sourced_fields, e.g. 's1'." },
+          "url": { "type": "string", "format": "uri" },
+          "title": { "type": "string" },
+          "publisher": { "type": "string" },
+          "retrieved": { "type": "string", "format": "date" },
+          "trust_tier": {
+            "type": "string",
+            "enum": ["regulatory", "company_official", "trade_press", "satellite", "local_journalism", "industry_report", "social_media"],
+            "description": "Roughly ranked by reliability, most reliable first."
+          },
+          "archived_url": { "type": "string", "format": "uri", "description": "Wayback or archive.ph snapshot, strongly encouraged." }
+        }
+      }
+    },
+
+    "sourced_fields": {
+      "type": "object",
+      "description": "Maps a field path to an array of source ids supporting it, with a confidence level. Use dot notation for nested fields (e.g. 'capacity.it_load_mw') and bracket notation for array elements (e.g. 'operators[0]', 'claims[0].entity').",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["source_ids", "confidence"],
+        "properties": {
+          "source_ids": {
+            "type": "array",
+            "items": { "type": "string" },
+            "minItems": 1
+          },
+          "confidence": {
+            "type": "string",
+            "enum": ["confirmed", "reported", "estimated", "disputed"]
+          },
+          "note": { "type": "string" }
+        }
+      }
+    },
+
+    "last_verified": {
+      "type": "string",
+      "format": "date",
+      "description": "Date of most recent end-to-end review of this record. Show prominently if >6 months old."
+    },
+    "first_tracked": { "type": "string", "format": "date" },
+    "notes": {
+      "type": "string",
+      "description": "Markdown, rendered on the detail page. For context not captured elsewhere."
+    }
+  }
+}

@@ -1,0 +1,96 @@
+id: vantage-waterfall-city
+name: "Vantage Data Centers Waterfall City"
+
+country: ZA
+city: Midrand
+region: Gauteng
+location:
+  # Waterfall City mixed-use development, Midrand — city-level centroid, site address not confirmed
+  lat: -26.0174
+  lng: 28.1041
+  precision: city
+
+status: announced
+scale_tier: medium
+status_history:
+  - status: announced
+    date: "2026-02-13"
+    note: "Reported in UCT AI Initiative article; power procurement from SolarAfrica confirmed."
+
+operators:
+  - "Vantage Data Centers"
+owners:
+  - "Vantage Data Centers"
+
+capacity:
+  it_load_mw: 87
+
+infrastructure:
+  cooling_adequacy_for_ai: unknown
+
+power:
+  grid_connected: true
+  utility: "Eskom"
+  grid_carbon_intensity_gco2_per_kwh: 900
+  ppa_partners:
+    - "SolarAfrica"
+  renewable_pct_reported: 100
+
+water:
+  cooling_uses_water: true
+  source: municipal
+  water_stress_region: high
+
+governance:
+  jurisdiction: "South Africa"
+
+workload_profile:
+  general_cloud: true
+  colocation: true
+  notes: >
+    Vantage is a hyperscale-focused colocation provider. Workload profile inferred from
+    corporate strategy; no AI-specific capacity publicly disclosed for this site.
+
+sources:
+  - id: s1
+    url: "https://ai.uct.ac.za/articles/2026-02-13-wheeling-and-dealing-behind-south-africas-ai-factories"
+    title: "Wheeling and dealing behind South Africa's AI factories"
+    publisher: "UCT AI Initiative"
+    retrieved: "2026-05-11"
+    trust_tier: trade_press
+
+sourced_fields:
+  operators:
+    source_ids: ["s1"]
+    confidence: reported
+  capacity.it_load_mw:
+    source_ids: ["s1"]
+    confidence: reported
+    note: "87MW is the figure reported as secured from SolarAfrica; total facility capacity may differ."
+  power.ppa_partners:
+    source_ids: ["s1"]
+    confidence: reported
+  status:
+    source_ids: ["s1"]
+    confidence: reported
+  power.grid_carbon_intensity_gco2_per_kwh:
+    source_ids: ["s1"]
+    confidence: estimated
+    note: "Eskom grid average ~900 gCO₂/kWh per Eskom Integrated Reports (2022-23). Grid-level figure. 100% renewable PPA offsets but does not change grid carbon intensity rating."
+  infrastructure.cooling_adequacy_for_ai:
+    source_ids: ["s1"]
+    confidence: estimated
+    note: "Cooling type not disclosed in source. Rated unknown pending direct disclosure."
+
+last_verified: "2026-05-11"
+first_tracked: "2026-05-11"
+notes: |
+  Vantage Data Centers is building a facility at Waterfall City, a large mixed-use development
+  in Midrand, Gauteng. The company has secured 87MW of power from SolarAfrica under a
+  power purchase agreement.
+
+  Vantage is a US-headquartered hyperscale data centre developer with campuses across North
+  America, Europe, and Asia Pacific. The Waterfall City site represents its South African entry.
+
+  Waterfall City sits in the Midrand corridor between Johannesburg and Pretoria — the same
+  general zone as the ADC Midrand campus and within the Ekurhuleni/Midrand industrial belt.

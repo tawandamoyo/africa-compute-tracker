@@ -1,0 +1,47 @@
+---
+import { formatStatus, statusColor, scaleTierLabel, scaleTierColor } from '../lib/formatters.js';
+
+const { facility } = Astro.props;
+
+const location = [facility.city, facility.region, facility.country]
+  .filter(Boolean)
+  .join(', ');
+---
+
+<a
+  href={`/facilities/${facility.id}`}
+  class="block p-4 bg-white border border-gray-200 rounded-lg hover:border-gray-400 hover:shadow-sm transition-all"
+>
+  <div class="flex items-start justify-between gap-2">
+    <div class="min-w-0">
+      <h3 class="font-semibold text-gray-900 text-sm leading-snug truncate">{facility.name}</h3>
+      {location && (
+        <p class="text-xs text-gray-500 mt-0.5 truncate">{location}</p>
+      )}
+    </div>
+    <span
+      class={`shrink-0 text-xs px-2 py-0.5 rounded-full font-medium whitespace-nowrap ${statusColor(facility.status)}`}
+    >
+      {formatStatus(facility.status)}
+    </span>
+  </div>
+
+  <div class="mt-2 flex flex-wrap items-center gap-2">
+    {facility.capacity?.it_load_mw != null && (
+      <span class="text-xs text-gray-600">
+        IT load: <span class="font-medium">{facility.capacity.it_load_mw} MW</span>
+      </span>
+    )}
+    {facility.scale_tier && (
+      <span class={`text-xs px-1.5 py-0.5 rounded font-medium ${scaleTierColor(facility.scale_tier)}`}>
+        {scaleTierLabel(facility.scale_tier)}
+      </span>
+    )}
+  </div>
+
+  {facility.operators?.length > 0 && (
+    <p class="text-xs text-gray-500 mt-1.5 truncate">
+      {facility.operators.join(', ')}
+    </p>
+  )}
+</a>

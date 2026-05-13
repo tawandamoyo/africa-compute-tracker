@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(nvm ls *)",
+      "Bash(nvm ls-remote *)"
+    ]
+  }
+}

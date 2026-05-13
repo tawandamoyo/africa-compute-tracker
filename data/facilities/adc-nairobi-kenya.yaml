@@ -1,0 +1,72 @@
+id: adc-nairobi-kenya
+name: Africa Data Centres Kenya
+aliases:
+  - ADC Kenya
+  - Cassava Technologies Kenya
+country: KE
+city: Nairobi
+region: Nairobi County
+location:
+  lat: -1.2921
+  lng: 36.8219
+  precision: city
+status: announced
+status_history:
+  - status: announced
+    date: "2026-05-11"
+    note: Expansion to Kenya announced in Cassava press release alongside Egypt, Morocco, Nigeria. No site details given.
+operators:
+  - Africa Data Centres
+owners:
+  - Africa Data Centres
+infrastructure:
+  connectivity:
+    - Cassava Technologies pan-African fibre-optic network (high-speed, ultra-low-latency)
+workload_profile:
+  ai_training: true
+  ai_inference: true
+  general_cloud: true
+  notes: >
+    Planned AI Factory expansion. Workload profile inferred from the SA deployment model — NVIDIA Cloud Partner (NCP)
+    accelerated computing for training and inference. No Kenya-specific capacity or timeline disclosed in the source.
+claims: []
+claim_history: []
+constraints: []
+sources:
+  - id: s1
+    url: https://example.com/todo-cassava-nvidia-ai-factory-press-release
+    title: Cassava Technologies announces Africa's first AI Factory powered by NVIDIA
+    publisher: Cassava Technologies
+    retrieved: "2026-05-11"
+    trust_tier: company_official
+sourced_fields:
+  operators:
+    source_ids:
+      - s1
+    confidence: confirmed
+  status:
+    source_ids:
+      - s1
+    confidence: confirmed
+    note: Named as an expansion target alongside Egypt, Morocco, Nigeria. No date given.
+  infrastructure.connectivity:
+    source_ids:
+      - s1
+    confidence: confirmed
+  workload_profile.ai_training:
+    source_ids:
+      - s1
+    confidence: reported
+    note: Inferred from the NCP AI Factory model described for SA; Kenya-specific workload not stated.
+last_verified: "2026-05-11"
+first_tracked: "2026-05-11"
+notes: |
+  Skeleton record. Cassava Technologies' press release names Kenya as one of four countries
+  earmarked for AI Factory expansion beyond South Africa (alongside Egypt, Morocco, Nigeria).
+  No site address, capacity, or timeline is given for Kenya specifically.
+
+  City set to Nairobi as the most likely hub; this is not confirmed in the source.
+
+  Update this record when Cassava publishes a country-specific announcement.
+
+  **Source URL:** Placeholder — replace with the actual Cassava press release URL.

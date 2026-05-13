@@ -1,0 +1,161 @@
+id: equinix-jb1-johannesburg
+name: "Equinix JB1 (Johannesburg 1)"
+aliases:
+  - "Teraco JB1"
+  - "Teraco Johannesburg 1"
+
+country: ZA
+city: Isando
+region: Gauteng
+location:
+  # Isando industrial zone, Ekurhuleni — city-level centroid, not verified site address
+  lat: -26.1473
+  lng: 28.1965
+  precision: city
+
+status: operational
+status_history:
+  - status: operational
+    date: "2009-01-01"
+    note: "Opened by Teraco Data Environments as JB1; founding year approximate."
+  - status: expanded
+    date: "2022-06-01"
+    note: "Equinix completed acquisition of Teraco Data Environments — first Equinix facility on the African continent."
+
+operators:
+  - "Equinix"
+owners:
+  - "Equinix"
+tenants:
+  - "Amazon Web Services"
+  - "Microsoft Azure"
+  - "Google Cloud"
+  - "Vodacom"
+  - "MTN"
+
+infrastructure:
+  cooling:
+    - chilled_water
+    - air
+  cooling_adequacy_for_ai: unknown
+  tier_certification: tier_iii
+  connectivity:
+    - "JINX (Johannesburg Internet Exchange)"
+    - "ACE submarine cable (via terrestrial link)"
+    - "WACS submarine cable (via terrestrial link)"
+
+power:
+  grid_connected: true
+  utility: "Eskom"
+  grid_carbon_intensity_gco2_per_kwh: 900
+  backup_type:
+    - diesel
+
+water:
+  cooling_uses_water: true
+  source: municipal
+  water_stress_region: high
+
+financials:
+  # This figure is the acquisition price for the entire Teraco portfolio, not JB1 alone.
+  # Converted from ZAR ~26.9B at prevailing June 2022 rate.
+  announced_capex_usd_millions: 1625
+
+governance:
+  jurisdiction: "South Africa"
+  data_residency_commitments:
+    - "Data physically resident in South Africa under POPIA jurisdiction"
+
+workload_profile:
+  ai_inference: true
+  general_cloud: true
+  colocation: true
+  notes: >
+    Carrier-neutral colocation hub and host of the Johannesburg Internet Exchange (JINX),
+    one of Africa's most significant IXPs. Serves as the primary hyperscaler on-ramp for
+    AWS, Microsoft Azure, and Google Cloud in sub-Saharan Africa. AI inference workloads
+    are inferred from hyperscaler presence; no AI-specific capacity is publicly disclosed
+    for this campus.
+
+sources:
+  - id: s1
+    url: "https://investor.equinix.com/news-releases/news-release-details/equinix-completes-acquisition-teraco"
+    title: "Equinix Completes Acquisition of Teraco"
+    publisher: "Equinix Investor Relations"
+    retrieved: "2026-04-24"
+    trust_tier: company_official
+    # TODO: archived_url could not be created at time of first tracking — equinix.com
+    # has bot-protection. Run: curl "https://web.archive.org/save/[URL]" to archive,
+    # then add: archived_url: "https://web.archive.org/web/[timestamp]/[URL]"
+
+  - id: s2
+    url: "https://www.equinix.com/data-centers/africa-colocation/south-africa-colocation/johannesburg-data-centers/jb1"
+    title: "Equinix JB1 — Johannesburg, South Africa"
+    publisher: "Equinix"
+    retrieved: "2026-04-24"
+    trust_tier: company_official
+    # TODO: archived_url — same note as s1
+
+sourced_fields:
+  operators:
+    source_ids: ["s1"]
+    confidence: confirmed
+  owners:
+    source_ids: ["s1"]
+    confidence: confirmed
+  status:
+    source_ids: ["s1"]
+    confidence: confirmed
+  status_history:
+    source_ids: ["s1"]
+    confidence: confirmed
+    note: "Acquisition completion date from press release. Teraco founding year is approximate."
+  tenants:
+    source_ids: ["s2"]
+    confidence: reported
+    note: "Tenants as advertised by Equinix on the JB1 product page; individual agreements not independently verified."
+  infrastructure.tier_certification:
+    source_ids: ["s2"]
+    confidence: reported
+    note: "Marketed as Tier III equivalent. Independent Uptime Institute certification status not verified."
+  infrastructure.connectivity:
+    source_ids: ["s2"]
+    confidence: reported
+  power.grid_connected:
+    source_ids: ["s2"]
+    confidence: confirmed
+  power.grid_carbon_intensity_gco2_per_kwh:
+    source_ids: ["s2"]
+    confidence: estimated
+    note: "Eskom grid average ~900 gCO₂/kWh per Eskom Integrated Reports (2022-23) and IEA data. Grid-level figure, not facility-specific."
+  infrastructure.cooling_adequacy_for_ai:
+    source_ids: ["s2"]
+    confidence: estimated
+    note: "Chilled water and air cooling confirmed; rack-level liquid cooling for AI workloads not confirmed. Rated unknown pending direct disclosure."
+  power.utility:
+    source_ids: ["s2"]
+    confidence: reported
+  financials.announced_capex_usd_millions:
+    source_ids: ["s1"]
+    confidence: confirmed
+    note: "Acquisition price for entire Teraco portfolio (JB1 + JB2 + JB3 + CT1 + PE1), not JB1 alone."
+
+last_verified: "2026-04-24"
+first_tracked: "2026-04-24"
+notes: |
+  Equinix JB1 (formerly Teraco JB1) is the flagship facility on Africa's largest carrier-neutral
+  colocation campus, located in the Isando industrial zone of Ekurhuleni municipality, east of
+  the Johannesburg CBD.
+
+  Equinix completed its acquisition of Teraco Data Environments in June 2022 for approximately
+  USD 1.625 billion (ZAR ~26.9 billion), marking Equinix's entry onto the African continent.
+  The deal included five campuses: three in Johannesburg (JB1, JB2, JB3), one in Cape Town (CT1),
+  and one in Port Elizabeth (PE1).
+
+  JB1 hosts the Johannesburg Internet Exchange (JINX) and serves as the primary hyperscaler
+  on-ramp for sub-Saharan Africa, with direct interconnects to AWS, Microsoft Azure, and
+  Google Cloud on-premises.
+
+  **Archived source URLs:** The source URLs in this record were live as of last_verified but
+  could not be archived at first tracking due to bot-protection on equinix.com. To archive:
+  visit https://web.archive.org/save/[URL] in a browser, then populate the `archived_url` field.

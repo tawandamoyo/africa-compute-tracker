@@ -1,0 +1,723 @@
+---
+import SourceCitation from '../../components/SourceCitation.astro';
+import ClaimCard from '../../components/ClaimCard.astro';
+import ConstraintBadge from '../../components/ConstraintBadge.astro';
+import AnalysisPanel from '../../components/AnalysisPanel.astro';
+import { loadFacilities } from '../../lib/loadFacilities.js';
+import {
+  formatStatus,
+  statusColor,
+  formatDate,
+  isStale,
+  trustTierClasses,
+  powerContext,
+  carbonContext,
+  scaleTierLabel,
+  scaleTierColor,
+  coolingAiLabel,
+  coolingAiColor,
+} from '../../lib/formatters.js';
+import '../../styles/global.css';
+
+export function getStaticPaths() {
+  const facilities = loadFacilities();
+  return facilities.map(f => ({ params: { id: f.id }, props: { facility: f } }));
+}
+
+const { facility } = Astro.props;
+
+const sourceMap = Object.fromEntries((facility.sources ?? []).map((s: any) => [s.id, s]));
+
+type SFResult = { sourceInfo: any[]; confidence: string | null; note: string | null };
+function sf(fieldPath: string): SFResult {
+  const entry = facility.sourced_fields?.[fieldPath];
+  if (!entry) return { sourceInfo: [], confidence: null, note: null };
+  return {
+    sourceInfo: (entry.source_ids ?? []).map((id: string) => sourceMap[id]).filter(Boolean),
+    confidence: entry.confidence ?? null,
+    note: entry.note ?? null,
+  };
+}
+
+type RowData = { label: string; value: string; sourceInfo: any[]; confidence: string | null; note: string | null };
+function row(label: string, value: string | string[] | null | undefined, fieldPath: string): RowData | null {
+  if (value == null || value === '' || (Array.isArray(value) && value.length === 0)) return null;
+  const displayValue = Array.isArray(value) ? value.join(', ') : String(value);
+  return { label, value: displayValue, ...sf(fieldPath) };
+}
+const isRow = (r: RowData | null): r is RowData => r !== null;
+
+const capacityRows = [
+  row('IT load — full buildout',
+      facility.capacity?.it_load_mw != null ? `${facility.capacity.it_load_mw} MW` : null,
+      'capacity.it_load_mw'),
+  row('IT load — current',
+      facility.capacity?.it_load_mw_current != null ? `${facility.capacity.it_load_mw_current} MW` : null,
+      'capacity.it_load_mw_current'),
+  row('Total facility power',
+      facility.capacity?.total_facility_mw != null ? `${facility.capacity.total_facility_mw} MW` : null,
+      'capacity.total_facility_mw'),
+  row('Power density',
+      facility.capacity?.power_density_kw_per_rack != null ? `${facility.capacity.power_density_kw_per_rack} kW/rack` : null,
+      'capacity.power_density_kw_per_rack'),
+  row('GPU count (disclosed)',
+      facility.capacity?.gpu_count_known != null ? facility.capacity.gpu_count_known.toLocaleString() : null,
+      'capacity.gpu_count_known'),
+  row('H100-equivalent GPUs',
+      facility.capacity?.h100_equivalent_gpus != null ? facility.capacity.h100_equivalent_gpus.toLocaleString() : null,
+      'capacity.h100_equivalent_gpus'),
+  row('Building area',
+      facility.capacity?.building_sqm != null ? `${facility.capacity.building_sqm.toLocaleString()} m²` : null,
+      'capacity.building_sqm'),
+  row('Land area',
+      facility.capacity?.land_area_hectares != null ? `${facility.capacity.land_area_hectares.toLocaleString()} ha` : null,
+      'capacity.land_area_hectares'),
+  row('Phases planned',
+      facility.capacity?.phases_planned != null ? String(facility.capacity.phases_planned) : null,
+      'capacity.phases_planned'),
+  row('Phases operational',
+      facility.capacity?.phases_operational != null ? String(facility.capacity.phases_operational) : null,
+      'capacity.phases_operational'),
+].filter(isRow);
+
+const infraRows = [
+  row('Tier certification',
+      facility.infrastructure?.tier_certification
+        ? facility.infrastructure.tier_certification.replace('_', ' ').toUpperCase()
+        : null,
+      'infrastructure.tier_certification'),
+  row('Cooling',
+      facility.infrastructure?.cooling?.length ? facility.infrastructure.cooling.join(', ') : null,
+      'infrastructure.cooling'),
+  row('Connectivity',
+      facility.infrastructure?.connectivity?.length ? facility.infrastructure.connectivity : null,
+      'infrastructure.connectivity'),
+].filter(isRow);
+
+const powerRows = [
+  row('Grid utility', facility.power?.utility, 'power.utility'),
+  row('Grid carbon intensity',
+      facility.power?.grid_carbon_intensity_gco2_per_kwh != null
+        ? `${facility.power.grid_carbon_intensity_gco2_per_kwh} g CO₂/kWh`
+        : null,
+      'power.grid_carbon_intensity_gco2_per_kwh'),
+  row('On-site generation',
+      facility.power?.on_site_generation_mw != null ? `${facility.power.on_site_generation_mw} MW` : null,
+      'power.on_site_generation_mw'),
+  row('Renewable % (reported)',
+      facility.power?.renewable_pct_reported != null ? `${facility.power.renewable_pct_reported}%` : null,
+      'power.renewable_pct_reported'),
+  row('Backup', facility.power?.backup_type, 'power.backup_type'),
+  row('PPA partners', facility.power?.ppa_partners, 'power.ppa_partners'),
+].filter(isRow);
+
+const waterRows = [
+  row('Water source', facility.water?.source, 'water.source'),
+  row('Consumptive cooling',
+      facility.water?.cooling_is_consumptive != null
+        ? (facility.water.cooling_is_consumptive ? 'Yes — evaporative (water lost to atmosphere)' : 'No — closed-loop / air-cooled (water recirculated)')
+        : null,
+      'water.cooling_is_consumptive'),
+  row('Annual use (estimated)',
+      facility.water?.annual_use_megaliters_estimated != null
+        ? `${facility.water.annual_use_megaliters_estimated.toLocaleString()} ML/yr`
+        : null,
+      'water.annual_use_megaliters_estimated'),
+  row('Water stress (WRI)', facility.water?.water_stress_region, 'water.water_stress_region'),
+].filter(isRow);
+
+const financialRows = [
+  row('Announced capex',
+      facility.financials?.announced_capex_usd_millions != null
+        ? `USD ${facility.financials.announced_capex_usd_millions.toLocaleString()}M`
+        : null,
+      'financials.announced_capex_usd_millions'),
+  row('Investors', facility.financials?.investors, 'financials.investors'),
+  row('Government incentives', facility.financials?.government_incentives, 'financials.government_incentives'),
+].filter(isRow);
+
+const govRows = [
+  row('Jurisdiction', facility.governance?.jurisdiction, 'governance.jurisdiction'),
+  row('Data residency', facility.governance?.data_residency_commitments, 'governance.data_residency_commitments'),
+  row('Government contracts', facility.governance?.known_government_contracts, 'governance.known_government_contracts'),
+  row('Foreign capital origin', facility.governance?.foreign_capital_origin, 'governance.foreign_capital_origin'),
+].filter(isRow);
+
+const entitySf = sf('tenants');
+const locationStr = [facility.city, facility.region, facility.country].filter(Boolean).join(', ');
+const stale = isStale(facility.last_verified);
+const pwrCtx = powerContext(facility.capacity?.it_load_mw, facility.city, facility.country);
+const carbonCtx = carbonContext(facility.power?.grid_carbon_intensity_gco2_per_kwh);
+const hasTimeline = facility.timeline?.construction_start || facility.timeline?.expected_operational || facility.timeline?.actual_operational;
+
+const coolingAiDesc = {
+  inference_only: 'Standard cooling (<50 kW/rack). Suitable for inference workloads only; not suitable for dense GPU training.',
+  ai_capable: 'Liquid cooling confirmed. Suitable for AI model training and high-density inference (50–200 kW/rack).',
+  frontier_training: 'High-density liquid cooling (200+ MW). Capable of frontier model training with latest-generation GPUs.',
+  unknown: 'Cooling adequacy for AI workloads has not been independently assessed for this facility.',
+};
+
+const trustTierDefs = {
+  regulatory: 'Government filings, planning applications, official gazette notices.',
+  company_official: 'Press releases, investor relations filings, and product pages from the operating company.',
+  trade_press: 'Specialist outlets (DatacenterDynamics, DataCenter Knowledge, etc.) with editorial standards.',
+  satellite: 'Commercial satellite imagery used to verify construction progress.',
+  local_journalism: 'Local news outlets; variable editorial standards, used for leads and corroboration.',
+  industry_report: 'Analyst reports (CBRE, JLL, Synergy Research, etc.) — often behind paywalls.',
+  social_media: 'LinkedIn posts, job listings, tweets — lowest trust, used only as a lead.',
+};
+const tiersUsed: string[] = [...new Set(((facility.sources ?? []) as any[]).map((s: any) => s.trust_tier as string))];
+const trustTierDefsMap = trustTierDefs as Record<string, string>;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{facility.name} — Africa AI Datacenter Tracker</title>
+    <meta
+      name="description"
+      content={`${facility.name} — ${formatStatus(facility.status)} datacenter in ${locationStr}`}
+    />
+  </head>
+  <body class="bg-gray-50 text-gray-900 font-sans">
+
+    <header class="bg-white border-b border-gray-200">
+      <div class="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between gap-4">
+        <a href="/" class="text-base font-bold tracking-tight hover:text-gray-600">
+          Africa AI Datacenter Tracker
+        </a>
+        <nav class="flex gap-4 text-sm text-gray-500">
+          <a href="/glossary" class="hover:text-gray-900">Glossary</a>
+          <a href="/methodology" class="hover:text-gray-900">Methodology</a>
+          <a href="https://github.com" class="hover:text-gray-900">GitHub ↗</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="max-w-5xl mx-auto px-4 py-8">
+
+      <!-- Stale banner -->
+      {stale && (
+        <div class="mb-6 flex items-start gap-3 px-4 py-3 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-800">
+          <span class="shrink-0 text-base leading-snug">⚠</span>
+          <p>
+            <strong>Stale record</strong> — last verified {formatDate(facility.last_verified)}.
+            Data may be outdated. If you have an updated source,{' '}
+            <a href="#report" class="underline hover:no-underline">suggest a correction</a>.
+          </p>
+        </div>
+      )}
+
+      <!-- Breadcrumb -->
+      <nav class="text-sm text-gray-400 mb-5">
+        <a href="/" class="hover:text-gray-600">Tracker</a>
+        <span class="mx-1.5">›</span>
+        <span class="text-gray-600">{facility.name}</span>
+      </nav>
+
+      <!-- Title row -->
+      <div class="flex flex-wrap items-start gap-2 mb-2">
+        <h1 class="text-2xl font-bold text-gray-900 leading-tight">{facility.name}</h1>
+        <span class={`text-sm px-2.5 py-1 rounded-full font-medium mt-0.5 ${statusColor(facility.status)}`}>
+          {formatStatus(facility.status)}
+        </span>
+        {facility.scale_tier && (
+          <span class={`text-sm px-2.5 py-1 rounded-full font-medium mt-0.5 ${scaleTierColor(facility.scale_tier)}`}>
+            {scaleTierLabel(facility.scale_tier)}
+          </span>
+        )}
+      </div>
+
+      {facility.aliases?.length > 0 && (
+        <p class="text-sm text-gray-400 mb-1">
+          Also known as: {facility.aliases.join(' · ')}
+        </p>
+      )}
+
+      <!-- Meta row -->
+      <div class="flex flex-wrap items-center gap-x-5 gap-y-1 text-sm text-gray-500 mb-8">
+        <span>
+          {locationStr}
+          {facility.location?.precision && (
+            <span class="ml-1.5 text-xs px-1.5 py-0.5 bg-gray-100 text-gray-500 rounded">
+              {facility.location.precision} coords
+            </span>
+          )}
+        </span>
+        <span class={stale ? 'text-amber-600 font-medium' : ''}>
+          Last verified: {formatDate(facility.last_verified) ?? '—'}
+        </span>
+        <a href="#report" class="text-blue-500 hover:underline text-xs">Report a correction</a>
+      </div>
+
+      <!-- Significance bullets — why this matters, for journalists -->
+      {facility.analysis?.significance_summary?.length > 0 && (
+        <div class="mb-6 bg-amber-50 border border-amber-200 rounded-lg px-5 py-4">
+          <p class="text-xs font-semibold text-amber-700 uppercase tracking-widest mb-2">Why this matters</p>
+          <ul class="space-y-1.5">
+            {(facility.analysis.significance_summary as string[]).map((bullet: string) => (
+              <li class="flex items-start gap-2 text-sm text-amber-900">
+                <span class="shrink-0 mt-1.5 w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                <span>{bullet}</span>
+              </li>
+            ))}
+          </ul>
+          <p class="text-xs text-amber-600 mt-3 italic">
+            Editorial assessment — see full analysis below.
+          </p>
+        </div>
+      )}
+
+      <div class="grid gap-6 lg:grid-cols-3">
+
+        <!-- Main content -->
+        <div class="lg:col-span-2 space-y-5">
+
+          {facility.notes && (
+            <section class="bg-white border border-gray-200 rounded-lg p-5">
+              <h2 class="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">Overview</h2>
+              <div class="text-sm text-gray-700 leading-relaxed whitespace-pre-line">
+                {facility.notes}
+              </div>
+            </section>
+          )}
+
+          {capacityRows.length > 0 && (
+            <section class="bg-white border border-gray-200 rounded-lg p-5">
+              <div class="flex items-center justify-between mb-1">
+                <h2 class="text-xs font-semibold text-gray-400 uppercase tracking-widest">Capacity</h2>
+                <a href="/glossary#it-load" class="text-xs text-gray-400 hover:text-blue-600">What is IT load? →</a>
+              </div>
+              <dl>
+                {capacityRows.map(r => <SourceCitation {...r} />)}
+              </dl>
+
+              <!-- Power in context callout -->
+              {pwrCtx && (
+                <div class="mt-4 bg-indigo-50 border border-indigo-100 rounded-lg p-4 text-sm text-indigo-900 space-y-1">
+                  <p class="text-xs font-semibold text-indigo-500 uppercase tracking-wide mb-2">Power in context</p>
+                  <p>
+                    <strong>{facility.capacity.it_load_mw} MW</strong> IT load ≈{' '}
+                    <strong>{pwrCtx.households} South African households</strong>
+                    <span class="text-indigo-600 text-xs ml-1">(avg 250 kWh/month)</span>
+                  </p>
+                  {pwrCtx.gridNote && (
+                    <p class="text-indigo-800">{pwrCtx.gridNote}</p>
+                  )}
+                  {pwrCtx.nationalGridNote && (
+                    <p class="text-indigo-700">{pwrCtx.nationalGridNote}</p>
+                  )}
+                  {pwrCtx.scaleNote && (
+                    <p class="text-indigo-600 text-xs italic">{pwrCtx.scaleNote}</p>
+                  )}
+                  <p class="text-xs text-indigo-400 pt-1">
+                    <a href="/glossary#it-load" class="underline hover:no-underline">About IT load</a>
+                    {' · '}
+                    <a href="/glossary#announced-mw" class="underline hover:no-underline">Announced vs operational MW</a>
+                  </p>
+                </div>
+              )}
+            </section>
+          )}
+
+          {(infraRows.length > 0 || facility.infrastructure?.cooling_adequacy_for_ai) && (
+            <section class="bg-white border border-gray-200 rounded-lg p-5">
+              <div class="flex items-center justify-between mb-1">
+                <h2 class="text-xs font-semibold text-gray-400 uppercase tracking-widest">Infrastructure</h2>
+                <a href="/glossary#tier" class="text-xs text-gray-400 hover:text-blue-600">Tier guide →</a>
+              </div>
+              <dl>
+                {infraRows.map(r => <SourceCitation {...r} />)}
+              </dl>
+
+              <!-- AI cooling readiness badge -->
+              {facility.infrastructure?.cooling_adequacy_for_ai && (
+                <div class="mt-4 pt-4 border-t border-gray-100">
+                  <dt class="text-xs font-medium text-gray-400 uppercase tracking-wide mb-2">AI cooling readiness</dt>
+                  <dd>
+                    <span class={`text-xs px-2.5 py-1 rounded-full font-medium ${coolingAiColor(facility.infrastructure.cooling_adequacy_for_ai)}`}>
+                      {coolingAiLabel(facility.infrastructure.cooling_adequacy_for_ai)}
+                    </span>
+                    <p class="text-xs text-gray-500 mt-2">
+                      {coolingAiDesc[facility.infrastructure.cooling_adequacy_for_ai]}
+                    </p>
+                    <p class="text-xs text-gray-400 mt-1">
+                      AI data centres require ~100 kW/rack (10× conventional). Liquid cooling at rack level is the key differentiator.
+                      <a href="/glossary#ai-training-inference" class="ml-1 underline hover:no-underline">Learn more →</a>
+                    </p>
+                  </dd>
+                </div>
+              )}
+            </section>
+          )}
+
+          {powerRows.length > 0 && (
+            <section class="bg-white border border-gray-200 rounded-lg p-5">
+              <div class="flex items-center justify-between mb-1">
+                <h2 class="text-xs font-semibold text-gray-400 uppercase tracking-widest">Power</h2>
+                <a href="/glossary#ppa" class="text-xs text-gray-400 hover:text-blue-600">PPAs &amp; wheeling →</a>
+              </div>
+              <dl>
+                {powerRows.map(r => <SourceCitation {...r} />)}
+              </dl>
+
+              <!-- Carbon intensity context -->
+              {carbonCtx && (
+                <div class="mt-4 bg-gray-50 border border-gray-200 rounded-lg p-4 text-sm space-y-1.5">
+                  <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Grid carbon context</p>
+                  <p>
+                    <strong class={carbonCtx.color}>{carbonCtx.gco2} g CO₂/kWh</strong>
+                    <span class="text-gray-600 ml-1.5">— {carbonCtx.label}</span>
+                  </p>
+                  <p class="text-gray-600">
+                    <strong class={carbonCtx.color}>{carbonCtx.multiple}×</strong> the global average
+                    ({carbonCtx.global_avg} g CO₂/kWh, IEA 2022).
+                    Compare: France ~60, UK ~175, US ~400 g CO₂/kWh.
+                  </p>
+                  <p class="text-xs text-gray-400 mt-1">
+                    Grid-level estimate. PPAs and on-site renewables may reduce the effective carbon footprint.
+                  </p>
+                </div>
+              )}
+            </section>
+          )}
+
+          {waterRows.length > 0 && (
+            <section class="bg-white border border-gray-200 rounded-lg p-5">
+              <div class="flex items-center justify-between mb-1">
+                <h2 class="text-xs font-semibold text-gray-400 uppercase tracking-widest">Water</h2>
+                <a href="/glossary#water-stress" class="text-xs text-gray-400 hover:text-blue-600">Water stress →</a>
+              </div>
+              <dl>
+                {waterRows.map(r => <SourceCitation {...r} />)}
+              </dl>
+            </section>
+          )}
+
+          {financialRows.length > 0 && (
+            <section class="bg-white border border-gray-200 rounded-lg p-5">
+              <h2 class="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-1">Financials</h2>
+              <dl>
+                {financialRows.map(r => <SourceCitation {...r} />)}
+              </dl>
+            </section>
+          )}
+
+          {govRows.length > 0 && (
+            <section class="bg-white border border-gray-200 rounded-lg p-5">
+              <div class="flex items-center justify-between mb-1">
+                <h2 class="text-xs font-semibold text-gray-400 uppercase tracking-widest">Governance</h2>
+                <a href="/glossary#data-residency" class="text-xs text-gray-400 hover:text-blue-600">Data residency →</a>
+              </div>
+              <dl>
+                {govRows.map(r => <SourceCitation {...r} />)}
+              </dl>
+            </section>
+          )}
+
+          {facility.workload_profile &&
+            Object.entries(facility.workload_profile).some(([k, v]) => k !== 'notes' && v === true) && (
+            <section class="bg-white border border-gray-200 rounded-lg p-5">
+              <div class="flex items-center justify-between mb-3">
+                <h2 class="text-xs font-semibold text-gray-400 uppercase tracking-widest">Workload Profile</h2>
+                <a href="/glossary#ai-training-inference" class="text-xs text-gray-400 hover:text-blue-600">Training vs inference →</a>
+              </div>
+              <div class="flex flex-wrap gap-2 mb-3">
+                {facility.workload_profile.ai_training && (
+                  <span class="text-xs px-2.5 py-1 bg-purple-50 text-purple-700 rounded-full">AI Training</span>
+                )}
+                {facility.workload_profile.ai_inference && (
+                  <span class="text-xs px-2.5 py-1 bg-indigo-50 text-indigo-700 rounded-full">AI Inference</span>
+                )}
+                {facility.workload_profile.general_cloud && (
+                  <span class="text-xs px-2.5 py-1 bg-blue-50 text-blue-700 rounded-full">General Cloud</span>
+                )}
+                {facility.workload_profile.colocation && (
+                  <span class="text-xs px-2.5 py-1 bg-gray-100 text-gray-600 rounded-full">Colocation</span>
+                )}
+              </div>
+              {facility.workload_profile.notes && (
+                <p class="text-sm text-gray-600">{facility.workload_profile.notes}</p>
+              )}
+            </section>
+          )}
+
+          <!-- Claims -->
+          {(facility.claims as any[])?.filter((c: any) => c).length > 0 && (
+            <section class="bg-white border border-gray-200 rounded-lg p-5">
+              <div class="flex items-center justify-between mb-1">
+                <h2 class="text-xs font-semibold text-gray-400 uppercase tracking-widest">Claims</h2>
+                <a href="/methodology#claims-model" class="text-xs text-gray-400 hover:text-blue-600">About claims →</a>
+              </div>
+              <p class="text-xs text-gray-400 mb-4">
+                Claims are tracked separately from sourced facts because their status is contested or evolving.
+                A disputed claim is not the same as a confirmed fact.
+              </p>
+              <div class="space-y-3">
+                {((facility.claims as any[]) ?? []).map((claim: any) => (
+                  <ClaimCard claim={claim} sourceMap={sourceMap} />
+                ))}
+              </div>
+            </section>
+          )}
+
+          <!-- Constraints -->
+          {(facility.constraints as any[])?.filter((c: any) => c).length > 0 && (
+            <section class="bg-white border border-gray-200 rounded-lg p-5">
+              <div class="flex items-center justify-between mb-1">
+                <h2 class="text-xs font-semibold text-gray-400 uppercase tracking-widest">Constraints</h2>
+                <a href="/methodology#constraints" class="text-xs text-gray-400 hover:text-blue-600">About constraints →</a>
+              </div>
+              <dl>
+                {((facility.constraints as any[]) ?? []).map((constraint: any) => (
+                  <ConstraintBadge constraint={constraint} sourceMap={sourceMap} />
+                ))}
+              </dl>
+            </section>
+          )}
+
+          <!-- Editorial analysis -->
+          {facility.analysis?.is_editorial && (
+            <AnalysisPanel analysis={facility.analysis as any} />
+          )}
+
+        </div>
+
+        <!-- Sidebar -->
+        <div class="space-y-4">
+
+          <!-- Entities -->
+          {(facility.operators?.length || facility.owners?.length || facility.tenants?.length) && (
+            <div class="bg-white border border-gray-200 rounded-lg p-4">
+              <h2 class="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">Entities</h2>
+              {facility.operators?.length > 0 && (
+                <div class="mb-3">
+                  <p class="text-xs text-gray-400 mb-1">Operator{facility.operators.length > 1 ? 's' : ''}</p>
+                  {facility.operators.map(op => (
+                    <p class="text-sm font-medium text-gray-900">{op}</p>
+                  ))}
+                </div>
+              )}
+              {facility.owners?.length > 0 && (
+                <div class="mb-3">
+                  <p class="text-xs text-gray-400 mb-1">Owner{facility.owners.length > 1 ? 's' : ''}</p>
+                  {facility.owners.map(ow => (
+                    <p class="text-sm font-medium text-gray-900">{ow}</p>
+                  ))}
+                </div>
+              )}
+              {facility.tenants?.length > 0 && (
+                <div>
+                  <p class="text-xs text-gray-400 mb-1 flex items-center gap-1.5">
+                    Known tenants
+                    {entitySf.confidence && (
+                      <span class="text-xs text-gray-400">({entitySf.confidence})</span>
+                    )}
+                  </p>
+                  {facility.tenants.map(t => (
+                    <p class="text-sm text-gray-700">{t}</p>
+                  ))}
+                  {entitySf.note && (
+                    <p class="text-xs text-gray-400 mt-1 italic">{entitySf.note}</p>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+
+          <!-- Location -->
+          {facility.location && (
+            <div class="bg-white border border-gray-200 rounded-lg p-4">
+              <h2 class="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">Location</h2>
+              <p class="text-sm text-gray-900">{locationStr}</p>
+              <p class="text-xs text-gray-400 mt-1 font-mono">
+                {facility.location.lat?.toFixed(4)}, {facility.location.lng?.toFixed(4)}
+              </p>
+              <span class="text-xs px-1.5 py-0.5 bg-gray-100 text-gray-500 rounded mt-1.5 inline-block">
+                {facility.location.precision} precision
+              </span>
+            </div>
+          )}
+
+          <!-- Timeline -->
+          {hasTimeline && (
+            <div class="bg-white border border-gray-200 rounded-lg p-4">
+              <h2 class="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">Timeline</h2>
+              <dl class="space-y-2.5">
+                {facility.timeline?.construction_start && (
+                  <div>
+                    <dt class="text-xs text-gray-400">Construction start</dt>
+                    <dd class="text-sm text-gray-900">{formatDate(facility.timeline.construction_start)}</dd>
+                  </div>
+                )}
+                {facility.timeline?.expected_operational && (
+                  <div>
+                    <dt class="text-xs text-gray-400">Expected operational</dt>
+                    <dd class="text-sm text-gray-900">{formatDate(facility.timeline.expected_operational)}</dd>
+                  </div>
+                )}
+                {facility.timeline?.actual_operational && (
+                  <div>
+                    <dt class="text-xs text-gray-400">Operational since</dt>
+                    <dd class="text-sm text-gray-900">{formatDate(facility.timeline.actual_operational)}</dd>
+                  </div>
+                )}
+              </dl>
+            </div>
+          )}
+
+          <!-- Status history -->
+          {facility.status_history?.length > 0 && (
+            <div class="bg-white border border-gray-200 rounded-lg p-4">
+              <h2 class="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">Status History</h2>
+              <ol class="space-y-3 relative border-l border-gray-200 ml-2">
+                {[...facility.status_history].reverse().map(h => (
+                  <li class="pl-4 relative">
+                    <span class="absolute -left-1.5 top-1 w-3 h-3 bg-gray-300 rounded-full"></span>
+                    <p class="text-sm font-medium text-gray-800 capitalize">
+                      {h.status.replace(/_/g, ' ')}
+                    </p>
+                    <p class="text-xs text-gray-400">{h.date}</p>
+                    {h.note && <p class="text-xs text-gray-500 mt-0.5">{h.note}</p>}
+                  </li>
+                ))}
+              </ol>
+            </div>
+          )}
+
+          <!-- Record metadata -->
+          <div class="bg-white border border-gray-200 rounded-lg p-4">
+            <h2 class="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">Record</h2>
+            <dl class="space-y-1.5 text-xs text-gray-600">
+              <div class="flex justify-between gap-2">
+                <dt class="text-gray-400">ID</dt>
+                <dd class="font-mono text-gray-600">{facility.id}</dd>
+              </div>
+              <div class="flex justify-between gap-2">
+                <dt class="text-gray-400">First tracked</dt>
+                <dd>{facility.first_tracked ?? '—'}</dd>
+              </div>
+              <div class="flex justify-between gap-2">
+                <dt class="text-gray-400">Last verified</dt>
+                <dd class={stale ? 'text-amber-600 font-medium' : ''}>{facility.last_verified ?? '—'}</dd>
+              </div>
+            </dl>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Claim history -->
+      {(facility.claim_history as any[])?.length > 0 && (
+        <section class="mt-8">
+          <details class="bg-white border border-gray-200 rounded-lg">
+            <summary class="px-5 py-4 cursor-pointer hover:bg-gray-50 select-none flex items-center justify-between">
+              <h2 class="text-xs font-semibold text-gray-400 uppercase tracking-widest">Field Change History</h2>
+              <span class="text-xs text-gray-400">
+                {(facility.claim_history as any[]).length} entr{(facility.claim_history as any[]).length === 1 ? 'y' : 'ies'}
+              </span>
+            </summary>
+            <div class="px-5 pb-5 pt-2">
+              <p class="text-xs text-gray-400 mb-4">
+                Prior values of structured fields, preserved when they changed. Most recent first.
+              </p>
+              <ol class="space-y-4 relative border-l border-gray-200 ml-2">
+                {([...(facility.claim_history as any[])].reverse()).map((entry: any) => (
+                  <li class="pl-4 relative text-sm">
+                    <span class="absolute -left-1.5 top-1 w-3 h-3 bg-gray-300 rounded-full"></span>
+                    <p class="font-mono text-xs text-gray-500 mb-0.5">{entry.field}</p>
+                    <p class="text-gray-800">
+                      Previously: <span class="font-medium">{String(entry.value)}</span>
+                    </p>
+                    <p class="text-xs text-gray-400 mt-0.5">Observed {entry.observed}
+                      {entry.superseded_on && ` · superseded ${entry.superseded_on}`}
+                    </p>
+                    {entry.reason && (
+                      <p class="text-xs text-gray-500 mt-0.5 italic">{entry.reason}</p>
+                    )}
+                  </li>
+                ))}
+              </ol>
+            </div>
+          </details>
+        </section>
+      )}
+
+      <!-- Sources -->
+      {facility.sources?.length > 0 && (
+        <section class="mt-8 bg-white border border-gray-200 rounded-lg p-5">
+          <h2 class="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-4">Sources</h2>
+          <ol class="space-y-4">
+            {facility.sources.map(s => (
+              <li class="flex items-start gap-3 text-sm">
+                <span class="shrink-0 font-mono text-xs bg-gray-100 px-1.5 py-0.5 rounded text-gray-500 mt-0.5">
+                  {s.id}
+                </span>
+                <div>
+                  <a href={s.archived_url ?? s.url} target="_blank" rel="noopener noreferrer"
+                     class="text-blue-600 hover:underline font-medium">
+                    {s.title ?? s.url}
+                  </a>
+                  {s.publisher && <span class="text-gray-500"> — {s.publisher}</span>}
+                  <div class="flex flex-wrap items-center gap-2 mt-1">
+                    <span class={`text-xs px-1.5 py-0.5 rounded font-medium ${trustTierClasses(s.trust_tier)}`}>
+                      {s.trust_tier.replace(/_/g, ' ')}
+                    </span>
+                    <span class="text-xs text-gray-400">retrieved {s.retrieved}</span>
+                    {s.archived_url
+                      ? <span class="text-xs text-emerald-600">✓ archived</span>
+                      : <span class="text-xs text-amber-600">not yet archived</span>
+                    }
+                  </div>
+                </div>
+              </li>
+            ))}
+          </ol>
+
+          {tiersUsed.length > 0 && (
+            <details class="mt-5 text-xs text-gray-500 border-t border-gray-100 pt-4">
+              <summary class="cursor-pointer hover:text-gray-700 select-none font-medium">
+                About these source tiers
+              </summary>
+              <dl class="mt-3 space-y-2">
+                {tiersUsed.map(tier => (
+                  <div class="flex items-start gap-2.5">
+                    <span class={`shrink-0 mt-0.5 px-1.5 py-0.5 rounded font-medium ${trustTierClasses(tier)}`}>
+                      {tier.replace(/_/g, ' ')}
+                    </span>
+                    <p class="text-gray-600">{trustTierDefsMap[tier] ?? ''}</p>
+                  </div>
+                ))}
+              </dl>
+              <p class="mt-3 text-gray-400">
+                Full ranking: <a href="/methodology" class="underline hover:text-gray-600">Methodology</a>
+                {' · '}
+                <a href="/glossary#trust-tier" class="underline hover:text-gray-600">Glossary</a>
+              </p>
+            </details>
+          )}
+        </section>
+      )}
+
+      <div id="report" class="mt-6 p-4 bg-gray-100 rounded-lg text-sm text-gray-600">
+        <strong>Found an error?</strong> Open an issue or pull request on GitHub (link coming soon)
+        with the corrected data and a source URL.
+      </div>
+
+    </main>
+
+    <footer class="border-t border-gray-200 mt-16">
+      <div class="max-w-5xl mx-auto px-4 py-6 flex flex-wrap items-center justify-between gap-4 text-sm text-gray-400">
+        <span>Africa AI Datacenter Tracker — open data, CC-BY 4.0</span>
+        <div class="flex gap-4">
+          <a href="/glossary" class="hover:text-gray-600">Glossary</a>
+          <a href="/methodology" class="hover:text-gray-600">Methodology</a>
+          <a href="https://github.com" class="hover:text-gray-600">GitHub ↗</a>
+        </div>
+      </div>
+    </footer>
+
+  </body>
+</html>

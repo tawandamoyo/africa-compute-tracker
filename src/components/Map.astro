@@ -1,0 +1,95 @@
+---
+const { facilities } = Astro.props;
+
+const pins = JSON.stringify(
+  facilities
+    .filter(f => f.location?.lat != null && f.location?.lng != null)
+    .map(f => ({
+      id: f.id,
+      name: f.name,
+      status: f.status,
+      city: f.city ?? '',
+      country: f.country,
+      lat: f.location.lat,
+      lng: f.location.lng,
+    }))
+);
+---
+
+<div
+  id="facility-map"
+  data-pins={pins}
+  class="w-full rounded-lg overflow-hidden border border-gray-200"
+  style="height: 500px;"
+></div>
+
+<script>
+  import 'maplibre-gl/dist/maplibre-gl.css';
+  import maplibregl from 'maplibre-gl';
+
+  const el = document.getElementById('facility-map');
+  if (!el) throw new Error('Map element not found');
+
+  const pins = JSON.parse(el.dataset.pins ?? '[]');
+
+  const STATUS_HEX = {
+    announced: '#f59e0b',
+    under_construction: '#3b82f6',
+    operational: '#10b981',
+    expanded: '#14b8a6',
+    cancelled: '#ef4444',
+    paused: '#6b7280',
+  };
+
+  const map = new maplibregl.Map({
+    container: 'facility-map',
+    style: {
+      version: 8,
+      sources: {
+        osm: {
+          type: 'raster',
+          tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
+          tileSize: 256,
+          attribution:
+            '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+        },
+      },
+      layers: [{ id: 'osm-layer', type: 'raster', source: 'osm' }],
+    },
+    center: [27, -8],
+    zoom: 3,
+  });
+
+  map.addControl(new maplibregl.NavigationControl(), 'top-right');
+
+  map.on('load', () => {
+    for (const pin of pins) {
+      const color = STATUS_HEX[pin.status] ?? '#6b7280';
+
+      const dot = document.createElement('div');
+      dot.style.cssText = [
+        'width:14px', 'height:14px', 'border-radius:50%',
+        `background:${color}`, 'border:2px solid white',
+        'box-shadow:0 1px 4px rgba(0,0,0,0.35)', 'cursor:pointer',
+      ].join(';');
+
+      const location = [pin.city, pin.country].filter(Boolean).join(', ');
+      const statusLabel = pin.status.replace(/_/g, ' ');
+
+      const popup = new maplibregl.Popup({ offset: 14, maxWidth: '240px' })
+        .setHTML(
+          `<div style="font-family:system-ui,sans-serif;padding:2px 0;line-height:1.5">` +
+          `<strong style="font-size:13px;display:block">${pin.name}</strong>` +
+          `<span style="font-size:12px;color:${color};text-transform:capitalize">${statusLabel}</span>` +
+          (location ? `<span style="font-size:12px;color:#6b7280"> · ${location}</span>` : '') +
+          `<br><a href="/facilities/${pin.id}" style="font-size:12px;color:#2563eb;text-decoration:underline">View details →</a>` +
+          `</div>`
+        );
+
+      new maplibregl.Marker({ element: dot })
+        .setLngLat([pin.lng, pin.lat])
+        .setPopup(popup)
+        .addTo(map);
+    }
+  });
+</script>
