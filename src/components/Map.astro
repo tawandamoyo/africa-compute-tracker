@@ -63,6 +63,14 @@ const pins = JSON.stringify(
   map.addControl(new maplibregl.NavigationControl(), 'top-right');
 
   map.on('load', () => {
+    if (pins.length) {
+      const bounds = pins.reduce(
+        (bounds, pin) => bounds.extend([pin.lng, pin.lat]),
+        new maplibregl.LngLatBounds([pins[0].lng, pins[0].lat], [pins[0].lng, pins[0].lat])
+      );
+      map.fitBounds(bounds, { padding: 32, maxZoom: 6, linear: true });
+    }
+
     for (const pin of pins) {
       const color = STATUS_HEX[pin.status] ?? '#6b7280';
 
