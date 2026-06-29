@@ -16,6 +16,13 @@ source that contradicts or updates a field in an existing record, open a pull re
    - If your source contradicts an existing value, set `confidence: disputed` and add a `note`
      explaining both positions
 
+   Facility names and ids must follow the source-backed naming convention:
+   - The filename must match `id` exactly.
+   - Use `[operator]-[facility-code]-[locality]` for single facilities.
+   - Use `[operator]-[official-campus-name]-campus` for campus-level records.
+   - Keep the display `name` to the official public name; put market names, former names, and
+     ambiguous labels in `aliases`.
+
 3. **Run validation** before opening a PR:
    ```
    npm run validate
