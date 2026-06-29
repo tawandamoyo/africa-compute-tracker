@@ -1,6 +1,7 @@
-id: adc-lagos-nigeria
-name: Africa Data Centres Nigeria
+id: adc-los1-lagos
+name: "LOS1 Lagos Data Centre"
 aliases:
+  - "Africa Data Centres LOS1"
   - ADC Nigeria
   - Cassava Technologies Nigeria
 country: NG
@@ -33,6 +34,13 @@ claims: []
 claim_history: []
 constraints: []
 sources:
+  - id: s0
+    url: "https://www.africadatacentres.com/lagos/"
+    title: "LOS1 Lagos Data Centre"
+    publisher: "Africa Data Centres"
+    retrieved: "2026-06-29"
+    trust_tier: company_official
+
   - id: s1
     url: https://example.com/todo-cassava-nvidia-ai-factory-press-release
     title: Cassava Technologies announces Africa's first AI Factory powered by NVIDIA
@@ -40,8 +48,17 @@ sources:
     retrieved: "2026-05-11"
     trust_tier: company_official
 sourced_fields:
+  name:
+    source_ids:
+      - s0
+    confidence: confirmed
+  aliases:
+    source_ids:
+      - s0
+    confidence: confirmed
   operators:
     source_ids:
+      - s0
       - s1
     confidence: confirmed
   status:
@@ -61,12 +78,10 @@ sourced_fields:
 last_verified: "2026-05-11"
 first_tracked: "2026-05-11"
 notes: |
-  Skeleton record. Cassava Technologies' press release names Nigeria as one of four countries
-  earmarked for AI Factory expansion beyond South Africa (alongside Egypt, Kenya, Morocco).
-  No site address, capacity, or timeline is given for Nigeria specifically.
-
-  City set to Lagos as Nigeria's primary commercial and technology hub; Abuja (capital) is a
-  possible alternative — not confirmed in the source.
+  LOS1 Lagos Data Centre is the named Africa Data Centres facility in Lagos. Cassava
+  Technologies' press release names Nigeria as one of four countries earmarked for AI Factory
+  expansion beyond South Africa (alongside Egypt, Kenya, Morocco), but does not confirm whether
+  the AI Factory expansion maps specifically to LOS1.
 
   Update this record when Cassava publishes a country-specific announcement.
 

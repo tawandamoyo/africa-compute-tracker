@@ -1,20 +1,21 @@
-id: adc-casablanca-morocco
-name: Africa Data Centres Morocco
+id: adc-nbo1-nairobi
+name: "NBO1 Nairobi Data Centre"
 aliases:
-  - ADC Morocco
-  - Cassava Technologies Morocco
-country: MA
-city: Casablanca
-region: Casablanca-Settat
+  - "Africa Data Centres NBO1"
+  - ADC Kenya
+  - Cassava Technologies Kenya
+country: KE
+city: Nairobi
+region: Nairobi County
 location:
-  lat: 33.5731
-  lng: -7.5898
+  lat: -1.2921
+  lng: 36.8219
   precision: city
 status: announced
 status_history:
   - status: announced
     date: "2026-05-11"
-    note: Expansion to Morocco announced in Cassava press release alongside Egypt, Kenya, Nigeria. No site details given.
+    note: Expansion to Kenya announced in Cassava press release alongside Egypt, Morocco, Nigeria. No site details given.
 operators:
   - Africa Data Centres
 owners:
@@ -28,11 +29,18 @@ workload_profile:
   general_cloud: true
   notes: >
     Planned AI Factory expansion. Workload profile inferred from the SA deployment model — NVIDIA Cloud Partner (NCP)
-    accelerated computing for training and inference. No Morocco-specific capacity or timeline disclosed in the source.
+    accelerated computing for training and inference. No Kenya-specific capacity or timeline disclosed in the source.
 claims: []
 claim_history: []
 constraints: []
 sources:
+  - id: s0
+    url: "https://www.africadatacentres.com/nbo1-nairobi-data-centre/"
+    title: "NBO1 Nairobi Data Centre"
+    publisher: "Africa Data Centres"
+    retrieved: "2026-06-29"
+    trust_tier: company_official
+
   - id: s1
     url: https://example.com/todo-cassava-nvidia-ai-factory-press-release
     title: Cassava Technologies announces Africa's first AI Factory powered by NVIDIA
@@ -40,15 +48,24 @@ sources:
     retrieved: "2026-05-11"
     trust_tier: company_official
 sourced_fields:
+  name:
+    source_ids:
+      - s0
+    confidence: confirmed
+  aliases:
+    source_ids:
+      - s0
+    confidence: confirmed
   operators:
     source_ids:
+      - s0
       - s1
     confidence: confirmed
   status:
     source_ids:
       - s1
     confidence: confirmed
-    note: Named as an expansion target alongside Egypt, Kenya, Nigeria. No date given.
+    note: Named as an expansion target alongside Egypt, Morocco, Nigeria. No date given.
   infrastructure.connectivity:
     source_ids:
       - s1
@@ -57,16 +74,14 @@ sourced_fields:
     source_ids:
       - s1
     confidence: reported
-    note: Inferred from the NCP AI Factory model described for SA; Morocco-specific workload not stated.
+    note: Inferred from the NCP AI Factory model described for SA; Kenya-specific workload not stated.
 last_verified: "2026-05-11"
 first_tracked: "2026-05-11"
 notes: |
-  Skeleton record. Cassava Technologies' press release names Morocco as one of four countries
-  earmarked for AI Factory expansion beyond South Africa (alongside Egypt, Kenya, Nigeria).
-  No site address, capacity, or timeline is given for Morocco specifically.
-
-  City set to Casablanca as Morocco's primary commercial hub; this is not confirmed in the source.
-  Rabat (capital) is an alternative possibility.
+  NBO1 Nairobi Data Centre is the named Africa Data Centres facility in Nairobi. Cassava
+  Technologies' press release names Kenya as one of four countries earmarked for AI Factory
+  expansion beyond South Africa (alongside Egypt, Morocco, Nigeria), but does not confirm
+  whether the AI Factory expansion maps specifically to NBO1.
 
   Update this record when Cassava publishes a country-specific announcement.
 

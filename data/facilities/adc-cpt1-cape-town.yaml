@@ -1,6 +1,7 @@
 id: adc-cpt1-cape-town
-name: "Africa Data Centres CPT1 (Cape Town 1)"
+name: "CPT1 Cape Town Data Centre"
 aliases:
+  - "Africa Data Centres CPT1"
   - "ADC CPT1"
   - "Cassava Technologies Cape Town"
 
@@ -71,6 +72,13 @@ workload_profile:
     OpenAI announced at Africa Tech Festival 2025.
 
 sources:
+  - id: s0
+    url: "https://www.africadatacentres.com/cpt1-cape-town-data-centre/"
+    title: "CPT1 Cape Town Data Centre"
+    publisher: "Africa Data Centres"
+    retrieved: "2026-06-29"
+    trust_tier: company_official
+
   - id: s1
     url: "https://ai.uct.ac.za/articles/2026-02-13-wheeling-and-dealing-behind-south-africas-ai-factories"
     title: "Wheeling and dealing behind South Africa's AI factories"
@@ -86,9 +94,15 @@ sources:
     trust_tier: company_official
 
 sourced_fields:
+  name:
+    source_ids: ["s0"]
+    confidence: confirmed
+  aliases:
+    source_ids: ["s0"]
+    confidence: confirmed
   operators:
-    source_ids: ["s1"]
-    confidence: reported
+    source_ids: ["s0", "s1"]
+    confidence: confirmed
   owners:
     source_ids: ["s1"]
     confidence: reported
@@ -128,7 +142,7 @@ sourced_fields:
 last_verified: "2026-05-11"
 first_tracked: "2026-05-11"
 notes: |
-  Africa Data Centres (ADC) CPT1 is the Cape Town campus of ADC, a subsidiary of Cassava
+  CPT1 Cape Town Data Centre is the Cape Town campus of ADC, a subsidiary of Cassava
   Technologies (chairman: Strive Masiyiwa, CEO: Adil El Youssefi).
 
   Cassava is an NVIDIA Cloud Partner (NCP), deploying NVIDIA accelerated computing platforms

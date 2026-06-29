@@ -1,0 +1,152 @@
+id: equinix-jn1-germiston
+name: "Equinix JN1"
+aliases:
+  - "Equinix Johannesburg JN1"
+  - "Equinix JN1 Johannesburg"
+
+country: ZA
+city: Germiston
+region: Gauteng
+location:
+  lat: -26.2259
+  lng: 28.1674
+  precision: city
+
+status: operational
+status_history:
+  - status: operational
+    date: "2024-10-24"
+    note: "Equinix announced that JN1 had opened and was welcoming customers and partners."
+
+operators:
+  - "Equinix"
+owners:
+  - "Equinix"
+tenants:
+  - "Liquid Intelligent Technologies"
+  - "Intelys Technology Group"
+  - "SEACOM"
+  - "WorkOnline Communications"
+
+capacity:
+  building_sqm: 1900
+  phases_planned: 2
+
+infrastructure:
+  cooling_adequacy_for_ai: unknown
+  connectivity:
+    - "JINX (Johannesburg Internet Exchange)"
+    - "Liquid Intelligent Technologies"
+    - "Intelys Technology Group"
+    - "SEACOM"
+    - "WorkOnline Communications"
+
+power:
+  grid_connected: true
+
+governance:
+  jurisdiction: "South Africa"
+
+workload_profile:
+  general_cloud: true
+  colocation: true
+  notes: >
+    Equinix describes JN1 as an International Business Exchange data center
+    serving cloud and connectivity demand from Johannesburg. AI-specific
+    workloads or installed GPU capacity have not been publicly disclosed.
+
+claims:
+  - id: c1
+    type: liquid_cooling
+    status: reported
+    denial_status: n_a
+    source_ids: ["s1"]
+    first_observed: "2024-10-24"
+    last_reviewed: "2026-06-29"
+    note: >
+      Equinix says JN1 has the capability to implement liquid cooling for
+      high-density deployments; this is not the same as a confirmed active
+      liquid-cooled AI deployment.
+
+sources:
+  - id: s1
+    url: "https://newsroom.equinix.com/2024-10-24-Equinix-opens-its-first-data-center-in-Johannesburg-enhancing-digital-infrastructure-and-connectivity-in-the-region"
+    title: "Equinix opens its first data center in Johannesburg enhancing digital infrastructure and connectivity in the region"
+    publisher: "Equinix Newsroom"
+    retrieved: "2026-06-29"
+    trust_tier: company_official
+
+sourced_fields:
+  name:
+    source_ids: ["s1"]
+    confidence: confirmed
+  aliases:
+    source_ids: ["s1"]
+    confidence: confirmed
+  city:
+    source_ids: ["s1"]
+    confidence: confirmed
+    note: "Equinix states that JN1 is located in Germiston, Johannesburg."
+  region:
+    source_ids: ["s1"]
+    confidence: reported
+  location:
+    source_ids: ["s1"]
+    confidence: estimated
+    note: "Coordinates are a Germiston city-level centroid, not a verified street address."
+  status:
+    source_ids: ["s1"]
+    confidence: confirmed
+  status_history:
+    source_ids: ["s1"]
+    confidence: confirmed
+  operators:
+    source_ids: ["s1"]
+    confidence: confirmed
+  owners:
+    source_ids: ["s1"]
+    confidence: confirmed
+  tenants:
+    source_ids: ["s1"]
+    confidence: reported
+    note: "Equinix described these organizations as already established deployments at JN1."
+  capacity.building_sqm:
+    source_ids: ["s1"]
+    confidence: reported
+    note: "Equinix reports over 1,900 square meters of colocation space in the initial phase, not total building area."
+  capacity.phases_planned:
+    source_ids: ["s1"]
+    confidence: reported
+    note: "Equinix reports an initial phase and a planned full-build expansion to more than 9,515 square meters."
+  infrastructure.cooling_adequacy_for_ai:
+    source_ids: ["s1"]
+    confidence: estimated
+    note: "Liquid-cooling capability is reported, but active rack-level liquid cooling and AI deployments are not confirmed."
+  infrastructure.connectivity:
+    source_ids: ["s1"]
+    confidence: reported
+  power.grid_connected:
+    source_ids: ["s1"]
+    confidence: estimated
+    note: "Grid connection is inferred from the operational IBX facility; utility and power mix are not disclosed in the source."
+  governance.jurisdiction:
+    source_ids: ["s1"]
+    confidence: confirmed
+  workload_profile:
+    source_ids: ["s1"]
+    confidence: reported
+  claims[0].type:
+    source_ids: ["s1"]
+    confidence: reported
+
+last_verified: "2026-06-29"
+first_tracked: "2026-06-29"
+notes: |
+  This record is distinct from Teraco's Isando campus. Earlier tracking conflated an
+  Equinix/JB1 record with Teraco JB1/JB3 material. Equinix's official Johannesburg
+  market facility is JN1, opened in Germiston on 2024-10-24.
+
+  Equinix states that JN1 has over 20,000 square feet (1,900+ square meters) of
+  colocation space in its initial phase and plans to expand to more than 100,000
+  square feet (9,515 square meters) at full build-out. Cabinet counts are disclosed
+  by Equinix, but the current schema has no cabinet-count field.

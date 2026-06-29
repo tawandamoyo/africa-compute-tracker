@@ -1,6 +1,7 @@
-id: adc-midrand
-name: "Africa Data Centres Midrand"
+id: adc-jhb1-midrand
+name: "JHB1 Midrand Data Centre"
 aliases:
+  - "Africa Data Centres JHB1"
   - "ADC Midrand"
   - "Cassava Technologies Midrand"
 
@@ -66,6 +67,13 @@ workload_profile:
     Midrand and CPT1 is not publicly disclosed.
 
 sources:
+  - id: s0
+    url: "https://www.africadatacentres.com/jhb1-midrand-data-centre/"
+    title: "JHB1 Midrand Data Centre"
+    publisher: "Africa Data Centres"
+    retrieved: "2026-06-29"
+    trust_tier: company_official
+
   - id: s1
     url: "https://ai.uct.ac.za/articles/2026-02-13-wheeling-and-dealing-behind-south-africas-ai-factories"
     title: "Wheeling and dealing behind South Africa's AI factories"
@@ -81,9 +89,15 @@ sources:
     trust_tier: company_official
 
 sourced_fields:
+  name:
+    source_ids: ["s0"]
+    confidence: confirmed
+  aliases:
+    source_ids: ["s0"]
+    confidence: confirmed
   operators:
-    source_ids: ["s1"]
-    confidence: reported
+    source_ids: ["s0", "s1"]
+    confidence: confirmed
   owners:
     source_ids: ["s1"]
     confidence: reported

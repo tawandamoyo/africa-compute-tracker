@@ -1,20 +1,21 @@
-id: adc-cairo-egypt
-name: Africa Data Centres Egypt
+id: cassava-ai-factory-morocco
+name: "Cassava AI Factory Morocco (planned)"
 aliases:
-  - ADC Egypt
-  - Cassava Technologies Egypt
-country: EG
-city: Cairo
-region: Cairo Governorate
+  - Africa Data Centres Morocco
+  - ADC Morocco
+  - Cassava Technologies Morocco
+country: MA
+city: Casablanca
+region: Casablanca-Settat
 location:
-  lat: 30.0444
-  lng: 31.2357
+  lat: 33.5731
+  lng: -7.5898
   precision: city
 status: announced
 status_history:
   - status: announced
     date: "2026-05-11"
-    note: Expansion to Egypt announced in Cassava press release alongside Kenya, Morocco, Nigeria. No site details given.
+    note: Expansion to Morocco announced in Cassava press release alongside Egypt, Kenya, Nigeria. No site details given.
 operators:
   - Africa Data Centres
 owners:
@@ -28,7 +29,7 @@ workload_profile:
   general_cloud: true
   notes: >
     Planned AI Factory expansion. Workload profile inferred from the SA deployment model — NVIDIA Cloud Partner (NCP)
-    accelerated computing for training and inference. No Egypt-specific capacity or timeline disclosed in the source.
+    accelerated computing for training and inference. No Morocco-specific capacity or timeline disclosed in the source.
 claims: []
 claim_history: []
 constraints: []
@@ -40,6 +41,15 @@ sources:
     retrieved: "2026-05-11"
     trust_tier: company_official
 sourced_fields:
+  name:
+    source_ids:
+      - s1
+    confidence: reported
+    note: "No facility name has been disclosed; this is a programme-level placeholder name."
+  aliases:
+    source_ids:
+      - s1
+    confidence: reported
   operators:
     source_ids:
       - s1
@@ -48,7 +58,7 @@ sourced_fields:
     source_ids:
       - s1
     confidence: confirmed
-    note: Named as an expansion target alongside Kenya, Morocco, Nigeria. No date given.
+    note: Named as an expansion target alongside Egypt, Kenya, Nigeria. No date given.
   infrastructure.connectivity:
     source_ids:
       - s1
@@ -57,15 +67,16 @@ sourced_fields:
     source_ids:
       - s1
     confidence: reported
-    note: Inferred from the NCP AI Factory model described for SA; Egypt-specific workload not stated.
+    note: Inferred from the NCP AI Factory model described for SA; Morocco-specific workload not stated.
 last_verified: "2026-05-11"
 first_tracked: "2026-05-11"
 notes: |
-  Skeleton record. Cassava Technologies' press release names Egypt as one of four countries
-  earmarked for AI Factory expansion beyond South Africa (alongside Kenya, Morocco, Nigeria).
-  No site address, capacity, or timeline is given for Egypt specifically.
+  Programme placeholder. Cassava Technologies' press release names Morocco as one of four countries
+  earmarked for AI Factory expansion beyond South Africa (alongside Egypt, Kenya, Nigeria).
+  No facility name, site address, capacity, or timeline is given for Morocco specifically.
 
-  City set to Cairo as the most likely hub; this is not confirmed in the source.
+  City set to Casablanca as Morocco's primary commercial hub; this is not confirmed in the source.
+  Rabat (capital) is an alternative possibility.
 
   Update this record when Cassava publishes a country-specific announcement.
 

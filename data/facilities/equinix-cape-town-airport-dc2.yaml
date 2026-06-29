@@ -1,0 +1,144 @@
+id: equinix-cape-town-airport-dc2
+name: "Equinix Cape Town Airport Data Centre 2"
+aliases:
+  - "Equinix Cape Town Airport Site 2"
+  - "Equinix King David Golf Club Data Centre 2"
+
+country: ZA
+city: Cape Town
+region: Western Cape
+location:
+  lat: -33.9706
+  lng: 18.5978
+  precision: city
+
+status: announced
+status_history:
+  - status: announced
+    date: "2026-04-13"
+    note: "Civil-society objection dated 2026-04-13 challenged the rezoning application for two proposed Equinix data centres."
+
+operators:
+  - "Equinix"
+owners:
+  - "Equinix"
+
+capacity:
+  total_facility_mw: 80
+
+infrastructure:
+  cooling:
+    - air
+  cooling_adequacy_for_ai: unknown
+
+power:
+  grid_connected: true
+  utility: "City of Cape Town"
+  grid_carbon_intensity_gco2_per_kwh: 900
+  backup_type:
+    - diesel
+
+water:
+  cooling_uses_water: false
+  source: none
+  water_stress_region: high
+
+governance:
+  jurisdiction: "South Africa"
+  data_residency_commitments:
+    - "Data physically resident in South Africa under POPIA jurisdiction"
+
+workload_profile:
+  general_cloud: true
+  colocation: true
+  notes: >
+    One of two proposed Equinix data centres next to Cape Town International Airport
+    on the old King David Golf Club course. Equinix describes the combined 160MW as
+    a maximum-case scenario rather than committed or immediately deliverable capacity.
+
+sources:
+  - id: s1
+    url: "https://www.dailymaverick.co.za/article/2026-04-28-new-data-centres-set-to-swallow-34-of-cape-towns-current-electricity-supply/"
+    title: "New data centres set to swallow 34% of Cape Town's current electricity supply"
+    publisher: "Daily Maverick"
+    retrieved: "2026-06-29"
+    trust_tier: local_journalism
+
+sourced_fields:
+  name:
+    source_ids: ["s1"]
+    confidence: reported
+    note: "Descriptive dataset name; Equinix has not disclosed an official facility code for this proposed site."
+  aliases:
+    source_ids: ["s1"]
+    confidence: reported
+  city:
+    source_ids: ["s1"]
+    confidence: confirmed
+  region:
+    source_ids: ["s1"]
+    confidence: confirmed
+  location:
+    source_ids: ["s1"]
+    confidence: reported
+    note: "Daily Maverick places the proposed sites at the old King David Golf Club course opposite Cape Town International Airport."
+  status:
+    source_ids: ["s1"]
+    confidence: reported
+  status_history:
+    source_ids: ["s1"]
+    confidence: reported
+  operators:
+    source_ids: ["s1"]
+    confidence: reported
+  owners:
+    source_ids: ["s1"]
+    confidence: reported
+  capacity.total_facility_mw:
+    source_ids: ["s1"]
+    confidence: estimated
+    note: "Daily Maverick reports 160MW combined for two proposed Equinix sites; this record uses an equal split because per-site demand is not disclosed."
+  infrastructure.cooling:
+    source_ids: ["s1"]
+    confidence: reported
+    note: "Equinix told Daily Maverick the Cape Town data centres would use dry, air-based cooling systems."
+  infrastructure.cooling_adequacy_for_ai:
+    source_ids: ["s1"]
+    confidence: estimated
+    note: "Dry air-based cooling is reported; rack-level liquid cooling and GPU deployments are not confirmed."
+  power.grid_connected:
+    source_ids: ["s1"]
+    confidence: reported
+    note: "Equinix said power would be supplied via the City of Cape Town distribution network, with upstream generation and bulk supply ultimately sourced from Eskom."
+  power.utility:
+    source_ids: ["s1"]
+    confidence: reported
+  power.grid_carbon_intensity_gco2_per_kwh:
+    source_ids: ["s1"]
+    confidence: estimated
+    note: "Grid-level Eskom-backed estimate, not facility-specific."
+  power.backup_type:
+    source_ids: ["s1"]
+    confidence: estimated
+    note: "Daily Maverick reports city officials said data centres typically require near-100% backup, usually diesel generators plus UPS; Equinix had not disclosed generator details."
+  water:
+    source_ids: ["s1"]
+    confidence: reported
+    note: "Equinix said dry, air-based cooling requires no water for data hall cooling beyond limited domestic and ancillary uses."
+  governance.jurisdiction:
+    source_ids: ["s1"]
+    confidence: confirmed
+  workload_profile:
+    source_ids: ["s1"]
+    confidence: reported
+
+last_verified: "2026-06-29"
+first_tracked: "2026-05-11"
+notes: |
+  This record replaces the provisional `equinix-ct3-cape-town` identity. The source
+  does not give official Equinix facility codes for the two proposed Cape Town sites.
+
+  Daily Maverick reports that the two proposed Equinix data centres are next to Cape
+  Town International Airport, on the old King David Golf Club course, and together
+  have a combined 160MW maximum-case demand. This record uses an equal 80MW split only
+  because the source does not disclose per-site demand.

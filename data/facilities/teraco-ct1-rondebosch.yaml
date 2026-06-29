@@ -1,0 +1,174 @@
+id: teraco-ct1-rondebosch
+name: "Teraco CT1 Rondebosch"
+aliases:
+  - "Teraco CT1"
+  - "Teraco Cape Town 1"
+  - "CT1 Rondebosch"
+
+country: ZA
+city: Cape Town
+region: Western Cape
+location:
+  lat: -33.9637
+  lng: 18.4762
+  precision: city
+
+status: expanded
+scale_tier: small
+status_history:
+  - status: operational
+    date: "2012-01-01"
+    note: "Older CT1 facility; exact opening date not verified in the cited sources."
+  - status: expanded
+    date: "2025-11-12"
+    note: "Teraco announced commencement of the CT1 Rondebosch expansion."
+
+operators:
+  - "Teraco"
+owners:
+  - "Digital Realty"
+
+capacity:
+  it_load_mw: 5
+  it_load_mw_current: 3
+  it_load_mw_as_of: "2025-11-12"
+  building_sqm: 3500
+
+infrastructure:
+  cooling_adequacy_for_ai: unknown
+
+power:
+  grid_connected: true
+  utility: "City of Cape Town"
+  grid_carbon_intensity_gco2_per_kwh: 900
+
+water:
+  cooling_uses_water: true
+  source: unknown
+  water_stress_region: high
+
+governance:
+  jurisdiction: "South Africa"
+  data_residency_commitments:
+    - "Data physically resident in South Africa under POPIA jurisdiction"
+
+workload_profile:
+  general_cloud: true
+  colocation: true
+  notes: >
+    Carrier-neutral colocation campus operated under the Teraco brand. Daily
+    Maverick describes a 60MW Cape Town expansion by Teraco but does not confirm
+    AI-specific workloads or GPU capacity.
+
+claims:
+  - id: c1
+    type: capacity_expansion
+    status: disputed
+    denial_status: n_a
+    source_ids: ["s1", "s2"]
+    first_observed: "2026-04-28"
+    last_reviewed: "2026-06-29"
+    note: >
+      Daily Maverick reports a 60MW Teraco expansion in Cape Town and links to the
+      CT1 Rondebosch announcement. Teraco's own CT1 release reports 3MW current
+      critical IT load plus a 2MW expansion, not 60MW at CT1. The structured capacity
+      fields follow Teraco's company-official CT1 figures.
+
+sources:
+  - id: s1
+    url: "https://www.dailymaverick.co.za/article/2026-04-28-new-data-centres-set-to-swallow-34-of-cape-towns-current-electricity-supply/"
+    title: "New data centres set to swallow 34% of Cape Town's current electricity supply"
+    publisher: "Daily Maverick"
+    retrieved: "2026-06-29"
+    trust_tier: local_journalism
+
+  - id: s2
+    url: "https://www.teraco.co.za/news/teraco-announces-ct1-data-centre-expansion-in-rondebosch-cape-town/"
+    title: "Teraco announces CT1 data centre expansion in Rondebosch, Cape Town"
+    publisher: "Teraco"
+    retrieved: "2026-06-29"
+    trust_tier: company_official
+
+sourced_fields:
+  name:
+    source_ids: ["s1", "s2"]
+    confidence: confirmed
+  aliases:
+    source_ids: ["s1", "s2"]
+    confidence: confirmed
+  city:
+    source_ids: ["s1", "s2"]
+    confidence: confirmed
+  region:
+    source_ids: ["s1", "s2"]
+    confidence: confirmed
+  location:
+    source_ids: ["s2"]
+    confidence: estimated
+    note: "Coordinates are a Rondebosch locality centroid, not a verified site entrance."
+  status:
+    source_ids: ["s1", "s2"]
+    confidence: reported
+  status_history:
+    source_ids: ["s1", "s2"]
+    confidence: reported
+  operators:
+    source_ids: ["s1", "s2"]
+    confidence: confirmed
+  owners:
+    source_ids: ["s2"]
+    confidence: reported
+    note: "Teraco is branded as a Digital Realty company; ownership stake details are not repeated in these Cape Town sources."
+  capacity.it_load_mw:
+    source_ids: ["s1", "s2"]
+    confidence: confirmed
+    note: "Teraco reports CT1 will expand from 3MW by a further 2MW of critical IT load."
+  capacity.it_load_mw_current:
+    source_ids: ["s2"]
+    confidence: confirmed
+  capacity.it_load_mw_as_of:
+    source_ids: ["s2"]
+    confidence: confirmed
+  capacity.building_sqm:
+    source_ids: ["s2"]
+    confidence: confirmed
+    note: "Teraco reports 2,500 square meters of current data halls plus a 1,000 square meter expansion."
+  infrastructure.cooling_adequacy_for_ai:
+    source_ids: ["s1", "s2"]
+    confidence: estimated
+    note: "Cooling technology for this expansion is not confirmed in the reviewed sources."
+  power.grid_connected:
+    source_ids: ["s1"]
+    confidence: estimated
+  power.utility:
+    source_ids: ["s1"]
+    confidence: reported
+  power.grid_carbon_intensity_gco2_per_kwh:
+    source_ids: ["s1"]
+    confidence: estimated
+    note: "City of Cape Town large loads are ultimately Eskom-backed; grid-level figure, not facility-specific."
+  water:
+    source_ids: ["s1"]
+    confidence: estimated
+    note: "Daily Maverick highlights unknown cooling-water demand for new Cape Town data centres."
+  governance.jurisdiction:
+    source_ids: ["s1"]
+    confidence: confirmed
+  workload_profile:
+    source_ids: ["s1", "s2"]
+    confidence: reported
+  claims:
+    source_ids: ["s1", "s2"]
+    confidence: disputed
+
+last_verified: "2026-06-29"
+first_tracked: "2026-05-11"
+notes: |
+  This record replaces the prior inaccurate `equinix-ct1-cape-town` identity. The
+  Daily Maverick article identifies a 60MW Cape Town expansion as Teraco's project
+  and links to Teraco's CT1 Rondebosch announcement. Teraco's own announcement reports
+  CT1 current critical IT load of 3MW and a further 2MW expansion, so the structured
+  CT1 capacity fields use Teraco's company-official figures.
+
+  Cooling method, water demand, and AI-specific capacity remain unconfirmed in the
+  reviewed sources.

@@ -1,0 +1,276 @@
+id: cavaleros-cdc-cape-town-campus
+name: "Cosmas Data City Cape Town Campus"
+aliases:
+  - "CDC Cape Town"
+  - "Cavaleros CDC Cape Town"
+  - "Cavaleros Group Cape Town DC1"
+
+country: ZA
+city: Cape Town
+region: Western Cape
+location:
+  lat: -33.9249
+  lng: 18.4241
+  precision: city
+
+status: announced
+status_history:
+  - status: announced
+    date: "2025-01-01"
+    note: "Announcement date approximate; Daily Maverick says Cavaleros announced the Cape Town plan in the previous year."
+
+timeline:
+  expected_operational: "2027-01-01"
+
+project:
+  name: "Cosmas Data City (CDC) Campuses"
+  confidence: confirmed
+
+operators:
+  - "Cavaleros Group"
+owners:
+  - "Cavaleros Group"
+
+capacity:
+  total_facility_mw: 360
+  it_load_mw_current: 0
+  it_load_mw_as_of: "2026-06-29"
+  land_area_hectares: 100
+
+infrastructure:
+  tier_certification: unknown
+  cooling_adequacy_for_ai: unknown
+  connectivity:
+    - "Existing availability zones"
+
+power:
+  grid_connected: true
+  utility: "City of Cape Town"
+  grid_carbon_intensity_gco2_per_kwh: 900
+
+water:
+  cooling_uses_water: true
+  source: unknown
+  water_stress_region: high
+
+governance:
+  jurisdiction: "South Africa"
+  operator_jurisdictions:
+    - "ZA"
+  owner_jurisdictions:
+    - "ZA"
+  foreign_capital_origin: []
+  compute_access:
+    access_model: open_market
+    local_access_commitment: unknown
+    local_access_note: "Operator statement frames the campus for hyperscale, Neo Cloud, and enterprise deployments; no public local-access commitment identified."
+
+workload_profile:
+  general_cloud: true
+  colocation: true
+  notes: >
+    Cavaleros describes the CDC campuses as hyperscale-capable infrastructure for
+    cloud, AI, Neo Cloud, and enterprise deployments. No reviewed source confirms
+    a specific AI tenant, GPU cluster, or live AI training deployment for the Cape
+    Town campus.
+
+claims:
+  - id: c1
+    type: anchor_tenant
+    entity: "Microsoft"
+    status: disputed
+    denial_status: unaddressed
+    source_ids:
+      - s1
+    first_observed: "2026-04-28"
+    last_reviewed: "2026-06-29"
+    note: >
+      Daily Maverick reports that the 360MW Cape Town project is thought to be linked
+      to Microsoft, while also stating that neither Cavaleros nor Microsoft has
+      confirmed or denied the link.
+  - id: c2
+    type: other
+    status: reported
+    denial_status: n_a
+    source_ids:
+      - s2
+    first_observed: "2026-06-29"
+    last_reviewed: "2026-06-29"
+    note: >
+      Operator-supplied LinkedIn text describes the Cape Town campus as positioned
+      within existing availability zones and supported by over 360MVA of power
+      availability.
+
+claim_history: []
+
+constraints:
+  - dimension: grid_capacity
+    severity: high
+    rationale: >
+      Daily Maverick reports the Cape Town project as 360MW; the Cavaleros operator
+      statement describes over 360MVA power availability. Either figure is material
+      relative to Cape Town's reported 1,676MW maximum electricity demand.
+    source_ids:
+      - s1
+      - s2
+  - dimension: water_stress
+    severity: high
+    rationale: >
+      Daily Maverick raises unresolved questions about water demand for new Cape Town
+      data centres, and no reviewed Cavaleros source discloses cooling technology,
+      water source, or projected consumption.
+    source_ids:
+      - s1
+
+analysis:
+  strategic_significance:
+    level: high
+    rationale: >
+      If built as announced, the CDC Cape Town Campus would be one of Cape Town's
+      largest data-centre developments and a major power-ready hyperscale campus in
+      South Africa's Western Cape cloud market.
+  significance_summary:
+    - "Operator statement identifies the project as CDC Cape Town, a 100-hectare campus with over 360MVA of power availability."
+    - "Material grid implications relative to Cape Town's reported 1,676MW maximum electricity demand."
+    - "Microsoft anchor link remains unconfirmed and should not be treated as fact."
+  assessed_by: "project-maintainer"
+  assessed_on: "2026-06-29"
+  is_editorial: true
+
+external_ids: {}
+
+sources:
+  - id: s1
+    url: "https://www.dailymaverick.co.za/article/2026-04-28-new-data-centres-set-to-swallow-34-of-cape-towns-current-electricity-supply/"
+    title: "New data centres set to swallow 34% of Cape Town's current electricity supply"
+    publisher: "Daily Maverick"
+    retrieved: "2026-06-29"
+    trust_tier: local_journalism
+
+  - id: s2
+    url: "https://www.linkedin.com/posts/the-cavaleros-group-54b216272_cavalerosgroup-datacentres-digitalinfrastructure-activity-7392478439703724032-GprC"
+    title: "The Cavaleros Group Announces Major Data Centre Campus Developments in Partnership with Knight Frank and Future-Tech"
+    publisher: "Cavaleros Group LinkedIn"
+    retrieved: "2026-06-29"
+    trust_tier: social_media
+
+sourced_fields:
+  name:
+    source_ids:
+      - s2
+    confidence: confirmed
+  aliases:
+    source_ids:
+      - s1
+      - s2
+    confidence: confirmed
+  status:
+    source_ids:
+      - s1
+      - s2
+    confidence: reported
+  status_history:
+    source_ids:
+      - s1
+    confidence: reported
+  timeline.expected_operational:
+    source_ids:
+      - s1
+    confidence: reported
+  project.name:
+    source_ids:
+      - s2
+    confidence: confirmed
+  operators:
+    source_ids:
+      - s1
+      - s2
+    confidence: confirmed
+  owners:
+    source_ids:
+      - s2
+    confidence: confirmed
+  capacity.total_facility_mw:
+    source_ids:
+      - s1
+      - s2
+    confidence: reported
+    note: "Daily Maverick reports 360MW; Cavaleros reports over 360MVA power availability. Stored as MW-equivalent pending schema support for MVA."
+  capacity.it_load_mw_current:
+    source_ids:
+      - s1
+      - s2
+    confidence: estimated
+    note: "No operational load is disclosed; the campus is tracked as announced rather than operational."
+  capacity.it_load_mw_as_of:
+    source_ids:
+      - s2
+    confidence: confirmed
+  capacity.land_area_hectares:
+    source_ids:
+      - s2
+    confidence: reported
+  infrastructure.connectivity:
+    source_ids:
+      - s2
+    confidence: reported
+  infrastructure.cooling_adequacy_for_ai:
+    source_ids:
+      - s1
+      - s2
+    confidence: estimated
+    note: "Hyperscale/AI readiness is marketed, but cooling technology and GPU deployment are not disclosed."
+  power.grid_connected:
+    source_ids:
+      - s1
+      - s2
+    confidence: estimated
+    note: "Power availability is reported; grid connection path is not fully disclosed."
+  power.grid_carbon_intensity_gco2_per_kwh:
+    source_ids:
+      - s1
+    confidence: estimated
+    note: "City of Cape Town supply is ultimately Eskom-backed for large grid loads; grid-level figure, not facility-specific."
+  water:
+    source_ids:
+      - s1
+    confidence: estimated
+    note: "Daily Maverick highlights unknown cooling-water demand; Cavaleros source reviewed here does not disclose cooling water use."
+  governance:
+    source_ids:
+      - s2
+    confidence: reported
+  workload_profile:
+    source_ids:
+      - s2
+    confidence: reported
+  claims:
+    source_ids:
+      - s1
+      - s2
+    confidence: reported
+  constraints:
+    source_ids:
+      - s1
+      - s2
+    confidence: estimated
+
+last_verified: "2026-06-29"
+first_tracked: "2026-05-11"
+
+notes: |
+  This record replaces the provisional `cavaleros-cape-town-dc1` identity. Cavaleros'
+  operator statement identifies the project as the CDC Cape Town campus, part of the
+  Cosmas Data City campus programme.
+
+  The operator statement describes CDC Cape Town as a 100-hectare development with over
+  360MVA of power availability. Daily Maverick reports the Cape Town project as 360MW
+  and places it within a broader set of four Cape Town data-centre developments totalling
+  580MW of reported demand.
+
+  The Microsoft link remains unconfirmed. Do not cite Microsoft as a tenant or anchor
+  customer unless a primary source confirms it.
+
+  The Cavaleros LinkedIn evidence is also preserved as a local text snapshot in
+  `data/sources/2026-Cavaleros-Cosmas-Data-City-LinkedIn.md` because social posts can
+  be difficult to retrieve reproducibly.

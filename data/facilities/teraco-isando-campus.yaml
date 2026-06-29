@@ -1,0 +1,167 @@
+id: teraco-isando-campus
+name: "Teraco Isando Campus (JB1 + JB3 + JB5)"
+aliases:
+  - "Teraco Isando Campus"
+  - "Teraco JB1 + JB3 + JB5"
+  - "Teraco JB1"
+  - "Teraco JB3"
+  - "Teraco Johannesburg Isando"
+
+country: ZA
+city: Isando
+region: Gauteng
+location:
+  lat: -26.1379868
+  lng: 28.1986812
+  precision: exact
+
+status: operational
+status_history:
+  - status: operational
+    date: "2009-01-01"
+    note: "Teraco JB1 is an older operational facility; exact opening date not verified in the cited sources."
+  - status: expanded
+    date: "2024-01-01"
+    note: "The 2023 technical sheet described JB5 as a planned 2024 addition to the Isando campus."
+
+operators:
+  - "Teraco"
+owners:
+  - "Digital Realty"
+
+capacity:
+  it_load_mw_current: 40
+  it_load_mw_as_of: "2023-04-11"
+  total_facility_mw: 80
+  building_sqm: 45000
+
+infrastructure:
+  cooling:
+    - unknown
+  cooling_adequacy_for_ai: unknown
+  connectivity:
+    - "NAPAfrica Internet Exchange"
+    - "Africa Cloud Exchange"
+    - "Cloud on-ramps for Amazon, Google, Huawei, Microsoft Azure, Oracle, and VMware Cloud Verified providers"
+    - "Carrier-neutral network and interconnection hub"
+
+power:
+  grid_connected: true
+  backup_type:
+    - diesel
+
+governance:
+  jurisdiction: "South Africa"
+
+workload_profile:
+  general_cloud: true
+  colocation: true
+  notes: >
+    Teraco describes the Isando campus as a carrier-neutral colocation and
+    interconnection hub with cloud on-ramps. No public source reviewed here
+    confirms dedicated AI training capacity, GPU counts, or active liquid-cooled
+    AI deployments.
+
+sources:
+  - id: s1
+    url: "https://www.teraco.co.za/data-centre-locations/johannesburg/"
+    title: "Johannesburg Data Centre Locations"
+    publisher: "Teraco"
+    retrieved: "2026-06-29"
+    trust_tier: company_official
+
+  - id: s2
+    url: "https://www.teraco.co.za/data-centre-locations/johannesburg/"
+    title: "Teraco JB1 + JB3 Isando Campus technical specifications, PDF retrieved from the Equinix/Teraco site and stored in data/sources/2023-Teraco-Tech-Spec-Isando-Campus.pdf"
+    publisher: "Teraco"
+    retrieved: "2026-06-29"
+    trust_tier: company_official
+
+sourced_fields:
+  name:
+    source_ids: ["s1", "s2"]
+    confidence: confirmed
+  aliases:
+    source_ids: ["s1", "s2"]
+    confidence: confirmed
+  city:
+    source_ids: ["s1", "s2"]
+    confidence: confirmed
+  region:
+    source_ids: ["s1"]
+    confidence: reported
+  location:
+    source_ids: ["s1", "s2"]
+    confidence: reported
+    note: "Teraco gives the Isando campus address as 5 Brewery Street and publishes map coordinates for the Isando campus area."
+  status:
+    source_ids: ["s1", "s2"]
+    confidence: confirmed
+  status_history:
+    source_ids: ["s2"]
+    confidence: reported
+    note: "JB1 opening year remains approximate; JB5 timing comes from the 2023 technical sheet."
+  operators:
+    source_ids: ["s1", "s2"]
+    confidence: confirmed
+  owners:
+    source_ids: ["s1"]
+    confidence: reported
+    note: "Teraco's official site brands the company as 'A Digital Realty Company'."
+  capacity.it_load_mw_current:
+    source_ids: ["s2"]
+    confidence: reported
+    note: "The technical sheet reports 40MVA available IT power load across the data centre footprint; stored as MW-equivalent pending schema support for MVA."
+  capacity.it_load_mw_as_of:
+    source_ids: ["s2"]
+    confidence: confirmed
+    note: "PDF metadata creation date is 2023-04-11."
+  capacity.total_facility_mw:
+    source_ids: ["s2"]
+    confidence: reported
+    note: "The technical sheet reports 80MVA total power; stored as MW-equivalent pending schema support for MVA."
+  capacity.building_sqm:
+    source_ids: ["s2"]
+    confidence: reported
+    note: "The technical sheet reports over 45,000 square meters of total space."
+  infrastructure.cooling:
+    source_ids: ["s2"]
+    confidence: reported
+    note: "The technical sheet reports N+1 cooling redundancy and environmental controls but does not identify a cooling technology."
+  infrastructure.cooling_adequacy_for_ai:
+    source_ids: ["s1", "s2"]
+    confidence: estimated
+    note: "No source reviewed confirms rack-level liquid cooling, GPU clusters, or AI training suitability."
+  infrastructure.connectivity:
+    source_ids: ["s1", "s2"]
+    confidence: reported
+  power.grid_connected:
+    source_ids: ["s2"]
+    confidence: confirmed
+    note: "The technical sheet states that utility power is provided."
+  power.backup_type:
+    source_ids: ["s2"]
+    confidence: confirmed
+    note: "The technical sheet reports diesel backup generators with a minimum 48 hours of fuel under full-load design conditions."
+  governance.jurisdiction:
+    source_ids: ["s1", "s2"]
+    confidence: confirmed
+  workload_profile:
+    source_ids: ["s1", "s2"]
+    confidence: reported
+
+last_verified: "2026-06-29"
+first_tracked: "2026-06-29"
+notes: |
+  This record covers Teraco's Isando campus, not a single JB1 building. The 2023
+  technical sheet in `data/sources/2023-Teraco-Tech-Spec-Isando-Campus.pdf` is titled
+  "JB1 + JB3 Isando Campus"; Teraco's current Johannesburg page presents the Isando
+  campus as JB1 + JB3 + JB5.
+
+  The technical sheet reports 45,000 square meters of total space, 20,000 square
+  meters of white space, 80MVA total power, and 40MVA available IT power load across
+  the data centre footprint. Because the schema has MW fields but no MVA fields, the
+  power figures are recorded as MW-equivalent with notes.
+
+  Cloud on-ramps and provider names are treated as connectivity/ecosystem evidence,
+  not as proof that the named cloud providers are tenants in this facility.
