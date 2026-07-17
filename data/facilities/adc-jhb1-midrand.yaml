@@ -36,6 +36,7 @@ infrastructure:
   cooling_adequacy_for_ai: unknown
   connectivity:
     - "Cassava Technologies pan-African fibre-optic network (high-speed, ultra-low-latency)"
+    - "Oni-Tel Fibre Networks 'Infinity' interconnection platform — dark fibre, carrier-grade, high-capacity, ultra-low-latency connectivity"
 
 power:
   grid_connected: true
@@ -81,11 +82,17 @@ sources:
     retrieved: "2026-05-11"
     trust_tier: trade_press
   - id: s2
-    # TODO: replace with the actual Cassava press release URL
-    url: "https://example.com/todo-cassava-nvidia-ai-factory-press-release"
+    url: "https://www.cassavatechnologies.com/cassava-to-upgrade-its-data-centres-with-nvidia-supercomputers-to-drive-africas-ai-future/"
     title: "Cassava Technologies announces Africa's first AI Factory powered by NVIDIA"
     publisher: "Cassava Technologies"
     retrieved: "2026-05-11"
+    trust_tier: company_official
+
+  - id: s3
+    url: "https://www.cassavatechnologies.com/africa-data-centres-partners-with-oni-tel-to-enhance-data-centre-connectivity-in-south-africa/"
+    title: "Africa Data Centres partners with Oni-Tel to enhance data centre connectivity in South Africa"
+    publisher: "Cassava Technologies"
+    retrieved: "2026-07-17"
     trust_tier: company_official
 
 sourced_fields:
@@ -103,9 +110,9 @@ sourced_fields:
     confidence: reported
     note: "Stanlib Infrastructure Fund II acquired a major stake in ADC's SA operations, approved end-January 2026."
   infrastructure.connectivity:
-    source_ids: ["s2"]
+    source_ids: ["s2", "s3"]
     confidence: confirmed
-    note: "Pan-African fibre network owned by Cassava Technologies, described as high-speed ultra-low-latency."
+    note: "Pan-African fibre network owned by Cassava Technologies, described as high-speed ultra-low-latency. Oni-Tel partnership (announced 2026, per s3) adds dark fibre and carrier-neutral interconnection via the Infinity platform, specifically named for the Midrand and Samrand campuses."
   power.ppa_partners:
     source_ids: ["s1"]
     confidence: reported
@@ -153,6 +160,10 @@ notes: |
   The press release does not distinguish between Midrand and CPT1 for GPU allocation — both SA
   facilities are part of the NCP deployment.
 
-  **Capacity:** Not stated in source — requires a primary source (ADC press releases, company filings).
+  Africa Data Centres partnered with Oni-Tel Fibre Networks to enhance connectivity at the
+  Midrand and Samrand campuses via Oni-Tel's "Infinity" fibre interconnection platform,
+  adding dark fibre and carrier-neutral options for Gauteng customers. The announcement
+  cites enterprise demand for cloud adoption, AI deployment, and data-intensive workloads
+  as the driver, though no specific bandwidth or capacity figures are given.
 
-  **Source URL s2:** The Cassava press release URL is a placeholder — replace with the actual URL.
+  **Capacity:** Not stated in source — requires a primary source (ADC press releases, company filings).

@@ -35,7 +35,7 @@ claim_history: []
 constraints: []
 sources:
   - id: s1
-    url: https://example.com/todo-cassava-nvidia-ai-factory-press-release
+    url: https://www.cassavatechnologies.com/cassava-to-upgrade-its-data-centres-with-nvidia-supercomputers-to-drive-africas-ai-future/
     title: Cassava Technologies announces Africa's first AI Factory powered by NVIDIA
     publisher: Cassava Technologies
     retrieved: "2026-05-11"
@@ -68,10 +68,10 @@ sourced_fields:
       - s1
     confidence: reported
     note: Inferred from the NCP AI Factory model described for SA; Egypt-specific workload not stated.
-last_verified: "2026-05-11"
+last_verified: "2026-07-17"
 first_tracked: "2026-05-11"
 notes: |
-  Programme placeholder. Cassava Technologies' press release names Egypt as one of four countries
+  Cassava Technologies' press release names Egypt as one of four countries
   earmarked for AI Factory expansion beyond South Africa (alongside Kenya, Morocco, Nigeria).
   No facility name, site address, capacity, or timeline is given for Egypt specifically.
 
@@ -79,4 +79,4 @@ notes: |
 
   Update this record when Cassava publishes a country-specific announcement.
 
-  **Source URL:** Placeholder — replace with the actual Cassava press release URL.
+  **Source URL:** https://www.cassavatechnologies.com/cassava-to-upgrade-its-data-centres-with-nvidia-supercomputers-to-drive-africas-ai-future/
