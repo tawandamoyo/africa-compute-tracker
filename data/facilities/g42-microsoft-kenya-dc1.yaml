@@ -1,150 +1,303 @@
 id: g42-microsoft-kenya-dc1
-name: G42 / Microsoft Azure East Africa Data Centre
+name: G42 / Microsoft East Africa Cloud Region data centre campus
 aliases:
   - Microsoft Azure East Africa Region
   - G42 Kenya Data Centre
 country: KE
-city: Nairobi
-region: Nairobi County
-location:
-  lat: -1.2921
-  lng: 36.8219
-  precision: city
-status: announced
+city: Olkaria
+
+status: paused
 status_history:
   - status: announced
     date: "2024-05-22"
     note: >-
-      Letter of intent signed between Microsoft, G42, and Kenya's Ministry of Information at President Ruto's US state
-      visit. Operational within 2 years of signing definitive agreements.
-timeline:
-  expected_operational: "2026-12-31"
-operators:
-  - G42
-owners:
-  - G42
-tenants:
-  - Microsoft Azure
+      Microsoft and G42 announced the broader Kenya digital initiative and said
+      that a letter of intent with Kenya's Ministry of Information,
+      Communications and the Digital Economy would be signed on 24 May 2024.
+  - status: paused
+    date: "2026-05-06"
+    note: >-
+      Trade reporting said the original project had stalled after its concept
+      note failed to receive Kenyan Treasury clearance, the May 2026 target was
+      missed, and talks over government capacity-payment guarantees broke down.
+      Kenyan officials subsequently denied that the project had been withdrawn
+      and said discussions could continue, potentially at a smaller scale.
+
 infrastructure:
   cooling_adequacy_for_ai: unknown
-  connectivity:
-    - Submarine cable access (East African coast)
+
 power:
-  grid_connected: true
-  utility: Kenya Power
-  grid_carbon_intensity_gco2_per_kwh: 70
-  backup_type:
-    - diesel
-water:
-  source: unknown
-  water_stress_region: medium
-financials:
-  announced_capex_usd_millions: 1000
-  investors:
-    - Microsoft
-    - G42
-  government_incentives:
-    - Supported by Kenya government under Ministry of Information, Communications and the Digital Economy
+  renewable_pct_reported: 100
+
 governance:
   jurisdiction: Kenya
+  data_residency_commitments:
+    - >-
+      Planned East Africa cloud region described as part of a trusted data zone
+      intended to support local-law governance for data stored in Kenya.
+  known_government_contracts:
+    - >-
+      Planned letter of intent among Microsoft, G42, and Kenya's Ministry of
+      Information, Communications and the Digital Economy, announced on 22 May 2024.
   foreign_capital_origin:
     - United Arab Emirates (G42)
     - United States (Microsoft)
-  known_government_contracts:
-    - Strategic partnership with Kenya government signed at President Ruto's US state visit (2024-05-24)
+  compute_access:
+    access_model: open_market
+    local_access_commitment: voluntary_commitment
+    local_access_note: >-
+      Microsoft and G42 said the planned cloud region would provide customers
+      across Kenya and East Africa access to Azure cloud and AI services. No
+      pricing, reserved local capacity, or research-compute allocation was disclosed.
+
 workload_profile:
   ai_inference: true
   general_cloud: true
-  notes: >
-    Purpose-built Azure cloud region for East Africa, providing access to Microsoft's full Azure cloud portfolio. G42
-    (Abu Dhabi-based, Microsoft-backed) is the developer and operator. G42 was simultaneously training an open-source
-    LLM in Swahili and English at time of announcement. AI inference workloads confirmed by Microsoft Azure cloud region
-    designation.
-claims: []
-claim_history: []
-constraints: []
+  notes: >-
+    The announced East Africa cloud region is intended to provide Azure cloud
+    and AI services. The source does not disclose GPU models, GPU counts,
+    training capacity, rack density, or cooling technology for the Olkaria campus.
+
+claims:
+  - id: c1
+    type: hyperscaler_presence
+    entity: Microsoft Azure
+    status: reported
+    denial_status: n_a
+    source_ids: ["s1"]
+    first_observed: "2024-05-22"
+    last_reviewed: "2026-07-17"
+    note: >-
+      Microsoft and G42 said the planned Olkaria campus would run Microsoft
+      Azure as a new East Africa Cloud Region.
+  - id: c2
+    type: government_contract
+    entity: Republic of Kenya
+    status: reported
+    denial_status: n_a
+    source_ids: ["s1"]
+    first_observed: "2024-05-22"
+    last_reviewed: "2026-07-17"
+    note: >-
+      The announcement said a letter of intent among Microsoft, G42, and the
+      Kenyan ministry would be signed on 24 May 2024; this source does not
+      independently confirm that the signing occurred.
+  - id: c3
+    type: foreign_investment
+    entity: G42
+    status: reported
+    denial_status: n_a
+    source_ids: ["s1"]
+    first_observed: "2024-05-22"
+    last_reviewed: "2026-07-17"
+    note: >-
+      G42 was to lead arrangement of an initial $1 billion investment covering
+      the entire five-pillar digital initiative. The source does not allocate
+      $1 billion specifically to the data centre.
+  - id: c4
+    type: capacity_expansion
+    entity: G42 / Microsoft Olkaria campus
+    status: reported
+    denial_status: n_a
+    source_ids: ["s2", "s5"]
+    first_observed: "2026-05-07"
+    last_reviewed: "2026-07-17"
+    note: >-
+      Data Center Dynamics reports that the concept targeted an initial 100MW
+      and could scale to 1GW. The 1GW figure is not disclosed in the original
+      Microsoft announcement and is not stored as IT load in the structured
+      capacity fields.
+  - id: c5
+    type: other
+    entity: Project continuation
+    status: disputed
+    denial_status: denied_by_one_party
+    source_ids: ["s2", "s3", "s4", "s5"]
+    first_observed: "2026-05-06"
+    last_reviewed: "2026-07-17"
+    note: >-
+      Reporting describes the original project as stalled or suspended, with
+      Treasury clearance and commercial offtake issues unresolved. Kenya's
+      Special Tech Envoy says it has not been suspended or withdrawn and that
+      the government remains committed. No source reviewed confirms a formal
+      cancellation by Microsoft or G42.
+
+claim_history:
+  - field: status
+    value: announced
+    observed: "2024-05-22"
+    source_ids: ["s1"]
+    superseded_on: "2026-05-06"
+    reason: >-
+      Later reporting established that the original timetable and commercial
+      structure had stalled, while the parties continued discussing the project.
+
+constraints:
+  - dimension: grid_capacity
+    severity: critical
+    rationale: >-
+      Reporting says the full 1GW concept would equal about one-third of Kenya's
+      roughly 3GW installed generation capacity. President William Ruto said
+      operating it at that scale would require cutting power to roughly half the
+      country. Government officials later clarified that this was an argument
+      for expanding generation, not confirmation that the project was cancelled.
+    source_ids: ["s2", "s4", "s5"]
+  - dimension: regulatory
+    severity: high
+    rationale: >-
+      Reporting says the project concept failed to receive National Treasury
+      clearance and that talks broke down over requested government guarantees
+      to purchase a minimum amount of compute capacity each year.
+    source_ids: ["s2", "s3", "s5"]
+
 sources:
   - id: s1
-    url: https://example.com/todo-reuters-microsoft-g42-kenya-data-center
-    title: Microsoft, G42 to invest $1 billion in Kenya data center
-    publisher: Reuters
-    retrieved: "2026-05-12"
+    url: "https://news.microsoft.com/source/2024/05/22/microsoft-and-g42-announce-1-billion-comprehensive-digital-ecosystem-initiative-for-kenya/"
+    title: "Microsoft and G42 announce $1 billion comprehensive digital ecosystem initiative for Kenya"
+    publisher: Microsoft Source
+    retrieved: "2026-07-17"
+    trust_tier: company_official
+  - id: s2
+    url: "https://www.datacenterdynamics.com/en/news/microsoft-and-g42-data-center-in-kenya-stalled-due-to-lack-of-power-capacity/"
+    title: "Microsoft and G42 data center in Kenya stalled due to lack of power capacity"
+    publisher: Data Center Dynamics
+    retrieved: "2026-07-17"
     trust_tier: trade_press
+  - id: s3
+    url: "https://www.bloomberg.com/news/articles/2026-05-10/microsoft-s-african-data-center-falters-on-payment-demands"
+    title: "Microsoft's African Data Center Falters on Payment Demands"
+    publisher: Bloomberg
+    retrieved: "2026-07-17"
+    trust_tier: trade_press
+  - id: s4
+    url: "https://www.the-star.co.ke/news/2026-05-10-state-microsoft-g42-data-centre-project-remains-on-track-despite-power-concerns"
+    title: "State: Microsoft-G42 data centre project remains on track despite power concerns"
+    publisher: The Star Kenya
+    retrieved: "2026-07-17"
+    trust_tier: local_journalism
+  - id: s5
+    url: "https://africa.businessinsider.com/local/markets/kenya-suspends-dollar1-billion-microsoft-data-centre-as-energy-shortfall-raises/hdtfmxz"
+    title: "Kenya suspends $1 billion Microsoft data centre as energy shortfall raises doubts over Africa's AI ambitions"
+    publisher: Business Insider Africa
+    retrieved: "2026-07-17"
+    trust_tier: local_journalism
+
 sourced_fields:
-  operators:
-    source_ids:
-      - s1
+  name:
+    source_ids: ["s1"]
     confidence: reported
-    note: G42 named as developer and builder; Microsoft is investor and cloud tenant.
-  owners:
-    source_ids:
-      - s1
-    confidence: reported
-    note: G42 builds and operates; ownership structure post-construction not disclosed.
-  tenants:
-    source_ids:
-      - s1
-    confidence: confirmed
-    note: Microsoft Azure East Africa cloud region explicitly confirmed in source.
-  financials.announced_capex_usd_millions:
-    source_ids:
-      - s1
-    confidence: confirmed
-    note: $1 billion investment figure explicitly stated in Reuters article.
-  power.grid_carbon_intensity_gco2_per_kwh:
-    source_ids:
-      - s1
-    confidence: estimated
     note: >-
-      Kenya grid is geothermal and hydro dominant (~93% renewable). IEA/IRENA estimate ~60-80 gCO₂/kWh; 70 used here.
-      Article explicitly states geothermal power. Grid-level figure, not facility-specific.
+      Descriptive tracker name; the announcement does not disclose a formal
+      facility name.
+  aliases:
+    source_ids: ["s1"]
+    confidence: reported
+  city:
+    source_ids: ["s1"]
+    confidence: confirmed
+    note: "Microsoft identifies Olkaria, not Nairobi, as the planned campus location."
+  status:
+    source_ids: ["s2", "s3", "s4", "s5"]
+    confidence: disputed
+    note: >-
+      The original project and timetable have stalled, but Kenyan officials deny
+      that it has been suspended or withdrawn. `paused` best represents the lack
+      of active delivery without asserting a formal cancellation.
+  status_history:
+    source_ids: ["s1", "s2", "s3", "s4", "s5"]
+    confidence: confirmed
   infrastructure.cooling_adequacy_for_ai:
-    source_ids:
-      - s1
-    confidence: estimated
+    source_ids: ["s1"]
+    confidence: reported
     note: >-
-      Cooling type not disclosed. AI inference confirmed via Azure cloud region. Rated unknown pending direct
-      disclosure.
-  timeline.expected_operational:
-    source_ids:
-      - s1
-    confidence: estimated
-    note: "'Within 2 years of signing definitive agreements' from LOI date ~May 2024. 2026-12-31 is a conservative estimate."
-  workload_profile.ai_inference:
-    source_ids:
-      - s1
+      The announcement mentions water-conservation technology but does not
+      disclose cooling design, rack density, or liquid-cooling capability.
+  power.renewable_pct_reported:
+    source_ids: ["s1"]
+    confidence: reported
+    note: >-
+      Microsoft and G42 say the planned campus will run entirely on renewable
+      geothermal energy; this is a forward-looking company commitment.
+  governance.jurisdiction:
+    source_ids: ["s1"]
     confidence: confirmed
-    note: Azure cloud region designation confirms cloud AI inference capability.
-  governance.foreign_capital_origin:
-    source_ids:
-      - s1
-    confidence: confirmed
+  governance.data_residency_commitments:
+    source_ids: ["s1"]
+    confidence: reported
   governance.known_government_contracts:
-    source_ids:
-      - s1
+    source_ids: ["s1"]
+    confidence: reported
+    note: >-
+      The source announces the intended LOI and its planned signing date; it is
+      not independent evidence that the LOI was executed.
+  governance.foreign_capital_origin:
+    source_ids: ["s1"]
     confidence: confirmed
-last_verified: "2026-05-12"
+  governance.compute_access:
+    source_ids: ["s1"]
+    confidence: reported
+  workload_profile:
+    source_ids: ["s1"]
+    confidence: reported
+    note: "These are planned Azure cloud and AI services, not observed workloads."
+  claims[0].type:
+    source_ids: ["s1"]
+    confidence: reported
+  claims[1].type:
+    source_ids: ["s1"]
+    confidence: reported
+  claims[2].type:
+    source_ids: ["s1"]
+    confidence: reported
+  claims[3].type:
+    source_ids: ["s2", "s5"]
+    confidence: reported
+  claims[4].type:
+    source_ids: ["s2", "s3", "s4", "s5"]
+    confidence: disputed
+  constraints[0].dimension:
+    source_ids: ["s2", "s4", "s5"]
+    confidence: reported
+  constraints[1].dimension:
+    source_ids: ["s2", "s3", "s5"]
+    confidence: reported
+
+last_verified: "2026-07-17"
 first_tracked: "2026-05-12"
 notes: |
-  G42 (Abu Dhabi-based AI and cloud company, backed by Microsoft's $1.5B investment in April 2024)
-  is developing a $1 billion data centre in Kenya, which will host Microsoft's Azure East Africa
-  cloud region.
+  Microsoft's 22 May 2024 announcement says G42 and local partners would design
+  and build the data centre campus in Olkaria, Kenya. It describes a new
+  Microsoft Azure East Africa Cloud Region powered entirely by renewable
+  geothermal energy and using water-conservation technology.
 
-  The facility was announced via a letter of intent (LOI) signed on 24 May 2024 between Microsoft,
-  G42, and Kenya's Ministry of Information, Communications and the Digital Economy — coinciding with
-  President William Ruto's state visit to the United States.
+  The announced $1 billion is for a broader digital initiative covering the
+  data centre plus local-language AI, an innovation lab and skills programmes,
+  connectivity, and government cloud collaboration. It should not be cited as
+  the facility's individual construction cost.
 
-  **Power:** The facility will be powered by geothermal energy — Kenya's primary renewable source
-  (Kenya is the 8th largest geothermal producer globally). Kenya's grid carbon intensity is
-  approximately 60–70 gCO₂/kWh, making this one of the lowest-carbon data centres on the continent.
+  The source says the cloud region would become operational within 24 months of
+  signing definitive agreements. Because it does not state that those definitive
+  agreements were signed or give their date, this record does not infer a fixed
+  operational deadline.
 
-  **Status note:** The source article is from May 2024. As of May 2026, definitive agreements may
-  have been signed and construction may be underway. This record should be verified against more
-  recent sources — update status to `under_construction` or `operational` as appropriate.
+  The Swahili/English language model mentioned in the announcement was being
+  trained using G42 infrastructure in the United States. It is therefore not
+  evidence of AI training taking place at the planned Olkaria campus.
 
-  **G42 context:** G42 is building a Swahili/English open-source LLM at time of announcement.
-  Microsoft's $1.5B investment in G42 (April 2024) includes a commitment to cloud interoperability.
-  The Kenya facility is part of Microsoft's broader African cloud expansion alongside its
-  South Africa Azure regions.
+  By May 2026, the original plan and timetable had stalled. Data Center Dynamics
+  reported an initial 100MW concept scaling to 1GW, which would be roughly one-third
+  of Kenya's approximately 3GW installed generation capacity. President William
+  Ruto described the implication more starkly: operating it at that scale could
+  require switching off power to roughly half the country.
 
-  **Source URL:** The Reuters article URL is a placeholder — replace with the actual article URL.
+  Power was not the only obstacle. Bloomberg reported that talks broke down over
+  Microsoft's request for the Kenyan government to guarantee annual purchases of
+  compute capacity. Data Center Dynamics also reported that a project concept note
+  did not receive National Treasury clearance.
+
+  The project should not currently be described as formally cancelled. Kenya's
+  Special Tech Envoy denied that it had been suspended or withdrawn and said the
+  government remained committed to enabling projects of this kind by expanding
+  national generation toward 10GW. Reporting also indicates that discussions may
+  continue around a smaller project. The tracker therefore records the present
+  status as `paused`, with project continuation treated as disputed.
