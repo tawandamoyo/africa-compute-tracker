@@ -42,7 +42,7 @@ sources:
     trust_tier: company_official
 
   - id: s1
-    url: https://example.com/todo-cassava-nvidia-ai-factory-press-release
+    url: https://www.cassavatechnologies.com/cassava-to-upgrade-its-data-centres-with-nvidia-supercomputers-to-drive-africas-ai-future/
     title: Cassava Technologies announces Africa's first AI Factory powered by NVIDIA
     publisher: Cassava Technologies
     retrieved: "2026-05-11"
@@ -77,12 +77,9 @@ sourced_fields:
     note: Inferred from the NCP AI Factory model described for SA; Nigeria-specific workload not stated.
 last_verified: "2026-05-11"
 first_tracked: "2026-05-11"
+# Maintainer: update this record when Cassava publishes a country-specific announcement.
 notes: |
   LOS1 Lagos Data Centre is the named Africa Data Centres facility in Lagos. Cassava
   Technologies' press release names Nigeria as one of four countries earmarked for AI Factory
   expansion beyond South Africa (alongside Egypt, Kenya, Morocco), but does not confirm whether
   the AI Factory expansion maps specifically to LOS1.
-
-  Update this record when Cassava publishes a country-specific announcement.
-
-  **Source URL:** Placeholder — replace with the actual Cassava press release URL.

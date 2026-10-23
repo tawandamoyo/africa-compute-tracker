@@ -1,5 +1,5 @@
 id: cassava-ai-factory-morocco
-name: "Cassava AI Factory Morocco (planned)"
+name: Cassava AI Factory Morocco
 aliases:
   - Africa Data Centres Morocco
   - ADC Morocco
@@ -35,7 +35,7 @@ claim_history: []
 constraints: []
 sources:
   - id: s1
-    url: https://example.com/todo-cassava-nvidia-ai-factory-press-release
+    url: https://www.cassavatechnologies.com/cassava-to-upgrade-its-data-centres-with-nvidia-supercomputers-to-drive-africas-ai-future/
     title: Cassava Technologies announces Africa's first AI Factory powered by NVIDIA
     publisher: Cassava Technologies
     retrieved: "2026-05-11"
@@ -70,14 +70,11 @@ sourced_fields:
     note: Inferred from the NCP AI Factory model described for SA; Morocco-specific workload not stated.
 last_verified: "2026-05-11"
 first_tracked: "2026-05-11"
+# Maintainer: update this record when Cassava publishes a country-specific announcement.
 notes: |
-  Programme placeholder. Cassava Technologies' press release names Morocco as one of four countries
+  Cassava Technologies' press release names Morocco as one of four countries
   earmarked for AI Factory expansion beyond South Africa (alongside Egypt, Kenya, Nigeria).
   No facility name, site address, capacity, or timeline is given for Morocco specifically.
 
   City set to Casablanca as Morocco's primary commercial hub; this is not confirmed in the source.
   Rabat (capital) is an alternative possibility.
-
-  Update this record when Cassava publishes a country-specific announcement.
-
-  **Source URL:** Placeholder — replace with the actual Cassava press release URL.

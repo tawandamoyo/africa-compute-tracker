@@ -35,6 +35,9 @@ function softWarnings(data, file) {
 
   // Any source missing archived_url
   for (const src of data.sources ?? []) {
+    if (/(^|\/\/)(www\.)?example\.(com|org)|\/todo-/i.test(src.url ?? '')) {
+      warnings.push(`source [${src.id}] has a placeholder url — the site shows it unlinked until the real URL is found`);
+    }
     if (!src.archived_url) {
       warnings.push(`source [${src.id}] has no archived_url — archive via web.archive.org/save/`);
     }
@@ -82,6 +85,13 @@ for (const file of files) {
     for (const err of validate.errors) {
       console.error(`   ${err.instancePath || '(root)'} ${err.message}`);
     }
+    hasErrors = true;
+    continue;
+  }
+
+  const expectedFile = `${data.id}.yaml`;
+  if (file !== expectedFile) {
+    console.error(`❌ ${file}: filename must match id — expected ${expectedFile}`);
     hasErrors = true;
     continue;
   }

@@ -1,5 +1,5 @@
 id: cassava-ai-factory-egypt
-name: "Cassava AI Factory Egypt (planned)"
+name: Cassava AI Factory Egypt
 aliases:
   - Africa Data Centres Egypt
   - ADC Egypt
@@ -70,13 +70,10 @@ sourced_fields:
     note: Inferred from the NCP AI Factory model described for SA; Egypt-specific workload not stated.
 last_verified: "2026-07-17"
 first_tracked: "2026-05-11"
+# Maintainer: update this record when Cassava publishes a country-specific announcement.
 notes: |
   Cassava Technologies' press release names Egypt as one of four countries
   earmarked for AI Factory expansion beyond South Africa (alongside Kenya, Morocco, Nigeria).
   No facility name, site address, capacity, or timeline is given for Egypt specifically.
 
   City set to Cairo as the most likely hub; this is not confirmed in the source.
-
-  Update this record when Cassava publishes a country-specific announcement.
-
-  **Source URL:** https://www.cassavatechnologies.com/cassava-to-upgrade-its-data-centres-with-nvidia-supercomputers-to-drive-africas-ai-future/

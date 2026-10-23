@@ -5,6 +5,12 @@ aliases:
   - G42 Kenya Data Centre
 country: KE
 city: Olkaria
+region: Nakuru County
+location:
+  # Centroid of the Olkaria geothermal area near Naivasha; no site coordinates are published.
+  lat: -0.8833
+  lng: 36.3
+  precision: region
 
 status: paused
 status_history:

@@ -163,9 +163,9 @@ sourced_fields:
 
 last_verified: "2026-06-29"
 first_tracked: "2026-05-11"
+# Maintainer: this record replaces the earlier, inaccurate `equinix-ct1-cape-town` identity.
 notes: |
-  This record replaces the prior inaccurate `equinix-ct1-cape-town` identity. The
-  Daily Maverick article identifies a 60MW Cape Town expansion as Teraco's project
+  The Daily Maverick article identifies a 60MW Cape Town expansion as Teraco's project
   and links to Teraco's CT1 Rondebosch announcement. Teraco's own announcement reports
   CT1 current critical IT load of 3MW and a further 2MW expansion, so the structured
   CT1 capacity fields use Teraco's company-official figures.

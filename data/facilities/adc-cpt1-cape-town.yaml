@@ -86,8 +86,7 @@ sources:
     retrieved: "2026-05-11"
     trust_tier: trade_press
   - id: s2
-    # TODO: replace with the actual Cassava press release URL
-    url: "https://example.com/todo-cassava-nvidia-ai-factory-press-release"
+    url: "https://www.cassavatechnologies.com/cassava-to-upgrade-its-data-centres-with-nvidia-supercomputers-to-drive-africas-ai-future/"
     title: "Cassava Technologies announces Africa's first AI Factory powered by NVIDIA"
     publisher: "Cassava Technologies"
     retrieved: "2026-05-11"
@@ -165,5 +164,3 @@ notes: |
 
   A 6MW expansion of this site was noted in the UCT source. Existing operational capacity is not
   stated — the 6MW in the capacity field refers to the expansion only.
-
-  **Source URL s2:** The Cassava press release URL is a placeholder — replace with the actual URL.
