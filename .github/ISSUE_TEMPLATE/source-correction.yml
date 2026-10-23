@@ -1,0 +1,52 @@
+name: Source correction
+description: A field in an existing record is wrong, outdated, or better sourced elsewhere
+title: "[correction] "
+labels: ["correction"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Corrections are the most valuable contribution to this dataset and are handled first.
+        You do not need to be certain — if something looks wrong, say so.
+  - type: input
+    id: record
+    attributes:
+      label: Record id
+      description: The facility id, e.g. `equinix-jn1-germiston`
+      placeholder: operator-code-locality
+    validations:
+      required: true
+  - type: input
+    id: field
+    attributes:
+      label: Field
+      description: The field path, e.g. `capacity.total_facility_mw`
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: What is wrong
+      description: What the record says, and what it should say
+    validations:
+      required: true
+  - type: textarea
+    id: source
+    attributes:
+      label: Source
+      description: >
+        URL, title, publisher and date. An archive.org link is ideal. If the correction comes from
+        non-public knowledge, say so and describe what kind — it will be recorded as a claim rather
+        than a fact.
+    validations:
+      required: true
+  - type: dropdown
+    id: relationship
+    attributes:
+      label: Your relationship to this facility
+      description: Optional, and it does not disqualify anything — it is recorded for transparency.
+      options:
+        - No relationship
+        - Operator, owner, or employee
+        - Journalist or researcher
+        - Prefer not to say

@@ -43,7 +43,7 @@ source that contradicts or updates a field in an existing record, open a pull re
 ## What makes a good correction PR
 
 - A primary source URL (not a secondary aggregator)
-- The correct `trust_tier` for your source (see `intend.md` or the Methodology page)
+- The correct `trust_tier` for your source (see [`docs/SCHEMA.md`](docs/SCHEMA.md) or the Methodology page)
 - An archived copy of the source
 - A note if the new value contradicts an existing one
 

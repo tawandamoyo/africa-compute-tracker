@@ -1,0 +1,52 @@
+name: New facility lead
+description: A facility that should be tracked but is not in the dataset
+title: "[lead] "
+labels: ["lead"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Leads are welcome without complete information. A lead becomes a record only once it has a
+        citable source — see `CONTRIBUTING.md` and `docs/SCOPE.md`.
+  - type: input
+    id: name
+    attributes:
+      label: Facility or project name
+    validations:
+      required: true
+  - type: input
+    id: operator
+    attributes:
+      label: Operator or owner
+  - type: input
+    id: location
+    attributes:
+      label: Country and city
+    validations:
+      required: true
+  - type: dropdown
+    id: status
+    attributes:
+      label: Status
+      options:
+        - announced
+        - operational
+        - expanded
+        - paused
+        - unknown
+    validations:
+      required: true
+  - type: textarea
+    id: sources
+    attributes:
+      label: Sources
+      description: URLs, filings, press releases, or reporting. One per line.
+    validations:
+      required: true
+  - type: textarea
+    id: relevance
+    attributes:
+      label: Why it is in scope
+      description: >
+        Hyperscaler cloud region, large carrier-neutral colocation campus, or purpose-built AI
+        compute facility? Retail colocation and edge sites are out of scope.

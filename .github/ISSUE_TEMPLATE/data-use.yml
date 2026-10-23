@@ -1,0 +1,28 @@
+name: Data use or question
+description: You are using the dataset and something is missing, unclear, or hard to work with
+title: "[data] "
+labels: ["data-use"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Knowing what people are trying to answer with this dataset directly shapes what gets built
+        next. Questions about methodology are welcome here too.
+  - type: textarea
+    id: question
+    attributes:
+      label: What are you trying to find out?
+    validations:
+      required: true
+  - type: textarea
+    id: gap
+    attributes:
+      label: What is missing or unclear?
+      description: A field that does not exist, a format you need, an ambiguous definition, a record you cannot interpret.
+    validations:
+      required: true
+  - type: input
+    id: context
+    attributes:
+      label: Context
+      description: Optional — research, journalism, policy, commercial. Helps prioritise.

@@ -1,0 +1,26 @@
+cff-version: 1.2.0
+message: "If you use this dataset, please cite it as below."
+title: "Africa Compute Tracker"
+abstract: >-
+  An open, version-controlled dataset of AI-relevant data centre infrastructure across Africa.
+  Every substantive field carries a source, a trust tier, a retrieval date and a confidence
+  level; contested assertions are recorded as claims rather than facts, and maintainer
+  judgement is separated from sourced data.
+type: dataset
+authors:
+  - family-names: Moyo
+    given-names: Tawanda
+    country: ZW
+repository-code: "https://github.com/tawandamoyo/africa-compute-tracker"
+url: "https://africacomputetracker.org"
+license: CC-BY-4.0
+version: "2026.08"
+date-released: "2026-08-12"
+keywords:
+  - datacenters
+  - compute governance
+  - artificial intelligence
+  - infrastructure
+  - Africa
+  - energy
+  - open data

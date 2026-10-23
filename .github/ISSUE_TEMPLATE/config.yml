@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Methodology
+    url: https://africacomputetracker.org/methodology
+    about: How sources are tiered, how confidence is assigned, and what the dataset does not claim
+  - name: Scope
+    url: https://github.com/tawandamoyo/africa-compute-tracker/blob/main/docs/SCOPE.md
+    about: What is covered, what is excluded, and how to read the capacity figures
