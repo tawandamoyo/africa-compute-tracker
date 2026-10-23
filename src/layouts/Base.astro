@@ -13,6 +13,9 @@ interface Props {
   schema?: object[];
   /** Path to a per-page Open Graph card (see pages/og). Falls back to the site card. */
   ogImage?: string;
+  /** For ogType 'article': ISO dates the record was first published and last updated. */
+  published?: string;
+  modified?: string;
   noindex?: boolean;
 }
 
@@ -23,6 +26,8 @@ const {
   ogType = 'website',
   schema = [],
   ogImage: ogImagePath = '/og/site.png',
+  published,
+  modified,
   noindex = false,
 } = Astro.props;
 
@@ -72,10 +77,13 @@ const current = Astro.url.pathname;
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
     <meta property="og:image" content={ogImage} />
+    <meta property="og:image:type" content="image/png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta property="og:image:alt" content={`${title === SITE.name ? SITE.name : title}: share card from the Africa Compute Tracker`} />
     <meta property="og:locale" content="en_GB" />
+    {ogType === 'article' && published && <meta property="article:published_time" content={published} />}
+    {ogType === 'article' && modified && <meta property="article:modified_time" content={modified} />}
     <meta name="twitter:card" content="summary_large_image" />
 
     <script type="application/ld+json" set:html={serialise(graph)} />

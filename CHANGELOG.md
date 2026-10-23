@@ -17,6 +17,10 @@ change materially. Record-level currency is tracked per record in `last_verified
   at a placeholder address.
 - Maintainer notes (update reminders, record-history remarks) moved out of public facility text
   into YAML comments.
+- Icons for every platform (favicon at 16/32/48 px, Apple touch, Android and maskable install
+  icons), generated from one definition with `npm run icons`. Share cards now show each
+  facility's disclosed capacity and verification date, and the data, methodology, glossary,
+  about, changelog and countries pages have their own cards.
 
 **Documentation**
 

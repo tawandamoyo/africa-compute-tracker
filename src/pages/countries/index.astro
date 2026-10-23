@@ -10,7 +10,7 @@ const s = summarise(loadFacilities());
 const description = `AI-relevant data centres in ${byCountry.length} African countries, run by ${byOperator.length} operators. See what is operating and what is only announced.`;
 ---
 
-<Base title="Data centres by country and operator" description={description} schema={[breadcrumbs([['Home', '/'], ['Countries', '/countries/']])]}>
+<Base ogImage="/og/pages/countries.png" title="Data centres by country and operator" description={description} schema={[breadcrumbs([['Home', '/'], ['Countries', '/countries/']])]}>
   <header class="pt-10 max-w-3xl">
     <h1 class="text-3xl font-bold tracking-tight sm:text-4xl">Data centres by country and operator</h1>
     <p class="mt-4 text-lg text-muted">

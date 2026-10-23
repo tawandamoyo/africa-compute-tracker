@@ -21,10 +21,10 @@ const FONTS = [
   { name: 'Public Sans', data: fontFile('public-sans-latin-700-normal.woff'), weight: 700, style: 'normal' },
 ];
 
-const h = (type, props, ...kids) => ({
-  type,
-  props: { ...props, children: kids.length === 0 ? undefined : kids.length === 1 ? kids[0] : kids },
-});
+const h = (type, props, ...children) => {
+  const kids = children.filter(k => k != null);
+  return { type, props: { ...props, children: kids.length === 0 ? undefined : kids.length === 1 ? kids[0] : kids } };
+};
 
 function mark(group, w, hgt) {
   const color = COLORS[group];
@@ -40,6 +40,18 @@ function mark(group, w, hgt) {
   });
 }
 
+/** The logo mark, as in the site header and favicon: solid, outlined, outlined grey. */
+function logo() {
+  const bar = extra => h('div', { style: { width: '14px', height: '34px', display: 'flex', ...extra } });
+  return h(
+    'div',
+    { style: { display: 'flex', gap: '5px' } },
+    bar({ background: COLORS.built }),
+    bar({ border: `4px solid ${COLORS.pipeline}` }),
+    bar({ border: `4px solid ${COLORS.stalled}` })
+  );
+}
+
 function titleSize(title) {
   const n = title.length;
   if (n <= 30) return 76;
@@ -49,9 +61,9 @@ function titleSize(title) {
 }
 
 /**
- * @param {{ title: string, kicker: string, marks: Array<'built'|'pipeline'|'stalled'> }} card
+ * @param {{ title: string, kicker: string, facts?: string, marks: Array<'built'|'pipeline'|'stalled'> }} card
  */
-export async function ogImage({ title, kicker, marks }) {
+export async function ogImage({ title, kicker, facts, marks }) {
   const big = marks.length <= 3;
   const tree = h(
     'div',
@@ -71,7 +83,7 @@ export async function ogImage({ title, kicker, marks }) {
     h(
       'div',
       { style: { display: 'flex', alignItems: 'center', gap: '16px', fontSize: '30px', fontWeight: 600 } },
-      h('div', { style: { display: 'flex', gap: '5px' } }, mark('built', 12, 32), mark('pipeline', 12, 32), mark('stalled', 12, 32)),
+      logo(),
       'Africa Compute Tracker'
     ),
     h(
@@ -82,7 +94,8 @@ export async function ogImage({ title, kicker, marks }) {
         'div',
         { style: { display: 'flex', fontSize: `${titleSize(title)}px`, fontWeight: 700, lineHeight: 1.08, letterSpacing: '-0.02em' } },
         title
-      )
+      ),
+      facts ? h('div', { style: { fontSize: '28px', color: MUTED, marginTop: '22px' } }, facts) : null
     ),
     h(
       'div',

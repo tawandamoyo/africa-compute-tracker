@@ -259,6 +259,8 @@ const placeholderCount = (facility.sources ?? []).filter((x: any) => isPlacehold
   description={metaDescription}
   ogType="article"
   ogImage={`/og/facilities/${facility.id}.png`}
+  published={facility.first_tracked}
+  modified={facility.last_verified}
   schema={[pageNode, placeNode, breadcrumbs(crumbs)]}
 >
   <nav aria-label="Breadcrumb" class="pt-6 text-sm text-muted">

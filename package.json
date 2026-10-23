@@ -10,6 +10,7 @@
     "validate": "node scripts/validate.mjs",
     "check-stale": "node scripts/check-stale.mjs",
     "inbox": "node scripts/inbox.mjs",
+    "icons": "node scripts/icons.mjs",
     "migrate": "node scripts/migrate-v1-to-v2.mjs",
     "export:epoch": "node scripts/export-epoch-format.mjs"
   },

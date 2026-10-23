@@ -1,9 +1,14 @@
 {
   "name": "Africa Compute Tracker",
   "short_name": "Compute Tracker",
+  "description": "An open, sourced record of AI data centres across Africa: what is built and what is only announced.",
+  "start_url": "/",
+  "scope": "/",
   "icons": [
     { "src": "/favicon.svg", "type": "image/svg+xml", "sizes": "any" },
-    { "src": "/apple-touch-icon.png", "type": "image/png", "sizes": "180x180" }
+    { "src": "/icon-192.png", "type": "image/png", "sizes": "192x192" },
+    { "src": "/icon-512.png", "type": "image/png", "sizes": "512x512" },
+    { "src": "/icon-maskable-512.png", "type": "image/png", "sizes": "512x512", "purpose": "maskable" }
   ],
   "theme_color": "#15212C",
   "background_color": "#F3F5F6",
