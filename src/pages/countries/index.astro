@@ -1,0 +1,56 @@
+---
+import Base from '../../layouts/Base.astro';
+import { facilitiesByCountry, facilitiesByOperator, countryName, countrySlug, statusGroup, summarise } from '../../lib/site.js';
+import { loadFacilities } from '../../lib/loadFacilities.js';
+import { breadcrumbs } from '../../lib/jsonld.js';
+
+const byCountry = Object.entries(facilitiesByCountry()).sort((a, b) => b[1].length - a[1].length);
+const byOperator = Object.entries(facilitiesByOperator()).sort((a, b) => b[1].facilities.length - a[1].facilities.length);
+const s = summarise(loadFacilities());
+const description = `AI-relevant data centres in ${byCountry.length} African countries, run by ${byOperator.length} operators. See what is operating and what is only announced.`;
+---
+
+<Base title="Data centres by country and operator" description={description} schema={[breadcrumbs([['Home', '/'], ['Countries', '/countries/']])]}>
+  <header class="pt-10 max-w-3xl">
+    <h1 class="text-3xl font-bold tracking-tight sm:text-4xl">Data centres by country and operator</h1>
+    <p class="mt-4 text-lg text-muted">
+      {s.total} facilities across {byCountry.length} countries. Ghana, Ethiopia, Rwanda, Côte d'Ivoire, Tunisia and
+      Senegal have active projects that are not yet recorded here.
+    </p>
+  </header>
+
+  <div class="mt-10 grid grid-cols-1 gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+    <section aria-labelledby="by-country">
+      <h2 id="by-country" class="text-xl font-semibold">Countries</h2>
+      <ul class="mt-3 divide-y divide-rule border-y border-rule">
+        {byCountry.map(([code, list]) => (
+          <li>
+            <a href={`/countries/${countrySlug(code)}/`} class="flex items-center justify-between gap-4 py-3 hover:bg-white">
+              <span class="font-medium">{countryName(code)}</span>
+              <span class="flex items-center gap-3">
+                <span class="flex gap-1" aria-hidden="true">{list.map(f => <span class={`mark mark-${statusGroup(f.status)}`}></span>)}</span>
+                <span class="w-24 text-right text-sm text-muted num">{list.length} {list.length === 1 ? 'facility' : 'facilities'}</span>
+              </span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </section>
+    <section id="operators" aria-labelledby="by-operator" class="scroll-mt-4">
+      <h2 id="by-operator" class="text-xl font-semibold">Operators</h2>
+      <ul class="mt-3 divide-y divide-rule border-y border-rule">
+        {byOperator.map(([slug, { name, facilities }]) => (
+          <li>
+            <a href={`/operators/${slug}/`} class="flex items-center justify-between gap-4 py-3 hover:bg-white">
+              <span class="font-medium">{name}</span>
+              <span class="flex items-center gap-3">
+                <span class="flex gap-1" aria-hidden="true">{facilities.map((f: any) => <span class={`mark mark-${statusGroup(f.status)}`}></span>)}</span>
+                <span class="w-24 text-right text-sm text-muted num">{facilities.length} {facilities.length === 1 ? 'facility' : 'facilities'}</span>
+              </span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </section>
+  </div>
+</Base>

@@ -1,0 +1,11 @@
+{
+  "name": "Africa Compute Tracker",
+  "short_name": "Compute Tracker",
+  "icons": [
+    { "src": "/favicon.svg", "type": "image/svg+xml", "sizes": "any" },
+    { "src": "/apple-touch-icon.png", "type": "image/png", "sizes": "180x180" }
+  ],
+  "theme_color": "#15212C",
+  "background_color": "#F3F5F6",
+  "display": "browser"
+}

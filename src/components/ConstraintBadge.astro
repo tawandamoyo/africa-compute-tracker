@@ -36,16 +36,16 @@ const severityColors: Record<string, string> = {
   medium: 'bg-amber-50 text-amber-700 border-amber-200',
   high: 'bg-orange-100 text-orange-800 border-orange-200',
   critical: 'bg-red-100 text-red-800 border-red-200',
-  unknown: 'bg-gray-50 text-gray-500 border-gray-200',
+  unknown: 'bg-gray-50 text-muted border-gray-200',
 };
 
 const severityColor = severityColors[constraint.severity] ?? severityColors.unknown;
 const constraintSources = (constraint.source_ids ?? []).map(id => sourceMap[id]).filter(Boolean);
 ---
 
-<div class="py-3 border-b border-gray-100 last:border-0">
+<div class="py-3 border-b border-rule last:border-0">
   <div class="flex flex-wrap items-start gap-2 mb-1">
-    <span class="text-sm font-medium text-gray-800">
+    <span class="text-sm font-medium text-ink">
       {dimensionLabels[constraint.dimension] ?? constraint.dimension.replace(/_/g, ' ')}
     </span>
     <span class={`text-xs px-1.5 py-0.5 rounded border font-medium ${severityColor}`}>
@@ -53,20 +53,12 @@ const constraintSources = (constraint.source_ids ?? []).map(id => sourceMap[id])
     </span>
   </div>
   {constraint.rationale && (
-    <p class="text-sm text-gray-600 leading-relaxed">{constraint.rationale}</p>
+    <p class="text-sm text-muted leading-relaxed">{constraint.rationale}</p>
   )}
   {constraintSources.length > 0 && (
     <div class="flex items-center gap-1 mt-1.5">
       {constraintSources.map(s => (
-        <a
-          href={s.archived_url ?? s.url}
-          target="_blank"
-          rel="noopener noreferrer"
-          title={s.title ?? s.url}
-          class="font-mono text-xs px-1.5 py-0.5 rounded bg-gray-100 text-gray-500 hover:bg-gray-200"
-        >
-          [{s.id}]
-        </a>
+        <a href={`#source-${s.id}`} title={s.title ?? 'Source'} class="rounded bg-mist px-1.5 font-mono text-xs leading-5 text-muted hover:underline"><span class="sr-only">Source </span>[{s.id}]</a>
       ))}
     </div>
   )}

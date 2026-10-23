@@ -1,0 +1,162 @@
+---
+import '../styles/global.css';
+import { SITE, absolute, issueUrl } from '../lib/site.js';
+import { website } from '../lib/jsonld.js';
+
+interface Props {
+  title: string;
+  description: string;
+  /** Override the canonical path; defaults to the current URL path. */
+  path?: string;
+  ogType?: 'website' | 'article';
+  /** Page-specific schema.org nodes, merged into the site graph. */
+  schema?: object[];
+  /** Path to a per-page Open Graph card (see pages/og). Falls back to the site card. */
+  ogImage?: string;
+  noindex?: boolean;
+}
+
+const {
+  title,
+  description,
+  path,
+  ogType = 'website',
+  schema = [],
+  ogImage: ogImagePath = '/og/site.png',
+  noindex = false,
+} = Astro.props;
+
+const pathname = path ?? Astro.url.pathname;
+const canonical = absolute(pathname);
+const fullTitle = title === SITE.name ? `${SITE.name}: ${SITE.tagline}` : `${title} | ${SITE.name}`;
+const ogImage = absolute(ogImagePath);
+
+const graph = {
+  '@context': 'https://schema.org',
+  '@graph': [website, ...schema],
+};
+const serialise = (o: object) => JSON.stringify(o).replace(/</g, '\\u003c');
+
+const nav = [
+  { href: '/#facilities', label: 'Facilities', match: (p: string) => p.startsWith('/facilities') },
+  { href: '/countries/', label: 'Countries', match: (p: string) => p.startsWith('/countries') || p.startsWith('/operators') },
+  { href: '/data/', label: 'Data', match: (p: string) => p.startsWith('/data') },
+  { href: '/methodology/', label: 'Methodology', match: (p: string) => p.startsWith('/methodology') || p.startsWith('/glossary') },
+  { href: '/about/', label: 'About', match: (p: string) => p.startsWith('/about') || p.startsWith('/changelog') },
+];
+const current = Astro.url.pathname;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    {noindex && <meta name="robots" content="noindex" />}
+    <meta name="author" content={SITE.author} />
+    <meta name="theme-color" content="#15212C" />
+
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+    <link rel="alternate" type="application/json" href="/data/facilities.json" title="Facility records (JSON)" />
+
+    <meta property="og:site_name" content={SITE.name} />
+    <meta property="og:type" content={ogType} />
+    <meta property="og:title" content={title === SITE.name ? fullTitle : title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={`${title === SITE.name ? SITE.name : title}: share card from the Africa Compute Tracker`} />
+    <meta property="og:locale" content="en_GB" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <script type="application/ld+json" set:html={serialise(graph)} />
+    <slot name="head" />
+  </head>
+  <body class="min-h-screen flex flex-col">
+    <a href="#main" class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-3 focus:z-50 focus:bg-white focus:px-3 focus:py-2 focus:shadow">
+      Skip to content
+    </a>
+
+    <header class="bg-ink text-white">
+      <div class="mx-auto max-w-6xl px-4 sm:px-6 flex flex-wrap items-center justify-between gap-x-8 gap-y-2 py-3">
+        <a href="/" class="flex items-center gap-2.5 font-semibold tracking-tight py-1" aria-label={`${SITE.name}, home`}>
+          <span aria-hidden="true" class="flex gap-[3px]">
+            <span class="block w-[7px] h-[18px] bg-[#3fbf9a]"></span>
+            <span class="block w-[7px] h-[18px] border-2 border-[#e0a040]"></span>
+            <span class="block w-[7px] h-[18px] border-2 border-[#9aa6b0]"></span>
+          </span>
+          {SITE.name}
+        </a>
+        <nav aria-label="Main" class="-mx-2 overflow-x-auto">
+          <ul class="flex text-sm whitespace-nowrap">
+            {nav.map(item => (
+              <li>
+                <a
+                  href={item.href}
+                  class:list={[
+                    'block px-2 py-2 hover:text-white',
+                    item.match(current) ? 'text-white underline decoration-2 underline-offset-[6px]' : 'text-white/75',
+                  ]}
+                  aria-current={item.match(current) ? 'page' : undefined}
+                >
+                  {item.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      </div>
+    </header>
+
+    <main id="main" class="mx-auto w-full max-w-6xl flex-1 px-4 sm:px-6">
+      <slot />
+    </main>
+
+    <footer class="mt-20 border-t border-rule bg-white">
+      <div class="mx-auto max-w-6xl px-4 sm:px-6 py-10 grid grid-cols-1 gap-8 sm:grid-cols-[2fr_1fr_1fr_1fr] text-sm">
+        <div class="max-w-sm">
+          <p class="font-semibold">{SITE.name}</p>
+          <p class="mt-2 text-muted">
+            Dataset version {SITE.version}. Open data under{' '}
+            <a class="link" href={SITE.licenseUrl} rel="license">{SITE.license}</a>. Built and maintained by{' '}
+            <a class="link" href="/about/">{SITE.author}</a>.
+          </p>
+        </div>
+        <div>
+          <p class="font-semibold">Dataset</p>
+          <ul class="mt-2 space-y-1.5 text-muted">
+            <li><a class="hover:text-ink" href="/#facilities">All facilities</a></li>
+            <li><a class="hover:text-ink" href="/countries/">By country</a></li>
+            <li><a class="hover:text-ink" href="/data/">Download and cite</a></li>
+            <li><a class="hover:text-ink" href="/changelog/">Changelog</a></li>
+          </ul>
+        </div>
+        <div>
+          <p class="font-semibold">Reference</p>
+          <ul class="mt-2 space-y-1.5 text-muted">
+            <li><a class="hover:text-ink" href="/methodology/">Methodology</a></li>
+            <li><a class="hover:text-ink" href="/glossary/">Glossary</a></li>
+            <li><a class="hover:text-ink" href="/about/">About</a></li>
+          </ul>
+        </div>
+        <div>
+          <p class="font-semibold">Contribute</p>
+          <ul class="mt-2 space-y-1.5 text-muted">
+            <li><a class="hover:text-ink" href={issueUrl('source-correction')}>Report a correction</a></li>
+            <li><a class="hover:text-ink" href={issueUrl('new-facility-lead')}>Suggest a facility</a></li>
+            <li><a class="hover:text-ink" href={SITE.repo}>Source on GitHub</a></li>
+          </ul>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

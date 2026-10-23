@@ -1,0 +1,25 @@
+---
+import { statusGroup, GROUP_LABEL } from '../lib/site.js';
+import { formatStatus } from '../lib/formatters.js';
+
+interface Props {
+  status: string;
+  /** Show the status label next to the mark. */
+  label?: boolean;
+  size?: 'sm' | 'lg';
+  class?: string;
+}
+
+const { status, label = true, size = 'sm', class: className } = Astro.props;
+const group = statusGroup(status);
+---
+
+<span class:list={['inline-flex items-center gap-2', className]}>
+  <span
+    class:list={['mark', `mark-${group}`, size === 'lg' && 'mark-lg']}
+    role={label ? undefined : 'img'}
+    aria-label={label ? undefined : `${formatStatus(status)} (${GROUP_LABEL[group].toLowerCase()})`}
+    aria-hidden={label ? 'true' : undefined}
+  ></span>
+  {label && <span>{formatStatus(status)}</span>}
+</span>

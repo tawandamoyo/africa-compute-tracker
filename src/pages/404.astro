@@ -1,0 +1,18 @@
+---
+import Base from '../layouts/Base.astro';
+---
+
+<Base title="Page not found" description="This page does not exist." noindex>
+  <div class="max-w-prose pt-16">
+    <h1 class="text-3xl font-bold tracking-tight">This page doesn't exist</h1>
+    <p class="mt-4 text-lg text-muted">
+      The link may be out of date. Facility pages keep their record ID as the address, so a renamed facility
+      still has the same link.
+    </p>
+    <ul class="mt-6 space-y-2">
+      <li><a class="link" href="/#facilities">Browse all facilities</a></li>
+      <li><a class="link" href="/countries/">Browse by country</a></li>
+      <li><a class="link" href="/data/">Download the dataset</a></li>
+    </ul>
+  </div>
+</Base>

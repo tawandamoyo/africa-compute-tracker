@@ -1,0 +1,43 @@
+---
+interface Props {
+  citation: string;
+  label?: string;
+}
+
+const { citation, label = 'Copy citation' } = Astro.props;
+---
+
+<div data-cite class="rounded border border-rule bg-white p-4">
+  <p data-cite-text class="text-sm leading-relaxed">{citation}</p>
+  <button
+    type="button"
+    data-cite-copy
+    class="mt-3 rounded border border-ink px-3 py-1.5 text-sm font-medium hover:bg-ink hover:text-white"
+  >
+    {label}
+  </button>
+  <span data-cite-status class="ml-2 text-sm text-muted" aria-live="polite"></span>
+</div>
+
+<script>
+  for (const box of document.querySelectorAll<HTMLElement>('[data-cite]')) {
+    const text = box.querySelector<HTMLElement>('[data-cite-text]')!;
+    const status = box.querySelector<HTMLElement>('[data-cite-status]')!;
+    // Fill in today's date as the access date.
+    const today = new Date().toISOString().slice(0, 10);
+    text.textContent = text.textContent!.replace('YYYY-MM-DD', today);
+    box.querySelector('[data-cite-copy]')!.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(text.textContent!.trim());
+        status.textContent = 'Copied';
+      } catch {
+        const range = document.createRange();
+        range.selectNodeContents(text);
+        getSelection()?.removeAllRanges();
+        getSelection()?.addRange(range);
+        status.textContent = 'Selected. Press Ctrl+C or Cmd+C to copy.';
+      }
+      setTimeout(() => (status.textContent = ''), 4000);
+    });
+  }
+</script>

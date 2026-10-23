@@ -1,0 +1,53 @@
+---
+import Base from '../layouts/Base.astro';
+import { SITE, issueUrl } from '../lib/site.js';
+import { author, breadcrumbs } from '../lib/jsonld.js';
+---
+
+<Base
+  title="About"
+  description="Who maintains the Africa Compute Tracker, why it exists, and how to get in touch or contribute a correction."
+  schema={[
+    { '@type': 'AboutPage', '@id': `${SITE.url}/about/`, url: `${SITE.url}/about/`, name: 'About the Africa Compute Tracker', mainEntity: author },
+    breadcrumbs([['Home', '/'], ['About', '/about/']]),
+  ]}
+>
+  <article class="max-w-prose pt-10">
+    <h1 class="text-3xl font-bold tracking-tight sm:text-4xl">About the tracker</h1>
+
+    <div class="md mt-6 text-[1.0625rem]">
+      <p>
+        Africa is in the middle of an AI infrastructure announcement cycle. Hyperscalers, colocation providers and
+        "AI factory" ventures are promising hundreds of megawatts of new capacity, often in places where the grid is
+        already strained. Announcements are easy to find. What has actually been built, how much power it draws and
+        who owns it are much harder to pin down.
+      </p>
+      <p>
+        The Africa Compute Tracker is an attempt to keep that record straight. Each facility is a plain text file in a
+        public repository. Every figure carries a source, a trust tier, a retrieval date and a confidence level.
+        Contested assertions are kept apart from sourced facts, and the maintainer's own judgement is labelled as such.
+      </p>
+
+      <h2>Who maintains it</h2>
+      <p>
+        The tracker is built and maintained by <a href="https://tawanda.dev/" rel="author">Tawanda Moyo</a>, a software engineer
+        and technical writer in Harare working on AI safety, with a focus on compute governance.
+      </p>
+
+      <h2>Get in touch</h2>
+      <ul>
+        <li>Found an error? <a href={issueUrl('source-correction')}>Report a correction</a>. Corrections are handled first.</li>
+        <li>Know of a facility that should be here? <a href={issueUrl('new-facility-lead')}>Suggest it</a> with a source.</li>
+        <li>Using the data, or want to collaborate? <a href={issueUrl('data-use')}>Open a conversation</a> or reach out via <a href="https://tawanda.dev/about/">tawanda.dev</a>.</li>
+      </ul>
+
+      <h2>What it is not</h2>
+      <p>
+        This is not a complete census. It covers hyperscale, large colocation and purpose-built AI facilities, and it
+        favours fewer, well-sourced records over many thin ones. A facility's absence means it has not been recorded
+        yet. See the <a href="/methodology/">methodology</a> for scope and sourcing rules, and the
+        <a href="/changelog/">changelog</a> for what has changed.
+      </p>
+    </div>
+  </article>
+</Base>

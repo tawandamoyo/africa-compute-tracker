@@ -1,0 +1,120 @@
+---
+import Base from '../../layouts/Base.astro';
+import CiteBlock from '../../components/CiteBlock.astro';
+import { loadFacilities } from '../../lib/loadFacilities.js';
+import { SITE, summarise, datasetCitation, issueUrl } from '../../lib/site.js';
+import { formatDate } from '../../lib/formatters.js';
+import { dataset, breadcrumbs } from '../../lib/jsonld.js';
+import { facilitiesCsv, facilitiesJson } from '../../lib/exports.js';
+
+const s = summarise(loadFacilities());
+const kb = (str: string) => `${Math.max(1, Math.round(Buffer.byteLength(str) / 1024))} KB`;
+
+const columns: [string, string][] = [
+  ['id', 'Stable record ID. Also the facility page URL slug.'],
+  ['name', 'Facility name as used by its operator or in reporting.'],
+  ['status', 'announced, under_construction, operational, expanded, paused or cancelled.'],
+  ['status_group', 'built (operating), pipeline (announced or under construction) or stalled (paused or cancelled). Group by this before summing capacity.'],
+  ['country_code, country, region, city', 'Location. ISO 3166-1 alpha-2 country code.'],
+  ['latitude, longitude, location_precision', 'Coordinates and how precise they are. Most are city-level, not the exact site.'],
+  ['operators, owners', 'Semicolon-separated company names.'],
+  ['it_load_mw_planned', 'Disclosed IT load at full build-out or for a stated expansion phase, in MW. Blank if undisclosed.'],
+  ['it_load_mw_current', 'Disclosed IT load running today, in MW. Blank if undisclosed.'],
+  ['total_facility_mw', 'Total facility power including cooling, in MW, where disclosed.'],
+  ['scale_tier', 'hyperscale, large, medium or small.'],
+  ['announced_capex_usd_millions', 'Announced investment in millions of US dollars. Often covers more than the facility.'],
+  ['expected_operational, actual_operational', 'Dates as reported.'],
+  ['source_count', 'Number of sources cited on the record.'],
+  ['first_tracked, last_verified', 'When the record was created and last checked against its sources.'],
+  ['url', 'The facility page, with per-field sources and confidence levels.'],
+];
+---
+
+<Base
+  title="Download and cite the dataset"
+  description={`Download all ${s.total} records of the Africa Compute Tracker as CSV or JSON, free under CC BY 4.0. Version ${SITE.version}, with a ready-made citation and field guide.`}
+  schema={[dataset(s), breadcrumbs([['Home', '/'], ['Data', '/data/']])]}
+>
+  <header class="max-w-3xl pt-10">
+    <h1 class="text-3xl font-bold tracking-tight sm:text-4xl">Download and cite the dataset</h1>
+    <p class="mt-4 text-lg text-muted">
+      Every record is free to reuse under {SITE.license}, including commercially, as long as you credit the
+      Africa Compute Tracker.
+    </p>
+  </header>
+
+  <dl class="mt-8 grid max-w-3xl grid-cols-2 gap-px overflow-hidden rounded border border-rule bg-rule text-sm sm:grid-cols-4">
+    <div class="bg-white p-4"><dt class="text-muted">Version</dt><dd class="mt-1 font-semibold">{SITE.version}</dd></div>
+    <div class="bg-white p-4"><dt class="text-muted">Released</dt><dd class="mt-1 font-semibold">{formatDate(SITE.released)}</dd></div>
+    <div class="bg-white p-4"><dt class="text-muted">Records</dt><dd class="mt-1 font-semibold num">{s.total}</dd></div>
+    <div class="bg-white p-4"><dt class="text-muted">Last verified</dt><dd class="mt-1 font-semibold">{formatDate(s.lastVerified)}</dd></div>
+  </dl>
+
+  <section class="mt-12 max-w-3xl" aria-labelledby="dl-title">
+    <h2 id="dl-title" class="text-xl font-semibold">Downloads</h2>
+    <ul class="mt-3 divide-y divide-rule border-y border-rule">
+      <li class="flex flex-wrap items-center justify-between gap-3 py-4">
+        <div>
+          <p class="font-medium">CSV, one row per facility</p>
+          <p class="text-sm text-muted">Opens in Excel, Google Sheets or R. Headline fields only. {kb(facilitiesCsv())}.</p>
+        </div>
+        <a href="/data/facilities.csv" download class="rounded bg-ink px-4 py-2 text-sm font-medium text-white hover:bg-black">Download CSV</a>
+      </li>
+      <li class="flex flex-wrap items-center justify-between gap-3 py-4">
+        <div>
+          <p class="font-medium">JSON, full records</p>
+          <p class="text-sm text-muted">Every field, including sources, confidence levels, claims and history. {kb(facilitiesJson())}.</p>
+        </div>
+        <a href="/data/facilities.json" download class="rounded border border-ink px-4 py-2 text-sm font-medium hover:bg-ink hover:text-white">Download JSON</a>
+      </li>
+      <li class="flex flex-wrap items-center justify-between gap-3 py-4">
+        <div>
+          <p class="font-medium">Source YAML and schema</p>
+          <p class="text-sm text-muted">One file per facility, with full git history of every change.</p>
+        </div>
+        <a href={SITE.repo} class="px-1 py-2 text-sm link">View on GitHub</a>
+      </li>
+    </ul>
+  </section>
+
+  <section class="mt-12 max-w-3xl" aria-labelledby="cite-title">
+    <h2 id="cite-title" class="text-xl font-semibold">How to cite</h2>
+    <p class="mt-2 text-muted">For the dataset as a whole:</p>
+    <div class="mt-3"><CiteBlock citation={datasetCitation()} /></div>
+    <p class="mt-3 text-sm text-muted">
+      To cite one facility, use the citation at the bottom of its page. It includes the record ID and the date it
+      was last verified. Machine-readable metadata is in <a class="link" href={`${SITE.repo}/blob/main/CITATION.cff`}>CITATION.cff</a>.
+    </p>
+  </section>
+
+  <section class="mt-12 max-w-3xl" aria-labelledby="read-title">
+    <h2 id="read-title" class="text-xl font-semibold">Before you add up the megawatts</h2>
+    <p class="mt-2 leading-relaxed">
+      Most tracked capacity is announced, not built. Only {s.disclosing} of {s.total} facilities publish any IT-load
+      figure, and the planned figures mix full build-outs with single expansion phases. Group by
+      <code class="rounded bg-white px-1">status_group</code> before summing, and describe totals as disclosed
+      capacity, not installed capacity. The <a class="link" href="/methodology/">methodology</a> explains sourcing,
+      trust tiers and confidence levels.
+    </p>
+  </section>
+
+  <section class="mt-12" aria-labelledby="fields-title">
+    <h2 id="fields-title" class="text-xl font-semibold">CSV fields</h2>
+    <div class="mt-3 overflow-x-auto rounded border border-rule bg-white">
+      <table class="w-full text-left text-sm">
+        <thead class="border-b border-rule text-muted">
+          <tr><th scope="col" class="px-4 py-2.5 font-medium">Column</th><th scope="col" class="px-4 py-2.5 font-medium">Meaning</th></tr>
+        </thead>
+        <tbody class="divide-y divide-rule">
+          {columns.map(([k, v]) => (
+            <tr><td class="px-4 py-2.5 align-top font-mono text-xs leading-5 [overflow-wrap:anywhere] w-2/5">{k}</td><td class="px-4 py-2.5">{v}</td></tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+    <p class="mt-4 text-sm text-muted">
+      Using the data for a story or a paper? <a class="link" href={issueUrl('data-use')}>Tell us about it</a>. It helps
+      decide what to track next.
+    </p>
+  </section>
+</Base>

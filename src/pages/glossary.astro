@@ -1,41 +1,22 @@
 ---
-import '../styles/global.css';
+import Base from '../layouts/Base.astro';
+import { breadcrumbs } from '../lib/jsonld.js';
 import { trustTierClasses, confidenceClasses } from '../lib/formatters.js';
 
 const SA_HOUSEHOLDS_PER_MW = 2900;
 const CAPE_TOWN_PEAK_MW = 1676;
 ---
 
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Glossary — Africa AI Datacenter Tracker</title>
-    <meta
-      name="description"
-      content="Plain-language definitions of technical terms used in the Africa AI Datacenter Tracker, with memorable comparisons."
-    />
-  </head>
-  <body class="bg-gray-50 text-gray-900 font-sans">
+<Base
+  title="Glossary"
+  description="Plain-language definitions of data centre terms such as IT load, PUE, colocation, hyperscaler, wheeling and PPAs, with comparisons that make the numbers easier to judge."
+  schema={[breadcrumbs([['Home', '/'], ['Glossary', '/glossary/']])]}
+>
+  <div class="max-w-3xl pt-10">
 
-    <header class="bg-white border-b border-gray-200">
-      <div class="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between gap-4">
-        <a href="/" class="text-base font-bold tracking-tight hover:text-gray-600">
-          Africa AI Datacenter Tracker
-        </a>
-        <nav class="flex gap-4 text-sm text-gray-500">
-          <a href="/glossary" class="text-gray-900 font-medium">Glossary</a>
-          <a href="/methodology" class="hover:text-gray-900">Methodology</a>
-          <a href="https://github.com/tawandamoyo/africa-ai-data-tracker" class="hover:text-gray-900">GitHub ↗</a>
-        </nav>
-      </div>
-    </header>
-
-    <main class="max-w-3xl mx-auto px-4 py-12">
 
       <h1 class="text-2xl font-bold mb-2">Glossary</h1>
-      <p class="text-gray-500 text-sm mb-10">
+      <p class="text-muted text-sm mb-10">
         Plain-language definitions of technical terms used across this tracker,
         with concrete comparisons to help you judge scale.
       </p>
@@ -59,7 +40,7 @@ const CAPE_TOWN_PEAK_MW = 1676;
           ['#confidence', 'Confidence Levels'],
           ['#trust-tier', 'Source Trust Tiers'],
         ].map(([href, label]) => (
-          <a href={href} class="px-2.5 py-1 bg-white border border-gray-200 rounded-full hover:border-gray-400 hover:text-gray-900 text-gray-600 transition-colors">
+          <a href={href} class="px-2.5 py-1 bg-white border border-rule rounded-full hover:border-gray-400 hover:text-ink text-muted transition-colors">
             {label}
           </a>
         ))}
@@ -69,13 +50,13 @@ const CAPE_TOWN_PEAK_MW = 1676;
 
         <!-- IT Load -->
         <section id="it-load" class="scroll-mt-6">
-          <h2 class="text-base font-semibold text-gray-900 mb-1">IT Load (MW)</h2>
-          <p class="text-sm text-gray-700 leading-relaxed mb-3">
+          <h2 class="text-base font-semibold text-ink mb-1">IT Load (MW)</h2>
+          <p class="text-sm text-ink leading-relaxed mb-3">
             The electricity consumed by the IT equipment inside a data centre — servers, storage,
             and networking gear — at a given capacity level. It does <em>not</em> include the power
             used by cooling systems, lighting, or building infrastructure.
           </p>
-          <div class="bg-indigo-50 border border-indigo-100 rounded-lg p-4 text-sm text-indigo-900 space-y-1.5">
+          <div class="bg-indigo-50 border border-indigo-100 rounded p-4 text-sm text-indigo-900 space-y-1.5">
             <p class="font-medium">In context</p>
             <p>1 MW of IT load runs 24 hours a day, 365 days a year — it never switches off.</p>
             <p>
@@ -92,13 +73,13 @@ const CAPE_TOWN_PEAK_MW = 1676;
 
         <!-- Total Facility Power -->
         <section id="total-power" class="scroll-mt-6">
-          <h2 class="text-base font-semibold text-gray-900 mb-1">Total Facility Power</h2>
-          <p class="text-sm text-gray-700 leading-relaxed mb-3">
+          <h2 class="text-base font-semibold text-ink mb-1">Total Facility Power</h2>
+          <p class="text-sm text-ink leading-relaxed mb-3">
             The total electricity draw of the entire data centre complex, including IT equipment,
             cooling systems, lighting, security, and all other building loads. This is always
             larger than the IT load.
           </p>
-          <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 text-sm text-gray-700 space-y-1.5">
+          <div class="bg-gray-50 border border-rule rounded p-4 text-sm text-ink space-y-1.5">
             <p>
               If a facility has an IT load of 100 MW and a PUE of 1.4, its total facility power is
               140 MW — the extra 40 MW goes to cooling and overhead.
@@ -112,18 +93,18 @@ const CAPE_TOWN_PEAK_MW = 1676;
 
         <!-- PUE -->
         <section id="pue" class="scroll-mt-6">
-          <h2 class="text-base font-semibold text-gray-900 mb-1">Power Usage Effectiveness (PUE)</h2>
-          <p class="text-sm text-gray-700 leading-relaxed mb-3">
+          <h2 class="text-base font-semibold text-ink mb-1">Power Usage Effectiveness (PUE)</h2>
+          <p class="text-sm text-ink leading-relaxed mb-3">
             The ratio of total facility power to IT load power. A perfect score of 1.0 would mean
             every watt goes directly to computing, with zero overhead. In practice:
           </p>
-          <ul class="text-sm text-gray-700 space-y-1 mb-3 pl-4 list-disc">
+          <ul class="text-sm text-ink space-y-1 mb-3 pl-4 list-disc">
             <li>PUE 1.0 — theoretical perfect (impossible in practice)</li>
             <li>PUE 1.2 — hyperscaler-grade efficiency</li>
             <li>PUE 1.4–1.6 — industry average</li>
             <li>PUE 2.0+ — older or poorly managed facility</li>
           </ul>
-          <p class="text-sm text-gray-600">
+          <p class="text-sm text-muted">
             Cooling is the main driver of PUE. In hot climates like South Africa, maintaining
             low PUE requires more energy or advanced cooling approaches (liquid cooling,
             free-air economisation).
@@ -132,13 +113,13 @@ const CAPE_TOWN_PEAK_MW = 1676;
 
         <!-- Colocation -->
         <section id="colocation" class="scroll-mt-6">
-          <h2 class="text-base font-semibold text-gray-900 mb-1">Colocation (Colo)</h2>
-          <p class="text-sm text-gray-700 leading-relaxed">
+          <h2 class="text-base font-semibold text-ink mb-1">Colocation (Colo)</h2>
+          <p class="text-sm text-ink leading-relaxed">
             A data centre that rents out space, power, and cooling to multiple tenants, who install
             and own their own servers. The facility operator provides the building, power supply, cooling,
             physical security, and connectivity — tenants provide everything else.
           </p>
-          <p class="text-sm text-gray-600 mt-2">
+          <p class="text-sm text-muted mt-2">
             Think of it as a high-security, climate-controlled warehouse where companies keep their
             own hardware rather than building their own facility.
           </p>
@@ -146,13 +127,13 @@ const CAPE_TOWN_PEAK_MW = 1676;
 
         <!-- Carrier-neutral -->
         <section id="carrier-neutral" class="scroll-mt-6">
-          <h2 class="text-base font-semibold text-gray-900 mb-1">Carrier-neutral</h2>
-          <p class="text-sm text-gray-700 leading-relaxed">
+          <h2 class="text-base font-semibold text-ink mb-1">Carrier-neutral</h2>
+          <p class="text-sm text-ink leading-relaxed">
             A colocation facility that allows multiple competing telecommunications companies and
             internet service providers to interconnect inside the same building, without giving any
             single carrier preferential access or exclusivity.
           </p>
-          <p class="text-sm text-gray-600 mt-2">
+          <p class="text-sm text-muted mt-2">
             Carrier-neutral facilities become natural internet exchange points (IXPs). Equinix's
             Johannesburg campus hosts JINX (Johannesburg Internet Exchange) — one of Africa's busiest
             traffic hubs — precisely because multiple carriers can meet there.
@@ -161,13 +142,13 @@ const CAPE_TOWN_PEAK_MW = 1676;
 
         <!-- Hyperscaler -->
         <section id="hyperscaler" class="scroll-mt-6">
-          <h2 class="text-base font-semibold text-gray-900 mb-1">Hyperscaler</h2>
-          <p class="text-sm text-gray-700 leading-relaxed">
+          <h2 class="text-base font-semibold text-ink mb-1">Hyperscaler</h2>
+          <p class="text-sm text-ink leading-relaxed">
             The largest cloud computing companies — AWS, Microsoft Azure, Google Cloud, Meta, and a
             handful of others — that operate at planetary scale. They build or occupy hundreds of
             data centres globally, each consuming tens to hundreds of megawatts.
           </p>
-          <p class="text-sm text-gray-600 mt-2">
+          <p class="text-sm text-muted mt-2">
             Their arrival in a country typically unlocks cloud regions (local availability zones),
             which reduces latency for local businesses and enables compliance with data residency laws.
           </p>
@@ -175,12 +156,12 @@ const CAPE_TOWN_PEAK_MW = 1676;
 
         <!-- AI Training vs Inference -->
         <section id="ai-training-inference" class="scroll-mt-6">
-          <h2 class="text-base font-semibold text-gray-900 mb-1">AI Training vs AI Inference</h2>
-          <p class="text-sm text-gray-700 leading-relaxed mb-2">
+          <h2 class="text-base font-semibold text-ink mb-1">AI Training vs AI Inference</h2>
+          <p class="text-sm text-ink leading-relaxed mb-2">
             Two very different computational jobs that both happen in data centres:
           </p>
-          <div class="grid sm:grid-cols-2 gap-4 text-sm">
-            <div class="bg-purple-50 border border-purple-100 rounded-lg p-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+            <div class="bg-purple-50 border border-purple-100 rounded p-4">
               <p class="font-semibold text-purple-900 mb-1">AI Training</p>
               <p class="text-purple-800">
                 Creating an AI model from scratch by processing vast datasets. Extremely
@@ -188,7 +169,7 @@ const CAPE_TOWN_PEAK_MW = 1676;
                 GPT-4 training reportedly used ~50 MW for weeks.
               </p>
             </div>
-            <div class="bg-indigo-50 border border-indigo-100 rounded-lg p-4">
+            <div class="bg-indigo-50 border border-indigo-100 rounded p-4">
               <p class="font-semibold text-indigo-900 mb-1">AI Inference</p>
               <p class="text-indigo-800">
                 Running an already-trained model to answer a query ("generate this image", "translate
@@ -197,7 +178,7 @@ const CAPE_TOWN_PEAK_MW = 1676;
               </p>
             </div>
           </div>
-          <p class="text-sm text-gray-600 mt-3">
+          <p class="text-sm text-muted mt-3">
             Most facilities in Africa currently run <em>inference</em> workloads. Training data
             centres require specialised GPU infrastructure and very large power connections
             (100 MW+) that are still rare on the continent.
@@ -206,13 +187,13 @@ const CAPE_TOWN_PEAK_MW = 1676;
 
         <!-- Wheeling -->
         <section id="wheeling" class="scroll-mt-6">
-          <h2 class="text-base font-semibold text-gray-900 mb-1">Wheeling</h2>
-          <p class="text-sm text-gray-700 leading-relaxed mb-2">
+          <h2 class="text-base font-semibold text-ink mb-1">Wheeling</h2>
+          <p class="text-sm text-ink leading-relaxed mb-2">
             In South Africa, wheeling is the process of buying electricity from a private renewable
             energy generator (e.g. a solar farm in the Free State) and having it delivered to your
             facility via the national Eskom grid — even if your facility is hundreds of kilometres away.
           </p>
-          <p class="text-sm text-gray-600">
+          <p class="text-sm text-muted">
             The generator feeds electricity into the grid; the buyer draws an equivalent amount at
             their end. Eskom (or a municipality) charges a wheeling tariff for use of the transmission
             infrastructure. This allows data centres in Cape Town or Johannesburg to claim renewable
@@ -223,13 +204,13 @@ const CAPE_TOWN_PEAK_MW = 1676;
 
         <!-- PPA -->
         <section id="ppa" class="scroll-mt-6">
-          <h2 class="text-base font-semibold text-gray-900 mb-1">Power Purchase Agreement (PPA)</h2>
-          <p class="text-sm text-gray-700 leading-relaxed">
+          <h2 class="text-base font-semibold text-ink mb-1">Power Purchase Agreement (PPA)</h2>
+          <p class="text-sm text-ink leading-relaxed">
             A long-term contract (typically 10–25 years) between a power generator and a buyer,
             fixing the price per kWh in advance. Data centres sign PPAs with renewable energy
             developers (solar, wind) to lock in costs and secure green energy credentials.
           </p>
-          <p class="text-sm text-gray-600 mt-2">
+          <p class="text-sm text-muted mt-2">
             In South Africa, PPAs often involve wheeling (see above) since solar resources are
             concentrated in the Northern Cape while demand is centred in Gauteng and Western Cape.
             Vantage Data Centers secured 87 MW from SolarAfrica via PPA for its Waterfall City
@@ -239,17 +220,17 @@ const CAPE_TOWN_PEAK_MW = 1676;
 
         <!-- Water stress -->
         <section id="water-stress" class="scroll-mt-6">
-          <h2 class="text-base font-semibold text-gray-900 mb-1">Water Stress Region</h2>
-          <p class="text-sm text-gray-700 leading-relaxed mb-2">
+          <h2 class="text-base font-semibold text-ink mb-1">Water Stress Region</h2>
+          <p class="text-sm text-ink leading-relaxed mb-2">
             A classification from the WRI Aqueduct tool indicating how much demand exists on water
             resources relative to available supply. Ratings: low → medium → high → extremely high.
           </p>
-          <ul class="text-sm text-gray-700 space-y-1 pl-4 list-disc mb-3">
+          <ul class="text-sm text-ink space-y-1 pl-4 list-disc mb-3">
             <li><strong>Low:</strong> demand is a small fraction of available supply</li>
             <li><strong>High:</strong> demand is 40–80% of available supply — seasonal shortfalls likely</li>
             <li><strong>Extremely high:</strong> demand exceeds supply in dry periods</li>
           </ul>
-          <p class="text-sm text-gray-600">
+          <p class="text-sm text-muted">
             Cape Town is rated <strong>high</strong>. The city came within weeks of running out of water
             in 2018 ("Day Zero"). Large data centres that use evaporative cooling can consume millions
             of litres per year, making water stress a critical siting and design factor here.
@@ -258,15 +239,15 @@ const CAPE_TOWN_PEAK_MW = 1676;
 
         <!-- Tier certification -->
         <section id="tier" class="scroll-mt-6">
-          <h2 class="text-base font-semibold text-gray-900 mb-1">Tier Certification (I–IV)</h2>
-          <p class="text-sm text-gray-700 leading-relaxed mb-2">
+          <h2 class="text-base font-semibold text-ink mb-1">Tier Certification (I–IV)</h2>
+          <p class="text-sm text-ink leading-relaxed mb-2">
             The Uptime Institute's four-tier rating system for data centre reliability, based on
             redundancy and fault tolerance:
           </p>
           <div class="overflow-x-auto">
-            <table class="w-full text-sm text-gray-700 border-collapse">
+            <table class="w-full text-sm text-ink border-collapse">
               <thead>
-                <tr class="border-b border-gray-200 text-xs text-gray-400 uppercase tracking-wide">
+                <tr class="border-b border-rule text-xs text-muted uppercase tracking-wide">
                   <th class="text-left py-2 pr-4 font-medium">Tier</th>
                   <th class="text-left py-2 pr-4 font-medium">Uptime SLA</th>
                   <th class="text-left py-2 font-medium">What it means</th>
@@ -280,7 +261,7 @@ const CAPE_TOWN_PEAK_MW = 1676;
               </tbody>
             </table>
           </div>
-          <p class="text-sm text-gray-600 mt-2">
+          <p class="text-sm text-muted mt-2">
             Tier III is the standard for carrier-neutral colocation campuses serving enterprise
             and cloud workloads. Most facilities in this tracker target Tier III.
           </p>
@@ -288,13 +269,13 @@ const CAPE_TOWN_PEAK_MW = 1676;
 
         <!-- Data residency -->
         <section id="data-residency" class="scroll-mt-6">
-          <h2 class="text-base font-semibold text-gray-900 mb-1">Data Residency</h2>
-          <p class="text-sm text-gray-700 leading-relaxed">
+          <h2 class="text-base font-semibold text-ink mb-1">Data Residency</h2>
+          <p class="text-sm text-ink leading-relaxed">
             A legal or contractual requirement that data must physically remain within a specific
             country or jurisdiction. Relevant laws include South Africa's POPIA (Protection of
             Personal Information Act), Kenya's Data Protection Act, and Nigeria's NDPR.
           </p>
-          <p class="text-sm text-gray-600 mt-2">
+          <p class="text-sm text-muted mt-2">
             For governments and regulated industries (banking, health), data residency rules often
             require in-country data centre capacity, not just a regional cloud point of presence.
             This is a key driver of data centre investment across Africa.
@@ -303,13 +284,13 @@ const CAPE_TOWN_PEAK_MW = 1676;
 
         <!-- Announced MW -->
         <section id="announced-mw" class="scroll-mt-6">
-          <h2 class="text-base font-semibold text-gray-900 mb-1">Announced MW</h2>
-          <p class="text-sm text-gray-700 leading-relaxed">
+          <h2 class="text-base font-semibold text-ink mb-1">Announced MW</h2>
+          <p class="text-sm text-ink leading-relaxed">
             The declared planned power capacity of a facility at full buildout. Large facilities
             are typically built in phases over 5–10 years, so the announced figure represents a
             long-term target, not current or near-term capacity.
           </p>
-          <p class="text-sm text-gray-600 mt-2">
+          <p class="text-sm text-muted mt-2">
             This tracker records announced MW because it captures the infrastructure commitment
             and grid impact — even if Phase 1 is only 10% of the total. Where a phased breakdown
             is available, it is recorded separately in <em>IT load — current</em>.
@@ -318,8 +299,8 @@ const CAPE_TOWN_PEAK_MW = 1676;
 
         <!-- Confidence levels -->
         <section id="confidence" class="scroll-mt-6">
-          <h2 class="text-base font-semibold text-gray-900 mb-1">Confidence Levels</h2>
-          <p class="text-sm text-gray-700 mb-3">
+          <h2 class="text-base font-semibold text-ink mb-1">Confidence Levels</h2>
+          <p class="text-sm text-ink mb-3">
             Every data field in this tracker is assigned a confidence level indicating how
             well-supported it is by primary sources.
           </p>
@@ -334,7 +315,7 @@ const CAPE_TOWN_PEAK_MW = 1676;
                 <span class={`shrink-0 mt-0.5 text-xs px-1.5 py-0.5 rounded border font-medium ${confidenceClasses(level)}`}>
                   {level}
                 </span>
-                <p class="text-sm text-gray-700">{desc}</p>
+                <p class="text-sm text-ink">{desc}</p>
               </div>
             ))}
           </dl>
@@ -342,8 +323,8 @@ const CAPE_TOWN_PEAK_MW = 1676;
 
         <!-- Trust tiers -->
         <section id="trust-tier" class="scroll-mt-6">
-          <h2 class="text-base font-semibold text-gray-900 mb-1">Source Trust Tiers</h2>
-          <p class="text-sm text-gray-700 mb-3">
+          <h2 class="text-base font-semibold text-ink mb-1">Source Trust Tiers</h2>
+          <p class="text-sm text-ink mb-3">
             Sources are tagged by type, ranked roughly from most to least reliable.
           </p>
           <dl class="space-y-3">
@@ -360,7 +341,7 @@ const CAPE_TOWN_PEAK_MW = 1676;
                 <span class={`shrink-0 mt-0.5 text-xs px-1.5 py-0.5 rounded font-medium whitespace-nowrap ${trustTierClasses(tier)}`}>
                   {tier.replace(/_/g, ' ')}
                 </span>
-                <p class="text-sm text-gray-700">{desc}</p>
+                <p class="text-sm text-ink">{desc}</p>
               </div>
             ))}
           </dl>
@@ -368,21 +349,5 @@ const CAPE_TOWN_PEAK_MW = 1676;
 
       </div>
 
-      <p class="mt-14 text-sm">
-        <a href="/" class="text-blue-600 hover:underline">← Back to tracker</a>
-      </p>
-    </main>
-
-    <footer class="border-t border-gray-200 mt-16">
-      <div class="max-w-5xl mx-auto px-4 py-6 flex flex-wrap items-center justify-between gap-4 text-sm text-gray-400">
-        <span>Africa AI Datacenter Tracker — open data, CC-BY 4.0</span>
-        <div class="flex gap-4">
-          <a href="/glossary" class="hover:text-gray-600">Glossary</a>
-          <a href="/methodology" class="hover:text-gray-600">Methodology</a>
-          <a href="https://github.com/tawandamoyo/africa-ai-data-tracker" class="hover:text-gray-600">GitHub ↗</a>
-        </div>
-      </div>
-    </footer>
-
-  </body>
-</html>
+  </div>
+</Base>

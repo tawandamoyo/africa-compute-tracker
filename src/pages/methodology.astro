@@ -1,59 +1,44 @@
 ---
+import Base from '../layouts/Base.astro';
+import { breadcrumbs } from '../lib/jsonld.js';
 import '../styles/global.css';
 ---
 
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Methodology — Africa AI Datacenter Tracker</title>
-    <meta name="description" content="How the Africa AI Datacenter Tracker sources, evaluates, and records data about AI infrastructure across Africa." />
-  </head>
-  <body class="bg-gray-50 text-gray-900 font-sans">
+<Base
+  title="Methodology"
+  description="How the Africa Compute Tracker sources, ranks and records data about AI data centres in Africa: scope, trust tiers, confidence levels, the claims model and how to cite."
+  schema={[breadcrumbs([['Home', '/'], ['Methodology', '/methodology/']])]}
+>
+  <div class="max-w-3xl pt-10">
 
-    <header class="bg-white border-b border-gray-200">
-      <div class="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between gap-4">
-        <a href="/" class="text-base font-bold tracking-tight hover:text-gray-600">
-          Africa AI Datacenter Tracker
-        </a>
-        <nav class="flex gap-4 text-sm text-gray-500">
-          <a href="/glossary" class="hover:text-gray-900">Glossary</a>
-          <a href="/methodology" class="text-gray-900 font-medium">Methodology</a>
-          <a href="https://github.com/tawandamoyo/africa-ai-data-tracker" class="hover:text-gray-900">GitHub ↗</a>
-        </nav>
-      </div>
-    </header>
-
-    <main class="max-w-3xl mx-auto px-4 py-12">
       <h1 class="text-2xl font-bold mb-2">Methodology</h1>
-      <p class="text-gray-500 text-sm mb-10">
+      <p class="text-muted text-sm mb-10">
         How this dataset is collected, evaluated, and maintained. Read this before citing.
       </p>
 
-      <nav class="mb-10 p-4 bg-white border border-gray-200 rounded-lg text-sm">
-        <p class="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">Contents</p>
-        <ol class="space-y-1 text-gray-600 list-decimal list-inside">
-          <li><a href="#what-this-is" class="hover:text-blue-600 hover:underline">What this dataset is</a></li>
-          <li><a href="#what-this-isnt" class="hover:text-blue-600 hover:underline">What this dataset is not</a></li>
-          <li><a href="#scope" class="hover:text-blue-600 hover:underline">Scope criteria</a></li>
-          <li><a href="#trust-tiers" class="hover:text-blue-600 hover:underline">Source trust tiers</a></li>
-          <li><a href="#confidence-levels" class="hover:text-blue-600 hover:underline">Confidence levels</a></li>
-          <li><a href="#claims-model" class="hover:text-blue-600 hover:underline">The claims model</a></li>
-          <li><a href="#analysis-block" class="hover:text-blue-600 hover:underline">The analysis block</a></li>
-          <li><a href="#conflicting-sources" class="hover:text-blue-600 hover:underline">Conflicting sources</a></li>
-          <li><a href="#update-cadence" class="hover:text-blue-600 hover:underline">Update cadence</a></li>
-          <li><a href="#limitations" class="hover:text-blue-600 hover:underline">Known limitations</a></li>
-          <li><a href="#external-compatibility" class="hover:text-blue-600 hover:underline">External dataset compatibility</a></li>
-          <li><a href="#how-to-cite" class="hover:text-blue-600 hover:underline">How to cite</a></li>
+      <nav class="mb-10 p-4 bg-white border border-rule rounded text-sm">
+        <p class="text-sm font-semibold mb-3">Contents</p>
+        <ol class="space-y-1 text-muted list-decimal list-inside">
+          <li><a href="#what-this-is" class="hover:text-cobalt hover:underline">What this dataset is</a></li>
+          <li><a href="#what-this-isnt" class="hover:text-cobalt hover:underline">What this dataset is not</a></li>
+          <li><a href="#scope" class="hover:text-cobalt hover:underline">Scope criteria</a></li>
+          <li><a href="#trust-tiers" class="hover:text-cobalt hover:underline">Source trust tiers</a></li>
+          <li><a href="#confidence-levels" class="hover:text-cobalt hover:underline">Confidence levels</a></li>
+          <li><a href="#claims-model" class="hover:text-cobalt hover:underline">The claims model</a></li>
+          <li><a href="#analysis-block" class="hover:text-cobalt hover:underline">The analysis block</a></li>
+          <li><a href="#conflicting-sources" class="hover:text-cobalt hover:underline">Conflicting sources</a></li>
+          <li><a href="#update-cadence" class="hover:text-cobalt hover:underline">Update cadence</a></li>
+          <li><a href="#limitations" class="hover:text-cobalt hover:underline">Known limitations</a></li>
+          <li><a href="#external-compatibility" class="hover:text-cobalt hover:underline">External dataset compatibility</a></li>
+          <li><a href="#how-to-cite" class="hover:text-cobalt hover:underline">How to cite</a></li>
         </ol>
       </nav>
 
-      <div class="space-y-12 text-gray-700">
+      <div class="space-y-12 text-ink">
 
         <!-- 1 -->
         <section id="what-this-is">
-          <h2 class="text-lg font-semibold text-gray-900 mb-3">1. What this dataset is</h2>
+          <h2 class="text-lg font-semibold text-ink mb-3">1. What this dataset is</h2>
           <p class="leading-relaxed">
             This is an open-source, version-controlled dataset tracking AI-relevant datacenter infrastructure
             across Africa. Each facility is a YAML file in a public git repository. Every substantive
@@ -70,7 +55,7 @@ import '../styles/global.css';
 
         <!-- 2 -->
         <section id="what-this-isnt">
-          <h2 class="text-lg font-semibold text-gray-900 mb-3">2. What this dataset is not</h2>
+          <h2 class="text-lg font-semibold text-ink mb-3">2. What this dataset is not</h2>
           <p class="leading-relaxed">
             This is not a comprehensive commercial database. It is a single-maintainer research project
             that prioritises sourcing rigour over completeness. Gaps are documented openly. A facility
@@ -79,12 +64,12 @@ import '../styles/global.css';
           </p>
           <p class="leading-relaxed mt-3">
             This is not a real-time feed. Records are updated manually when new information is found.
-            The <code class="text-xs bg-gray-100 px-1 py-0.5 rounded">last_verified</code> field on each
+            The <code class="text-xs bg-white px-1 py-0.5 rounded">last_verified</code> field on each
             record shows the date of the most recent review. Records older than six months are flagged
             as potentially stale on the detail page.
           </p>
           <p class="leading-relaxed mt-3">
-            This is not an analytical publication. The <code class="text-xs bg-gray-100 px-1 py-0.5 rounded">analysis</code>
+            This is not an analytical publication. The <code class="text-xs bg-white px-1 py-0.5 rounded">analysis</code>
             block on some records contains the maintainer's interpretation, which is explicitly labelled
             as editorial and should be cited as such. The primary structured fields are sourced facts.
           </p>
@@ -92,10 +77,10 @@ import '../styles/global.css';
 
         <!-- 3 -->
         <section id="scope">
-          <h2 class="text-lg font-semibold text-gray-900 mb-3">3. Scope criteria</h2>
+          <h2 class="text-lg font-semibold text-ink mb-3">3. Scope criteria</h2>
           <p class="leading-relaxed mb-3">The following are in scope:</p>
           <ul class="space-y-1.5 list-disc list-outside ml-5 text-sm">
-            <li>Facilities in South Africa, Kenya, and Nigeria (v1 scope; expanding over time)</li>
+            <li>Facilities anywhere in Africa. Records currently cover South Africa, Kenya, Nigeria, Egypt and Morocco; see <a href="/countries/" class="text-cobalt underline">all countries</a></li>
             <li>Hyperscaler cloud regions (AWS, Azure, Google Cloud, and equivalents)</li>
             <li>Large carrier-neutral colocation campuses that serve as hyperscaler on-ramps</li>
             <li>Purpose-built AI compute and GPU cluster facilities</li>
@@ -111,16 +96,16 @@ import '../styles/global.css';
           <p class="leading-relaxed mt-4">
             The "AI-relevant" standard is applied conservatively. A facility must be designed for, or
             publicly described as serving, significant cloud or AI compute workloads. The
-            <code class="text-xs bg-gray-100 px-1 py-0.5 rounded">workload_profile</code> field records
+            <code class="text-xs bg-white px-1 py-0.5 rounded">workload_profile</code> field records
             what a facility actually does based on public statements; the
-            <code class="text-xs bg-gray-100 px-1 py-0.5 rounded">infrastructure.cooling_adequacy_for_ai</code>
+            <code class="text-xs bg-white px-1 py-0.5 rounded">infrastructure.cooling_adequacy_for_ai</code>
             field records whether the physical infrastructure is capable of supporting AI workloads.
           </p>
         </section>
 
         <!-- 4 -->
         <section id="trust-tiers">
-          <h2 class="text-lg font-semibold text-gray-900 mb-3">4. Source trust tiers</h2>
+          <h2 class="text-lg font-semibold text-ink mb-3">4. Source trust tiers</h2>
           <p class="leading-relaxed mb-4">
             Every source in the dataset is assigned one of seven trust tiers, ranked from most to least
             reliable. The tier does not determine whether a fact is included — it determines what
@@ -128,74 +113,74 @@ import '../styles/global.css';
           </p>
           <dl class="space-y-5">
             <div>
-              <dt class="text-sm font-semibold text-gray-900">regulatory</dt>
-              <dd class="text-sm text-gray-600 mt-0.5">
+              <dt class="text-sm font-semibold text-ink">regulatory</dt>
+              <dd class="text-sm text-muted mt-0.5">
                 Government filings, planning applications, environmental impact assessments, and official
                 gazette notices. These are primary legal records subject to perjury or regulatory
                 liability; they are the most reliable source in this dataset.
-                <span class="text-gray-400 italic"> Example: a South African Department of Environment
+                <span class="text-muted italic"> Example: a South African Department of Environment
                 EIA submission listing the facility's proposed power draw.</span>
               </dd>
             </div>
             <div>
-              <dt class="text-sm font-semibold text-gray-900">company_official</dt>
-              <dd class="text-sm text-gray-600 mt-0.5">
+              <dt class="text-sm font-semibold text-ink">company_official</dt>
+              <dd class="text-sm text-muted mt-0.5">
                 Press releases, investor relations filings, annual reports, and product or marketing
                 pages published by the operating or owning company. Self-reported but directly
                 attributable to the company; generally reliable for existence and basic facts, less
                 reliable for forward-looking capacity claims.
-                <span class="text-gray-400 italic"> Example: an Equinix investor relations press
+                <span class="text-muted italic"> Example: an Equinix investor relations press
                 release confirming the completion of its Teraco acquisition.</span>
               </dd>
             </div>
             <div>
-              <dt class="text-sm font-semibold text-gray-900">trade_press</dt>
-              <dd class="text-sm text-gray-600 mt-0.5">
+              <dt class="text-sm font-semibold text-ink">trade_press</dt>
+              <dd class="text-sm text-muted mt-0.5">
                 Specialist industry outlets with dedicated datacenter and infrastructure reporters,
                 editorial standards, and correction policies. Includes DatacenterDynamics,
                 DataCenter Knowledge, Capacity Media, and equivalent publications.
-                <span class="text-gray-400 italic"> Example: a DatacenterDynamics article reporting
+                <span class="text-muted italic"> Example: a DatacenterDynamics article reporting
                 on a new facility announcement with named company spokespeople.</span>
               </dd>
             </div>
             <div>
-              <dt class="text-sm font-semibold text-gray-900">satellite</dt>
-              <dd class="text-sm text-gray-600 mt-0.5">
+              <dt class="text-sm font-semibold text-ink">satellite</dt>
+              <dd class="text-sm text-muted mt-0.5">
                 Commercial satellite imagery (Planet Labs, Maxar, Google Earth Engine) analysed for
                 construction activity, facility footprint, or physical evidence of a claimed
                 development. Used to verify or contradict reported construction status.
-                <span class="text-gray-400 italic"> Example: a Planet Labs image showing foundation
+                <span class="text-muted italic"> Example: a Planet Labs image showing foundation
                 work at a site described as "under construction."</span>
               </dd>
             </div>
             <div>
-              <dt class="text-sm font-semibold text-gray-900">local_journalism</dt>
-              <dd class="text-sm text-gray-600 mt-0.5">
+              <dt class="text-sm font-semibold text-ink">local_journalism</dt>
+              <dd class="text-sm text-muted mt-0.5">
                 General-purpose local news outlets covering the region. Editorial standards vary widely.
                 Used as a research lead, for corroboration, or for facts that no higher-tier source
                 has confirmed. A single local journalism source is not sufficient for a
-                <code class="text-xs bg-gray-100 px-1 py-0.5 rounded">confirmed</code> rating.
-                <span class="text-gray-400 italic"> Example: a Business Day or TechCabal article
+                <code class="text-xs bg-white px-1 py-0.5 rounded">confirmed</code> rating.
+                <span class="text-muted italic"> Example: a Business Day or TechCabal article
                 reporting on an announcement based on a company statement.</span>
               </dd>
             </div>
             <div>
-              <dt class="text-sm font-semibold text-gray-900">industry_report</dt>
-              <dd class="text-sm text-gray-600 mt-0.5">
+              <dt class="text-sm font-semibold text-ink">industry_report</dt>
+              <dd class="text-sm text-muted mt-0.5">
                 Research and analyst reports from firms such as CBRE, JLL, Synergy Research, IDC, or
                 Omdia. Methodology is often not fully disclosed; primary data sourcing may not be
                 transparent. Often paywalled, which limits verification by third parties.
-                <span class="text-gray-400 italic"> Example: a Synergy Research market sizing report
+                <span class="text-muted italic"> Example: a Synergy Research market sizing report
                 listing South African colocation capacity.</span>
               </dd>
             </div>
             <div>
-              <dt class="text-sm font-semibold text-gray-900">social_media</dt>
-              <dd class="text-sm text-gray-600 mt-0.5">
+              <dt class="text-sm font-semibold text-ink">social_media</dt>
+              <dd class="text-sm text-muted mt-0.5">
                 LinkedIn posts, Twitter/X threads, job listings, and forum discussions. Lowest
                 reliability; used only as a research lead to identify facilities for further
                 investigation. A social media source is never used alone for a structured data field.
-                <span class="text-gray-400 italic"> Example: a LinkedIn post by a construction manager
+                <span class="text-muted italic"> Example: a LinkedIn post by a construction manager
                 referencing work on a new facility, used to identify a potential record to research.</span>
               </dd>
             </div>
@@ -204,42 +189,42 @@ import '../styles/global.css';
 
         <!-- 5 -->
         <section id="confidence-levels">
-          <h2 class="text-lg font-semibold text-gray-900 mb-3">5. Confidence levels</h2>
+          <h2 class="text-lg font-semibold text-ink mb-3">5. Confidence levels</h2>
           <p class="leading-relaxed mb-4">
-            Every entry in <code class="text-xs bg-gray-100 px-1 py-0.5 rounded">sourced_fields</code>
+            Every entry in <code class="text-xs bg-white px-1 py-0.5 rounded">sourced_fields</code>
             carries one of four confidence levels. The level reflects how well the available sources
             support the specific value, not just the existence of a source.
           </p>
           <dl class="space-y-4">
             <div>
-              <dt class="text-sm font-semibold text-gray-900">confirmed</dt>
-              <dd class="text-sm text-gray-600 mt-0.5">
+              <dt class="text-sm font-semibold text-ink">confirmed</dt>
+              <dd class="text-sm text-muted mt-0.5">
                 The value is directly stated in at least one primary source with no ambiguity. The
                 source explicitly names the number, date, or entity in question. Suitable for
                 direct citation.
               </dd>
             </div>
             <div>
-              <dt class="text-sm font-semibold text-gray-900">reported</dt>
-              <dd class="text-sm text-gray-600 mt-0.5">
+              <dt class="text-sm font-semibold text-ink">reported</dt>
+              <dd class="text-sm text-muted mt-0.5">
                 The value is stated in a source but has not been independently cross-checked against
                 a second primary source. Suitable for citation with the caveat that the figure has
                 not been independently verified.
               </dd>
             </div>
             <div>
-              <dt class="text-sm font-semibold text-gray-900">estimated</dt>
-              <dd class="text-sm text-gray-600 mt-0.5">
+              <dt class="text-sm font-semibold text-ink">estimated</dt>
+              <dd class="text-sm text-muted mt-0.5">
                 The value was calculated or inferred rather than directly stated in a source. The
                 methodology for the estimate is documented in the
-                <code class="text-xs bg-gray-100 px-1 py-0.5 rounded">sourced_fields[field].note</code>
+                <code class="text-xs bg-white px-1 py-0.5 rounded">sourced_fields[field].note</code>
                 field. Common for derived figures such as grid carbon intensity (inferred from
                 national grid data) or annual water use (estimated from IT load and cooling type).
               </dd>
             </div>
             <div>
-              <dt class="text-sm font-semibold text-gray-900">disputed</dt>
-              <dd class="text-sm text-gray-600 mt-0.5">
+              <dt class="text-sm font-semibold text-ink">disputed</dt>
+              <dd class="text-sm text-muted mt-0.5">
                 Conflicting sources exist and give materially different values, or a source makes
                 a claim that a named party has actively denied. Both positions are documented.
                 See <a href="#conflicting-sources" class="underline hover:no-underline">Section 8</a>
@@ -251,58 +236,58 @@ import '../styles/global.css';
 
         <!-- 6 -->
         <section id="claims-model">
-          <h2 class="text-lg font-semibold text-gray-900 mb-3">6. The claims model</h2>
+          <h2 class="text-lg font-semibold text-ink mb-3">6. The claims model</h2>
           <p class="leading-relaxed">
             Some assertions about a facility — whether a specific hyperscaler is an anchor tenant,
             whether a government contract exists, whether a foreign investor is involved — are contested,
             unconfirmed, or evolving. Placing these directly in structured fields (such as
-            <code class="text-xs bg-gray-100 px-1 py-0.5 rounded">tenants</code> or
-            <code class="text-xs bg-gray-100 px-1 py-0.5 rounded">governance.foreign_capital_origin</code>)
+            <code class="text-xs bg-white px-1 py-0.5 rounded">tenants</code> or
+            <code class="text-xs bg-white px-1 py-0.5 rounded">governance.foreign_capital_origin</code>)
             would imply a certainty that does not exist. The v2 schema introduces a separate
-            <code class="text-xs bg-gray-100 px-1 py-0.5 rounded">claims</code> array for exactly
+            <code class="text-xs bg-white px-1 py-0.5 rounded">claims</code> array for exactly
             this kind of assertion.
           </p>
           <p class="leading-relaxed mt-3">
-            A claim carries its own status (<code class="text-xs bg-gray-100 px-1 py-0.5 rounded">confirmed</code>,
-            <code class="text-xs bg-gray-100 px-1 py-0.5 rounded">reported</code>,
-            <code class="text-xs bg-gray-100 px-1 py-0.5 rounded">disputed</code>,
-            <code class="text-xs bg-gray-100 px-1 py-0.5 rounded">denied</code>,
-            <code class="text-xs bg-gray-100 px-1 py-0.5 rounded">withdrawn</code>),
+            A claim carries its own status (<code class="text-xs bg-white px-1 py-0.5 rounded">confirmed</code>,
+            <code class="text-xs bg-white px-1 py-0.5 rounded">reported</code>,
+            <code class="text-xs bg-white px-1 py-0.5 rounded">disputed</code>,
+            <code class="text-xs bg-white px-1 py-0.5 rounded">denied</code>,
+            <code class="text-xs bg-white px-1 py-0.5 rounded">withdrawn</code>),
             the source IDs supporting it, and a separate
-            <code class="text-xs bg-gray-100 px-1 py-0.5 rounded">denial_status</code> field tracking
+            <code class="text-xs bg-white px-1 py-0.5 rounded">denial_status</code> field tracking
             whether either or both parties have explicitly denied the claim. A
-            <code class="text-xs bg-gray-100 px-1 py-0.5 rounded">disputed</code> claim is visually
+            <code class="text-xs bg-white px-1 py-0.5 rounded">disputed</code> claim is visually
             distinct from confirmed facts on the detail page.
           </p>
           <p class="leading-relaxed mt-3">
             Journalists should treat a claim with status
-            <code class="text-xs bg-gray-100 px-1 py-0.5 rounded">reported</code> or
-            <code class="text-xs bg-gray-100 px-1 py-0.5 rounded">disputed</code> differently from a
+            <code class="text-xs bg-white px-1 py-0.5 rounded">reported</code> or
+            <code class="text-xs bg-white px-1 py-0.5 rounded">disputed</code> differently from a
             fact in a sourced field with confidence
-            <code class="text-xs bg-gray-100 px-1 py-0.5 rounded">confirmed</code>. The distinction
+            <code class="text-xs bg-white px-1 py-0.5 rounded">confirmed</code>. The distinction
             is intentional. Do not cite a disputed claim as a fact; cite it as a claim, note its
             status, and mention that parties have or have not responded.
           </p>
           <p class="leading-relaxed mt-3">
             Migration of speculation from earlier records into the claims model is an ongoing process.
             Records that have not yet been migrated may contain speculation in the
-            <code class="text-xs bg-gray-100 px-1 py-0.5 rounded">notes</code> or
-            <code class="text-xs bg-gray-100 px-1 py-0.5 rounded">workload_profile.notes</code> fields
+            <code class="text-xs bg-white px-1 py-0.5 rounded">notes</code> or
+            <code class="text-xs bg-white px-1 py-0.5 rounded">workload_profile.notes</code> fields
             rather than as formal claims. The migration TODO report at
-            <code class="text-xs bg-gray-100 px-1 py-0.5 rounded">dist/migration-todos.md</code>
+            <code class="text-xs bg-white px-1 py-0.5 rounded">dist/migration-todos.md</code>
             lists records pending that conversion.
           </p>
         </section>
 
         <!-- 7 -->
         <section id="analysis-block">
-          <h2 class="text-lg font-semibold text-gray-900 mb-3">7. The analysis block</h2>
+          <h2 class="text-lg font-semibold text-ink mb-3">7. The analysis block</h2>
           <p class="leading-relaxed">
             Some facility records contain an
-            <code class="text-xs bg-gray-100 px-1 py-0.5 rounded">analysis</code> block. Everything
+            <code class="text-xs bg-white px-1 py-0.5 rounded">analysis</code> block. Everything
             in that block — strategic significance level, rationale, and the "why this matters"
             bullet list — is the maintainer's interpretation, not a sourced fact. The block carries a
-            mandatory <code class="text-xs bg-gray-100 px-1 py-0.5 rounded">is_editorial: true</code>
+            mandatory <code class="text-xs bg-white px-1 py-0.5 rounded">is_editorial: true</code>
             flag and records who assessed it and when.
           </p>
           <p class="leading-relaxed mt-3">
@@ -310,13 +295,13 @@ import '../styles/global.css';
           </p>
           <ul class="space-y-2 mt-3 list-disc list-outside ml-5 text-sm">
             <li>
-              Sourced fields (e.g. <code class="text-xs bg-gray-100 px-1 py-0.5 rounded">capacity.it_load_mw</code>
-              with confidence <code class="text-xs bg-gray-100 px-1 py-0.5 rounded">reported</code>)
-              can be cited as: <em>"According to [source], as reported by the Africa AI Datacenter Tracker…"</em>
+              Sourced fields (e.g. <code class="text-xs bg-white px-1 py-0.5 rounded">capacity.it_load_mw</code>
+              with confidence <code class="text-xs bg-white px-1 py-0.5 rounded">reported</code>)
+              can be cited as: <em>"According to [source], as reported by the Africa Compute Tracker…"</em>
             </li>
             <li>
               Editorial analysis should be cited as:
-              <em>"The Africa AI Datacenter Tracker assessed this facility as strategically significant
+              <em>"The Africa Compute Tracker assessed this facility as strategically significant
               because…"</em> — making clear the assessment is the maintainer's, not the source's.
             </li>
           </ul>
@@ -329,12 +314,12 @@ import '../styles/global.css';
 
         <!-- 8 -->
         <section id="conflicting-sources">
-          <h2 class="text-lg font-semibold text-gray-900 mb-3">8. How we handle conflicting sources</h2>
+          <h2 class="text-lg font-semibold text-ink mb-3">8. How we handle conflicting sources</h2>
           <p class="leading-relaxed">
             When two sources give materially different values for the same field, the field is assigned
-            <code class="text-xs bg-gray-100 px-1 py-0.5 rounded">confidence: disputed</code>. Both
+            <code class="text-xs bg-white px-1 py-0.5 rounded">confidence: disputed</code>. Both
             source IDs are listed, and the
-            <code class="text-xs bg-gray-100 px-1 py-0.5 rounded">note</code> field explains the
+            <code class="text-xs bg-white px-1 py-0.5 rounded">note</code> field explains the
             discrepancy. The value stored in the primary field is the one with stronger source support;
             the alternative is documented in the note.
           </p>
@@ -349,13 +334,13 @@ import '../styles/global.css';
           <p class="leading-relaxed mt-3">
             The maintainer does not adjudicate between conflicting sources. Both positions are documented.
             If a field would require a judgement call to populate, it is left absent or marked
-            <code class="text-xs bg-gray-100 px-1 py-0.5 rounded">unknown</code>.
+            <code class="text-xs bg-white px-1 py-0.5 rounded">unknown</code>.
           </p>
         </section>
 
         <!-- 9 -->
         <section id="update-cadence">
-          <h2 class="text-lg font-semibold text-gray-900 mb-3">9. Update cadence</h2>
+          <h2 class="text-lg font-semibold text-ink mb-3">9. Update cadence</h2>
           <p class="leading-relaxed">
             This dataset is currently maintained by a single author. Update cadence is opportunistic,
             not scheduled: records are updated when new information is found, when a source is
@@ -365,7 +350,7 @@ import '../styles/global.css';
             The target cadence for re-verification of individual records is every six months. Records
             not verified within six months are flagged as stale on the detail page. A re-verification
             means reviewing the primary sources, checking whether the facility's status has changed,
-            and updating <code class="text-xs bg-gray-100 px-1 py-0.5 rounded">last_verified</code>
+            and updating <code class="text-xs bg-white px-1 py-0.5 rounded">last_verified</code>
             only when the review is complete.
           </p>
           <p class="leading-relaxed mt-3">
@@ -377,7 +362,7 @@ import '../styles/global.css';
 
         <!-- 10 -->
         <section id="limitations">
-          <h2 class="text-lg font-semibold text-gray-900 mb-3">10. Known limitations</h2>
+          <h2 class="text-lg font-semibold text-ink mb-3">10. Known limitations</h2>
           <p class="leading-relaxed mb-3">
             Naming the gaps is part of the sourcing standard. The following are known limitations
             of this dataset at the time of writing:
@@ -385,15 +370,15 @@ import '../styles/global.css';
           <ul class="space-y-3 list-disc list-outside ml-5 text-sm">
             <li>
               <strong>Geographic coverage is incomplete.</strong> The current dataset covers South Africa,
-              Kenya, and Nigeria. Egypt, Morocco, Ghana, Ethiopia, Rwanda, and Côte d'Ivoire all have
-              active datacenter development that is not yet tracked. Coverage will expand as sourcing
+              Kenya, Nigeria, Egypt and Morocco. Ghana, Ethiopia, Rwanda, Côte d'Ivoire, Tunisia and Senegal all have
+              active data centre development that is not yet tracked. Coverage will expand as sourcing
               allows.
             </li>
             <li>
               <strong>Some source URLs are placeholders.</strong> A small number of records have
-              <code class="bg-gray-100 px-1 py-0.5 rounded">example.com</code> placeholder URLs where
-              the original article was found but the URL was not recorded. These are flagged in the
-              record's notes and in the maintenance report. They do not affect the validity of the
+              <code class="bg-white px-1 py-0.5 rounded">example.com</code> placeholder URLs where
+              the original article was found but the URL was not recorded. On the site these sources are
+              shown without a link and marked "link not yet confirmed". They do not affect the validity of the
               structured data fields, which are sourced from the actual article content.
             </li>
             <li>
@@ -404,7 +389,7 @@ import '../styles/global.css';
             </li>
             <li>
               <strong>Capacity figures are often announced, not verified.</strong> Most
-              <code class="bg-gray-100 px-1 py-0.5 rounded">capacity.it_load_mw</code> values are
+              <code class="bg-white px-1 py-0.5 rounded">capacity.it_load_mw</code> values are
               reported from company announcements, not from regulatory filings or satellite
               verification. They represent planned capacity at full buildout, which may never be reached.
             </li>
@@ -428,93 +413,75 @@ import '../styles/global.css';
 
         <!-- 11 -->
         <section id="external-compatibility">
-          <h2 class="text-lg font-semibold text-gray-900 mb-3">11. External dataset compatibility</h2>
+          <h2 class="text-lg font-semibold text-ink mb-3">11. External dataset compatibility</h2>
           <p class="leading-relaxed">
             The dataset is designed to be joinable with external infrastructure databases. Each record
-            can carry an <code class="text-xs bg-gray-100 px-1 py-0.5 rounded">external_ids</code>
+            can carry an <code class="text-xs bg-white px-1 py-0.5 rounded">external_ids</code>
             object mapping recognised external dataset identifiers to their values. Currently recognised
             keys are:
           </p>
           <ul class="mt-2 mb-4 space-y-1 text-sm list-disc list-outside ml-5">
-            <li><code class="bg-gray-100 px-1 py-0.5 rounded">epoch_ai</code> — Epoch AI large-scale AI training dataset ID</li>
-            <li><code class="bg-gray-100 px-1 py-0.5 rounded">wikidata</code> — Wikidata QID (preferred for stable cross-referencing)</li>
-            <li><code class="bg-gray-100 px-1 py-0.5 rounded">dgtl_infra</code> — DGTL Infra datacenter database</li>
-            <li><code class="bg-gray-100 px-1 py-0.5 rounded">datacentermap</code> — datacentermap.com facility ID</li>
-            <li><code class="bg-gray-100 px-1 py-0.5 rounded">baxtel</code> — Baxtel datacenter directory ID</li>
+            <li><code class="bg-white px-1 py-0.5 rounded">epoch_ai</code> — Epoch AI large-scale AI training dataset ID</li>
+            <li><code class="bg-white px-1 py-0.5 rounded">wikidata</code> — Wikidata QID (preferred for stable cross-referencing)</li>
+            <li><code class="bg-white px-1 py-0.5 rounded">dgtl_infra</code> — DGTL Infra datacenter database</li>
+            <li><code class="bg-white px-1 py-0.5 rounded">datacentermap</code> — datacentermap.com facility ID</li>
+            <li><code class="bg-white px-1 py-0.5 rounded">baxtel</code> — Baxtel datacenter directory ID</li>
           </ul>
           <p class="leading-relaxed">
             An Epoch AI-compatible CSV export is available at
-            <code class="text-xs bg-gray-100 px-1 py-0.5 rounded">dist/exports/epoch-compatible.csv</code>
-            and is generated by running <code class="text-xs bg-gray-100 px-1 py-0.5 rounded">npm run export:epoch</code>.
-            The export follows Epoch's <code class="text-xs bg-gray-100 px-1 py-0.5 rounded">data_centers.csv</code>
+            <code class="text-xs bg-white px-1 py-0.5 rounded">dist/exports/epoch-compatible.csv</code>
+            and is generated by running <code class="text-xs bg-white px-1 py-0.5 rounded">npm run export:epoch</code>.
+            The export follows Epoch's <code class="text-xs bg-white px-1 py-0.5 rounded">data_centers.csv</code>
             column format and includes only facilities with at least one capacity figure
-            (<code class="text-xs bg-gray-100 px-1 py-0.5 rounded">it_load_mw</code> or
-            <code class="text-xs bg-gray-100 px-1 py-0.5 rounded">h100_equivalent_gpus</code>).
+            (<code class="text-xs bg-white px-1 py-0.5 rounded">it_load_mw</code> or
+            <code class="text-xs bg-white px-1 py-0.5 rounded">h100_equivalent_gpus</code>).
             Facilities without capacity data are omitted from the export with a logged reason.
           </p>
           <p class="leading-relaxed mt-3">
-            Field paths in <code class="text-xs bg-gray-100 px-1 py-0.5 rounded">sourced_fields</code>
+            Field paths in <code class="text-xs bg-white px-1 py-0.5 rounded">sourced_fields</code>
             use dot notation for nested fields (e.g.
-            <code class="text-xs bg-gray-100 px-1 py-0.5 rounded">capacity.it_load_mw</code>) and
+            <code class="text-xs bg-white px-1 py-0.5 rounded">capacity.it_load_mw</code>) and
             bracket notation for array elements (e.g.
-            <code class="text-xs bg-gray-100 px-1 py-0.5 rounded">operators[0]</code>,
-            <code class="text-xs bg-gray-100 px-1 py-0.5 rounded">claims[0].entity</code>).
+            <code class="text-xs bg-white px-1 py-0.5 rounded">operators[0]</code>,
+            <code class="text-xs bg-white px-1 py-0.5 rounded">claims[0].entity</code>).
           </p>
         </section>
 
         <!-- 12 -->
         <section id="how-to-cite">
-          <h2 class="text-lg font-semibold text-gray-900 mb-3">12. How to cite</h2>
+          <h2 class="text-lg font-semibold text-ink mb-3">12. How to cite</h2>
           <p class="leading-relaxed mb-3">
             When citing a specific facility record, include:
           </p>
           <ul class="space-y-2 list-disc list-outside ml-5 text-sm">
             <li>The facility name and ID (the ID is the stable URL slug)</li>
-            <li>The <code class="bg-gray-100 px-1 py-0.5 rounded">last_verified</code> date of the record you consulted</li>
+            <li>The <code class="bg-white px-1 py-0.5 rounded">last_verified</code> date of the record you consulted</li>
             <li>The dataset URL and version (the git commit hash is the version)</li>
           </ul>
           <p class="leading-relaxed mt-4">Suggested citation format:</p>
-          <div class="mt-2 p-4 bg-gray-100 rounded-lg text-sm font-mono text-gray-700 leading-relaxed">
-            Africa AI Datacenter Tracker. "[Facility Name]" (ID: [facility-id]).
+          <div class="mt-2 p-4 bg-white rounded text-sm font-mono text-ink leading-relaxed break-words">
+            Africa Compute Tracker. "[Facility Name]" (ID: [facility-id]).
             Record last verified [last_verified date].
-            https://africa-ai-datacenters.example/facilities/[facility-id].
+            https://africacomputetracker.org/facilities/[facility-id].
             Retrieved [your retrieval date].
           </div>
-          <p class="leading-relaxed mt-4 text-sm text-gray-500">
+          <p class="leading-relaxed mt-4 text-sm text-muted">
             Example for a facility record last verified 2026-06-29:
           </p>
-          <div class="mt-2 p-4 bg-gray-100 rounded-lg text-sm font-mono text-gray-700 leading-relaxed">
-            Africa AI Datacenter Tracker. "Cosmas Data City Cape Town Campus"
+          <div class="mt-2 p-4 bg-white rounded text-sm font-mono text-ink leading-relaxed break-words">
+            Africa Compute Tracker. "Cosmas Data City Cape Town Campus"
             (ID: cavaleros-cdc-cape-town-campus). Record last verified 2026-06-29.
-            https://africa-ai-datacenters.example/facilities/cavaleros-cdc-cape-town-campus.
+            https://africacomputetracker.org/facilities/cavaleros-cdc-cape-town-campus.
             Retrieved 2026-06-29.
           </div>
           <p class="leading-relaxed mt-4">
-            For the dataset as a whole (rather than a specific record), cite the git repository
-            with the commit hash at the time of access. The dataset is published under CC-BY 4.0;
-            attribution to "Africa AI Datacenter Tracker" is required.
+            For the dataset as a whole (rather than a specific record), cite the dataset version shown on the
+            <a href="/data/" class="text-cobalt underline">data page</a>, where a ready-made citation is provided.
+            The dataset is published under CC BY 4.0; attribution to "Africa Compute Tracker" is required.
           </p>
         </section>
 
       </div>
 
-      <p class="mt-12 text-sm">
-        <a href="/" class="text-blue-600 hover:underline">← Back to tracker</a>
-        {' · '}
-        <a href="/glossary" class="text-blue-600 hover:underline">Glossary →</a>
-      </p>
-    </main>
-
-    <footer class="border-t border-gray-200 mt-16">
-      <div class="max-w-5xl mx-auto px-4 py-6 flex flex-wrap items-center justify-between gap-4 text-sm text-gray-400">
-        <span>Africa AI Datacenter Tracker — open data, CC-BY 4.0</span>
-        <div class="flex gap-4">
-          <a href="/glossary" class="hover:text-gray-600">Glossary</a>
-          <a href="/methodology" class="hover:text-gray-600">Methodology</a>
-          <a href="https://github.com/tawandamoyo/africa-ai-data-tracker" class="hover:text-gray-600">GitHub ↗</a>
-        </div>
-      </div>
-    </footer>
-
-  </body>
-</html>
+  </div>
+</Base>

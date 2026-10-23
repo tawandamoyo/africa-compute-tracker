@@ -1,3 +1,102 @@
+@import '@fontsource-variable/public-sans';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  html {
+    font-feature-settings: 'tnum' 0;
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    @apply bg-mist text-ink antialiased;
+  }
+  :focus-visible {
+    outline: 2px solid #1d4ed8;
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+  a {
+    text-underline-offset: 0.18em;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer components {
+  /* Status marks: solid = operating, outlined = pipeline, hatched = stalled. */
+  .mark {
+    @apply inline-block shrink-0 align-middle;
+    width: 0.75rem;
+    height: 0.75rem;
+  }
+  .mark-lg {
+    width: 1.375rem;
+    height: 2.5rem;
+  }
+  .mark-built {
+    @apply bg-built;
+  }
+  .mark-pipeline {
+    @apply border-2 border-pipeline bg-white;
+  }
+  .mark-stalled {
+    border: 2px solid #65717c;
+    background: repeating-linear-gradient(-45deg, #65717c 0 2px, #fff 2px 5px);
+  }
+
+  .link {
+    @apply text-cobalt underline decoration-cobalt/30 hover:decoration-cobalt;
+  }
+  .num {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Long-form text rendered from YAML notes and markdown. */
+  .prose-notes p + p {
+    @apply mt-3;
+  }
+  .prose-notes code {
+    @apply rounded bg-mist px-1 py-0.5 text-[0.9em];
+  }
+  .prose-notes a {
+    @apply link;
+  }
+
+  .md h2 {
+    @apply mt-10 mb-3 text-xl font-semibold;
+  }
+  .md h3 {
+    @apply mt-6 mb-2 font-semibold;
+  }
+  .md p,
+  .md ul {
+    @apply mb-3 leading-relaxed;
+  }
+  .md ul {
+    @apply list-disc pl-5;
+  }
+  .md li + li {
+    @apply mt-1.5;
+  }
+  .md code {
+    @apply rounded bg-mist px-1 py-0.5 text-[0.9em];
+  }
+  .md a {
+    @apply link;
+  }
+}
+
+@layer components {
+  .md-page h1 {
+    @apply mb-6 text-3xl font-bold tracking-tight sm:text-4xl;
+  }
+}

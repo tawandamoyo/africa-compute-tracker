@@ -1,0 +1,78 @@
+---
+import Base from '../../layouts/Base.astro';
+import GroupPage from '../../components/GroupPage.astro';
+import { facilitiesByCountry, countryName, countrySlug, summarise, slugify, facilityUrl, absolute } from '../../lib/site.js';
+import { breadcrumbs, DATASET_ID } from '../../lib/jsonld.js';
+import { plainExcerpt } from '../../lib/markdown.js';
+
+export function getStaticPaths() {
+  const all = facilitiesByCountry();
+  return Object.entries(all).map(([code, facilities]) => ({
+    params: { slug: countrySlug(code) },
+    props: { code, facilities, others: Object.keys(all).filter(c => c !== code) },
+  }));
+}
+
+const { code, facilities, others } = Astro.props;
+const name = countryName(code);
+const s = summarise(facilities);
+const n = facilities.length;
+const cities = [...new Set(facilities.map((f: any) => f.city).filter(Boolean))];
+const operators = [...new Set(facilities.flatMap((f: any) => f.operators ?? []))] as string[];
+const list = (xs: string[]) => xs.length <= 1 ? xs.join('') : `${xs.slice(0, -1).join(', ')} and ${xs.at(-1)}`;
+
+const parts = [
+  s.groups.built.length && `${s.groups.built.length} operating`,
+  s.groups.pipeline.length && `${s.groups.pipeline.length} announced or under construction`,
+  s.groups.stalled.length && `${s.groups.stalled.length} paused or cancelled`,
+].filter(Boolean) as string[];
+
+const intro =
+  `We track ${n} AI-relevant data ${n === 1 ? 'centre' : 'centres'} in ${name}: ${list(parts)}. ` +
+  `${cities.length ? `${n === 1 ? 'It is' : 'They are'} in ${list(cities)}` : ''}` +
+  // Only say "run by" when every facility names an operator; otherwise it misattributes the rest.
+  `${operators.length && facilities.every((f: any) => f.operators?.length) ? `, run by ${list(operators)}` : ''}. Every figure links to its source.`;
+
+const title = `AI data centres in ${name}`;
+const path = `/countries/${countrySlug(code)}/`;
+const crumbs: [string, string][] = [['Home', '/'], ['Countries', '/countries/'], [name, path]];
+const schema = [
+  {
+    '@type': 'CollectionPage',
+    '@id': absolute(path),
+    url: absolute(path),
+    name: title,
+    description: intro,
+    isPartOf: { '@id': DATASET_ID },
+    mainEntity: {
+      '@type': 'ItemList',
+      numberOfItems: n,
+      itemListElement: facilities.map((f: any, i: number) => ({
+        '@type': 'ListItem', position: i + 1, name: f.name, url: absolute(facilityUrl(f)),
+      })),
+    },
+  },
+  breadcrumbs(crumbs),
+];
+---
+
+<Base title={title} description={plainExcerpt(intro, 160)} ogImage={`/og${path.replace(/\/$/, '')}.png`} schema={schema}>
+  <GroupPage title={title} intro={intro} facilities={facilities} showCountry={false} crumbs={crumbs}>
+    <section class="mt-14 grid grid-cols-1 gap-10 sm:grid-cols-2">
+      {operators.length > 0 && (
+        <div>
+          <h2 class="text-xl font-semibold">Operators in {name}</h2>
+          <ul class="mt-3 space-y-1.5">
+            {operators.map(op => <li><a class="link" href={`/operators/${slugify(op)}/`}>{op}</a></li>)}
+          </ul>
+        </div>
+      )}
+      <div>
+        <h2 class="text-xl font-semibold">Other countries</h2>
+        <ul class="mt-3 space-y-1.5">
+          {others.map((c: string) => <li><a class="link" href={`/countries/${countrySlug(c)}/`}>AI data centres in {countryName(c)}</a></li>)}
+        </ul>
+      </div>
+    </section>
+  </GroupPage>
+</Base>

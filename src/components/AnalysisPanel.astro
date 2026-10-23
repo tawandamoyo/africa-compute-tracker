@@ -27,9 +27,9 @@ const level = analysis.strategic_significance?.level;
 const levelColor = level ? (levelColors[level] ?? levelColors.low) : '';
 ---
 
-<section class="bg-amber-50 border border-amber-200 rounded-lg p-5">
+<section class="border-l-4 border-ink bg-white px-5 py-5" aria-labelledby="analysis-title">
   <div class="flex items-start justify-between gap-3 mb-3">
-    <h2 class="text-xs font-semibold text-amber-700 uppercase tracking-widest">Editorial assessment</h2>
+    <h2 id="analysis-title" class="text-xl font-semibold">Editorial assessment</h2>
     {level && (
       <span class={`text-xs px-2 py-0.5 rounded font-medium ${levelColor}`}>
         {level} significance
@@ -37,31 +37,16 @@ const levelColor = level ? (levelColors[level] ?? levelColors.low) : '';
     )}
   </div>
 
-  <p class="text-xs text-amber-700 italic mb-4">
+  <p class="text-sm text-muted mb-4">
     This section is the maintainer's interpretation, not a sourced claim.
     {analysis.assessed_by && ` Assessed by ${analysis.assessed_by}`}
     {analysis.assessed_on && ` on ${analysis.assessed_on}.`}
     {!analysis.assessed_on && '.'}
   </p>
 
-  {analysis.significance_summary && analysis.significance_summary.length > 0 && (
-    <div class="mb-4">
-      <p class="text-xs font-semibold text-amber-800 uppercase tracking-wide mb-2">Why this matters</p>
-      <ul class="space-y-1.5">
-        {analysis.significance_summary.map(bullet => (
-          <li class="flex items-start gap-2 text-sm text-amber-900">
-            <span class="shrink-0 mt-1 w-1.5 h-1.5 rounded-full bg-amber-500"></span>
-            <span>{bullet}</span>
-          </li>
-        ))}
-      </ul>
-    </div>
-  )}
-
   {analysis.strategic_significance?.rationale && (
     <div>
-      <p class="text-xs font-semibold text-amber-800 uppercase tracking-wide mb-1">Full assessment</p>
-      <p class="text-sm text-amber-900 leading-relaxed">{analysis.strategic_significance.rationale}</p>
+            <p class="max-w-prose leading-relaxed">{analysis.strategic_significance.rationale}</p>
     </div>
   )}
 </section>

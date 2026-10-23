@@ -1,103 +1,271 @@
 ---
-const { facilities } = Astro.props;
+import { statusGroup, countryName, facilityUrl } from '../lib/site.js';
+import { formatStatus } from '../lib/formatters.js';
 
-const pins = JSON.stringify(
-  facilities
-    .filter(f => f.location?.lat != null && f.location?.lng != null)
-    .map(f => ({
-      id: f.id,
-      name: f.name,
-      status: f.status,
-      city: f.city ?? '',
-      country: f.country,
-      lat: f.location.lat,
-      lng: f.location.lng,
-    }))
+interface Props {
+  facilities: any[];
+  /** Accessible description of what the map shows. */
+  label?: string;
+  /** Portrait frame for the home page hero; Africa is taller than it is wide. */
+  tall?: boolean;
+  class?: string;
+}
+
+const { facilities, label = 'Map of tracked facilities', tall = false, class: className } = Astro.props;
+
+// Many records use city-level coordinates, so several facilities share a point.
+// Spread exact duplicates on a small ring so each stays clickable when zoomed in.
+const located = facilities.filter(f => f.location?.lat != null && f.location?.lng != null);
+const byPoint = new Map<string, any[]>();
+for (const f of located) {
+  const key = `${f.location.lat},${f.location.lng}`;
+  byPoint.set(key, [...(byPoint.get(key) ?? []), f]);
+}
+
+const features = [...byPoint.values()].flatMap(group =>
+  group.map((f, i) => {
+    const angle = (2 * Math.PI * i) / group.length;
+    const r = group.length > 1 ? 0.006 : 0;
+    return {
+      type: 'Feature',
+      geometry: {
+        type: 'Point',
+        coordinates: [f.location.lng + r * Math.cos(angle), f.location.lat + r * Math.sin(angle)],
+      },
+      properties: {
+        id: f.id,
+        name: f.name,
+        group: statusGroup(f.status),
+        status: formatStatus(f.status),
+        place: [f.city, countryName(f.country)].filter(Boolean).join(', '),
+        precision: f.location.precision ?? '',
+        url: facilityUrl(f),
+      },
+    };
+  })
 );
+
+const geojson = JSON.stringify({ type: 'FeatureCollection', features });
 ---
 
-<div
-  id="facility-map"
-  data-pins={pins}
-  class="w-full rounded-lg overflow-hidden border border-gray-200"
-  style="height: 500px;"
-></div>
+<figure class:list={['relative', className]}>
+  <div
+    data-map
+    data-geojson={geojson}
+    role="region"
+    aria-label={`${label}. The table below lists the same facilities.`}
+    class:list={[
+      'w-full overflow-hidden rounded border border-rule bg-[#e9eef1]',
+      tall ? 'h-[420px] sm:h-[520px] lg:h-[640px]' : 'h-[360px] sm:h-[420px]',
+    ]}
+  >
+    <p data-map-placeholder class="flex h-full items-center justify-center text-sm text-muted">Loading map</p>
+  </div>
+  <figcaption class="mt-2 flex flex-wrap gap-x-5 gap-y-1 text-sm text-muted">
+    <span class="inline-flex items-center gap-2"><span class="mark mark-built" aria-hidden="true"></span>Operating</span>
+    <span class="inline-flex items-center gap-2"><span class="mark mark-pipeline" aria-hidden="true"></span>Announced or under construction</span>
+    <span class="inline-flex items-center gap-2"><span class="mark mark-stalled" aria-hidden="true"></span>Paused or cancelled</span>
+    <span>Numbered circles group nearby sites; the green badge counts how many are operating. Most pins are placed at city level, not the exact site.</span>
+  </figcaption>
+</figure>
 
 <script>
-  import 'maplibre-gl/dist/maplibre-gl.css';
-  import maplibregl from 'maplibre-gl';
+  const COLORS = { built: '#0B7A5F', pipeline: '#A35F00', stalled: '#65717C' };
 
-  const el = document.getElementById('facility-map');
-  if (!el) throw new Error('Map element not found');
+  function markImage(group: keyof typeof COLORS) {
+    const s = 44;
+    const c = document.createElement('canvas');
+    c.width = c.height = s;
+    const ctx = c.getContext('2d')!;
+    const color = COLORS[group];
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(4, 4, s - 8, s - 8);
+    if (group === 'built') {
+      ctx.fillStyle = color;
+      ctx.fillRect(8, 8, s - 16, s - 16);
+    } else if (group === 'stalled') {
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(8, 8, s - 16, s - 16);
+      ctx.clip();
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 3;
+      for (let x = -s; x < s * 2; x += 9) {
+        ctx.beginPath();
+        ctx.moveTo(x, s);
+        ctx.lineTo(x + s, 0);
+        ctx.stroke();
+      }
+      ctx.restore();
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 5;
+      ctx.strokeRect(10.5, 10.5, s - 21, s - 21);
+    } else {
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 6;
+      ctx.strokeRect(11, 11, s - 22, s - 22);
+    }
+    return ctx.getImageData(0, 0, s, s);
+  }
 
-  const pins = JSON.parse(el.dataset.pins ?? '[]');
+  async function init(el: HTMLElement) {
+    const [{ default: maplibregl }] = await Promise.all([
+      import('maplibre-gl'),
+      import('maplibre-gl/dist/maplibre-gl.css'),
+    ]);
+    const data = JSON.parse(el.dataset.geojson ?? '{"type":"FeatureCollection","features":[]}');
+    el.querySelector('[data-map-placeholder]')?.remove();
 
-  const STATUS_HEX = {
-    announced: '#f59e0b',
-    under_construction: '#3b82f6',
-    operational: '#10b981',
-    expanded: '#14b8a6',
-    cancelled: '#ef4444',
-    paused: '#6b7280',
-  };
+    const map = new maplibregl.Map({
+      container: el,
+      style: 'https://tiles.openfreemap.org/styles/positron',
+      center: [20, 2],
+      zoom: 2.4,
+      cooperativeGestures: true,
+      attributionControl: { compact: true },
+    });
+    map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
 
-  const map = new maplibregl.Map({
-    container: 'facility-map',
-    style: {
-      version: 8,
-      sources: {
-        osm: {
-          type: 'raster',
-          tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
-          tileSize: 256,
-          attribution:
-            '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-        },
-      },
-      layers: [{ id: 'osm-layer', type: 'raster', source: 'osm' }],
-    },
-    center: [27, -8],
-    zoom: 3,
-  });
-
-  map.addControl(new maplibregl.NavigationControl(), 'top-right');
-
-  map.on('load', () => {
-    if (pins.length) {
-      const bounds = pins.reduce(
-        (bounds, pin) => bounds.extend([pin.lng, pin.lat]),
-        new maplibregl.LngLatBounds([pins[0].lng, pins[0].lat], [pins[0].lng, pins[0].lat])
+    map.on('load', () => {
+      (['built', 'pipeline', 'stalled'] as const).forEach(g =>
+        map.addImage(`mark-${g}`, markImage(g), { pixelRatio: 2 })
       );
-      map.fitBounds(bounds, { padding: 32, maxZoom: 6, linear: true });
-    }
 
-    for (const pin of pins) {
-      const color = STATUS_HEX[pin.status] ?? '#6b7280';
+      map.addSource('facilities', {
+        type: 'geojson',
+        data,
+        cluster: true,
+        clusterRadius: 36,
+        clusterMaxZoom: 11,
+        // Count operating facilities per cluster so a cluster still says how much of it is built.
+        clusterProperties: { built: ['+', ['case', ['==', ['get', 'group'], 'built'], 1, 0]] },
+      });
 
-      const dot = document.createElement('div');
-      dot.style.cssText = [
-        'width:14px', 'height:14px', 'border-radius:50%',
-        `background:${color}`, 'border:2px solid white',
-        'box-shadow:0 1px 4px rgba(0,0,0,0.35)', 'cursor:pointer',
-      ].join(';');
+      map.addLayer({
+        id: 'clusters',
+        type: 'circle',
+        source: 'facilities',
+        filter: ['has', 'point_count'],
+        paint: {
+          'circle-color': '#15212C',
+          'circle-radius': ['step', ['get', 'point_count'], 13, 4, 16, 8, 19],
+          'circle-stroke-width': 2,
+          'circle-stroke-color': '#ffffff',
+        },
+      });
+      map.addLayer({
+        id: 'cluster-count',
+        type: 'symbol',
+        source: 'facilities',
+        filter: ['has', 'point_count'],
+        layout: { 'text-field': ['get', 'point_count_abbreviated'], 'text-size': 12, 'text-font': ['Noto Sans Bold'] },
+        paint: { 'text-color': '#ffffff' },
+      });
+      // Green badge on a cluster: how many of its facilities are operating.
+      const hasBuilt = ['all', ['has', 'point_count'], ['>', ['get', 'built'], 0]];
+      map.addLayer({
+        id: 'cluster-built',
+        type: 'circle',
+        source: 'facilities',
+        filter: hasBuilt,
+        paint: {
+          'circle-color': '#0B7A5F',
+          'circle-radius': 9,
+          'circle-stroke-width': 2,
+          'circle-stroke-color': '#ffffff',
+          'circle-translate': [14, -14],
+        },
+      });
+      map.addLayer({
+        id: 'cluster-built-count',
+        type: 'symbol',
+        source: 'facilities',
+        filter: hasBuilt,
+        layout: {
+          'text-field': ['to-string', ['get', 'built']],
+          'text-size': 10,
+          'text-font': ['Noto Sans Bold'],
+          'text-allow-overlap': true,
+        },
+        paint: { 'text-color': '#ffffff', 'text-translate': [14, -14] },
+      });
+      map.addLayer({
+        id: 'points',
+        type: 'symbol',
+        source: 'facilities',
+        filter: ['!', ['has', 'point_count']],
+        layout: {
+          'icon-image': ['concat', 'mark-', ['get', 'group']],
+          'icon-allow-overlap': true,
+          'icon-ignore-placement': true,
+        },
+      });
 
-      const location = [pin.city, pin.country].filter(Boolean).join(', ');
-      const statusLabel = pin.status.replace(/_/g, ' ');
+      const fit = (features: any[]) => {
+        if (!features.length) return;
+        const bounds = new maplibregl.LngLatBounds();
+        features.forEach((f: any) => bounds.extend(f.geometry.coordinates));
+        map.fitBounds(bounds, { padding: 48, maxZoom: 6, duration: matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 400 });
+      };
+      fit(data.features);
 
-      const popup = new maplibregl.Popup({ offset: 14, maxWidth: '240px' })
-        .setHTML(
-          `<div style="font-family:system-ui,sans-serif;padding:2px 0;line-height:1.5">` +
-          `<strong style="font-size:13px;display:block">${pin.name}</strong>` +
-          `<span style="font-size:12px;color:${color};text-transform:capitalize">${statusLabel}</span>` +
-          (location ? `<span style="font-size:12px;color:#6b7280"> · ${location}</span>` : '') +
-          `<br><a href="/facilities/${pin.id}" style="font-size:12px;color:#2563eb;text-decoration:underline">View details →</a>` +
-          `</div>`
-        );
+      map.on('click', 'clusters', async e => {
+        const feature = map.queryRenderedFeatures(e.point, { layers: ['clusters'] })[0];
+        const source = map.getSource('facilities') as any;
+        const zoom = await source.getClusterExpansionZoom(feature.properties.cluster_id);
+        map.easeTo({ center: (feature.geometry as any).coordinates, zoom });
+      });
 
-      new maplibregl.Marker({ element: dot })
-        .setLngLat([pin.lng, pin.lat])
-        .setPopup(popup)
-        .addTo(map);
-    }
-  });
+      map.on('click', 'points', e => {
+        const f = e.features?.[0];
+        if (!f) return;
+        const p = f.properties as Record<string, string>;
+        const box = document.createElement('div');
+        box.className = 'text-sm leading-snug';
+        const title = document.createElement('a');
+        title.href = p.url;
+        title.className = 'font-semibold text-ink underline';
+        title.textContent = p.name;
+        const meta = document.createElement('p');
+        meta.className = 'mt-1 text-muted';
+        meta.textContent = `${p.status}, ${p.place}`;
+        box.append(title, meta);
+        new maplibregl.Popup({ offset: 12, maxWidth: '260px' })
+          .setLngLat((f.geometry as any).coordinates)
+          .setDOMContent(box)
+          .addTo(map);
+      });
+
+      for (const layer of ['clusters', 'points']) {
+        map.on('mouseenter', layer, () => (map.getCanvas().style.cursor = 'pointer'));
+        map.on('mouseleave', layer, () => (map.getCanvas().style.cursor = ''));
+      }
+
+      const show = (list: string[]) => {
+        const ids = new Set(list);
+        const visible = data.features.filter((f: any) => ids.has(f.properties.id));
+        (map.getSource('facilities') as any).setData({ ...data, features: visible });
+        fit(visible);
+      };
+      const initial = (window as any).__facilityIds as string[] | undefined;
+      if (initial) show(initial);
+      document.addEventListener('facilities:filter', (e: Event) => show((e as CustomEvent).detail.ids));
+    });
+  }
+
+  for (const el of document.querySelectorAll<HTMLElement>('[data-map]')) {
+    const io = new IntersectionObserver(
+      entries => {
+        if (entries.some(e => e.isIntersecting)) {
+          io.disconnect();
+          init(el).catch(err => {
+            console.error('Map failed to load', err);
+            el.innerHTML = '<p class="flex h-full items-center justify-center p-4 text-sm text-muted">The map could not load. All facilities are listed in the table.</p>';
+          });
+        }
+      },
+      { rootMargin: '200px' }
+    );
+    io.observe(el);
+  }
 </script>

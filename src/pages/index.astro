@@ -1,209 +1,151 @@
 ---
+import Base from '../layouts/Base.astro';
 import Map from '../components/Map.astro';
-import FacilityCard from '../components/FacilityCard.astro';
+import FacilityTable from '../components/FacilityTable.astro';
+import CiteBlock from '../components/CiteBlock.astro';
 import { loadFacilities } from '../lib/loadFacilities.js';
-import { formatDate } from '../lib/formatters.js';
-import '../styles/global.css';
+import { formatDate, formatStatus } from '../lib/formatters.js';
+import {
+  SITE, summarise, countryName, countrySlug, facilityUrl, datasetCitation, GROUP_LABEL, statusGroup,
+} from '../lib/site.js';
+import { dataset } from '../lib/jsonld.js';
 
 const facilities = loadFacilities();
+const s = summarise(facilities);
+const groups = (['built', 'pipeline', 'stalled'] as const).filter(g => s.groups[g].length);
 
-// Summary stats
-const totalMw = facilities
-  .filter(f => f.capacity?.it_load_mw != null)
-  .reduce((sum, f) => sum + f.capacity.it_load_mw, 0);
-const countries = [...new Set(facilities.map(f => f.country))].length;
-const statusGroups = {
-  operational: facilities.filter(f => f.status === 'operational').length,
-  expanded:    facilities.filter(f => f.status === 'expanded').length,
-  announced:   facilities.filter(f => f.status === 'announced').length,
-  under_construction: facilities.filter(f => f.status === 'under_construction').length,
-};
+const byCountry = s.countries
+  .map(code => ({ code, list: facilities.filter(f => f.country === code) }))
+  .sort((a, b) => b.list.length - a.list.length);
 
-// Recently added — last 5 by first_tracked
-const recentlyAdded = [...facilities]
-  .filter(f => f.first_tracked)
-  .sort((a, b) => new Date(b.first_tracked) - new Date(a.first_tracked))
-  .slice(0, 5);
+const recent = [...facilities]
+  .filter(f => f.last_verified)
+  .sort((a, b) => b.last_verified.localeCompare(a.last_verified))
+  .slice(0, 4);
 
-const allStatuses = [...new Set(facilities.map(f => f.status))];
+const words = ['no', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten'];
+const spell = (n: number) => words[n] ?? String(n);
+const built = s.groups.built.length;
 ---
 
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Africa AI Datacenter Tracker</title>
-    <meta
-      name="description"
-      content="Open-source tracker and research publication for AI-relevant datacenters across Africa. Every data point is sourced and dated."
-    />
-  </head>
-  <body class="bg-gray-50 text-gray-900 font-sans">
+<Base
+  title={SITE.name}
+  description={`Which AI data centres in Africa are actually running? ${s.total} facilities in ${s.countries.length} countries, every figure sourced and dated. Free to download and cite.`}
+  schema={[dataset(s)]}
+>
+  <!-- Hero: the built-versus-announced split is the product's point of view. -->
+  <section class="grid grid-cols-1 gap-10 pt-10 pb-12 sm:pt-14 sm:pb-16 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] lg:gap-12" aria-labelledby="hero-title">
+    <div>
+    <h1 id="hero-title" class="text-[2rem] leading-[1.1] font-bold tracking-tight sm:text-5xl sm:leading-[1.05] lg:text-[2.75rem] xl:text-5xl">
+      Of {s.total} AI-relevant data centres tracked across Africa, {spell(built)} {built === 1 ? 'is' : 'are'} operating.
+    </h1>
+    <p class="mt-5 max-w-prose text-lg text-muted">
+      The rest are announcements, plans and stalled deals. This is an open record of AI compute
+      infrastructure in {[...s.countries].sort((a, b) => facilities.filter(f => f.country === b).length - facilities.filter(f => f.country === a).length).map(countryName).join(', ').replace(/, ([^,]*)$/, ' and $1')}, where every
+      figure links to its source and every record shows when it was last checked.
+    </p>
 
-    <header class="bg-white border-b border-gray-200">
-      <div class="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between gap-4">
-        <div>
-          <span class="text-base font-bold tracking-tight">Africa AI Datacenter Tracker</span>
-          <span class="hidden sm:inline text-sm text-gray-400 ml-2">open dataset + research</span>
-        </div>
-        <nav class="flex gap-4 text-sm text-gray-500">
-          <a href="/glossary" class="hover:text-gray-900">Glossary</a>
-          <a href="/methodology" class="hover:text-gray-900">Methodology</a>
-          <a href="https://github.com/tawandamoyo/africa-ai-data-tracker" class="hover:text-gray-900">GitHub ↗</a>
-        </nav>
-      </div>
-    </header>
-
-    <main class="max-w-5xl mx-auto px-4 py-8">
-
-      <section class="mb-8">
-        <h1 class="text-2xl font-bold text-gray-900 mb-2">AI Datacenter Infrastructure in Africa</h1>
-        <p class="text-gray-600 max-w-2xl mb-6">
-          A version-controlled, open dataset tracking hyperscaler, carrier-neutral colocation, and
-          AI cloud infrastructure across Africa. Every data point is sourced, dated, and assigned a
-          confidence level. Scope: announced, under construction, or operational within the last
-          three years.
-        </p>
-
-        <Map facilities={facilities} />
-
-        <!-- Map legend -->
-        <div class="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1 text-xs text-gray-500">
-          <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block"></span>Operational</span>
-          <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-blue-500 inline-block"></span>Under construction</span>
-          <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-amber-500 inline-block"></span>Announced</span>
-          <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-teal-500 inline-block"></span>Expanding</span>
-        </div>
-      </section>
-
-      <!-- Stats bar -->
-      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-        <div class="bg-white border border-gray-200 rounded-lg px-4 py-3">
-          <p class="text-2xl font-bold text-gray-900">{facilities.length}</p>
-          <p class="text-xs text-gray-400 mt-0.5">facilities tracked</p>
-        </div>
-        <div class="bg-white border border-gray-200 rounded-lg px-4 py-3">
-          <p class="text-2xl font-bold text-gray-900">{totalMw.toLocaleString()} <span class="text-base font-medium text-gray-500">MW</span></p>
-          <p class="text-xs text-gray-400 mt-0.5">total capacity tracked</p>
-        </div>
-        <div class="bg-white border border-gray-200 rounded-lg px-4 py-3">
-          <p class="text-2xl font-bold text-gray-900">{countries}</p>
-          <p class="text-xs text-gray-400 mt-0.5">{countries === 1 ? 'country' : 'countries'}</p>
-        </div>
-        <div class="bg-white border border-gray-200 rounded-lg px-4 py-3">
-          <p class="text-2xl font-bold text-gray-900">{statusGroups.operational + statusGroups.expanded}</p>
-          <p class="text-xs text-gray-400 mt-0.5">operational / expanding</p>
-        </div>
-      </div>
-
-      <!-- Status filter -->
-      <div class="flex flex-wrap items-center gap-2 mb-4">
-        <span class="text-xs text-gray-400 mr-1">Filter:</span>
-        <button
-          data-filter="all"
-          class="filter-btn active-filter text-xs px-3 py-1.5 rounded-full border font-medium transition-colors border-gray-900 bg-gray-900 text-white"
-        >
-          All <span class="filter-count ml-1 opacity-70">{facilities.length}</span>
-        </button>
-        {allStatuses.includes('operational') && (
-          <button data-filter="operational" class="filter-btn text-xs px-3 py-1.5 rounded-full border font-medium transition-colors border-gray-200 bg-white text-gray-600 hover:border-emerald-400">
-            Operational <span class="filter-count ml-1 opacity-70">{statusGroups.operational}</span>
-          </button>
-        )}
-        {allStatuses.includes('expanded') && (
-          <button data-filter="expanded" class="filter-btn text-xs px-3 py-1.5 rounded-full border font-medium transition-colors border-gray-200 bg-white text-gray-600 hover:border-teal-400">
-            Expanding <span class="filter-count ml-1 opacity-70">{statusGroups.expanded}</span>
-          </button>
-        )}
-        {allStatuses.includes('announced') && (
-          <button data-filter="announced" class="filter-btn text-xs px-3 py-1.5 rounded-full border font-medium transition-colors border-gray-200 bg-white text-gray-600 hover:border-amber-400">
-            Announced <span class="filter-count ml-1 opacity-70">{statusGroups.announced}</span>
-          </button>
-        )}
-        {allStatuses.includes('under_construction') && (
-          <button data-filter="under_construction" class="filter-btn text-xs px-3 py-1.5 rounded-full border font-medium transition-colors border-gray-200 bg-white text-gray-600 hover:border-blue-400">
-            Under Construction <span class="filter-count ml-1 opacity-70">{statusGroups.under_construction}</span>
-          </button>
-        )}
-      </div>
-
-      <!-- Facility grid -->
-      <section>
-        <h2 class="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">
-          Tracked Facilities
-        </h2>
-        <div id="facility-grid" class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {facilities.map(f => (
-            <div data-card data-status={f.status}>
-              <FacilityCard facility={f} />
-            </div>
-          ))}
-        </div>
-        <p id="no-results" class="hidden text-sm text-gray-400 mt-4">No facilities match this filter.</p>
-        <p class="text-xs text-gray-400 mt-4">
-          More facilities coming. Want to contribute?{' '}
-          <a href="https://github.com/tawandamoyo/africa-ai-data-tracker" class="underline hover:text-gray-600">Open a PR on GitHub.</a>
-        </p>
-      </section>
-
-      <!-- Recently added -->
-      {recentlyAdded.length > 0 && (
-        <section class="mt-12 border-t border-gray-200 pt-8">
-          <h2 class="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-4">Recently Added</h2>
-          <ol class="space-y-2">
-            {recentlyAdded.map(f => (
-              <li class="flex items-center justify-between gap-4 text-sm">
-                <a href={`/facilities/${f.id}`} class="text-gray-900 hover:text-blue-600 hover:underline font-medium truncate">
-                  {f.name}
-                </a>
-                <span class="shrink-0 text-xs text-gray-400">{formatDate(f.first_tracked)}</span>
-              </li>
+    <div class="mt-10 flex flex-wrap items-start gap-x-6 gap-y-6" role="list" aria-label="Every tracked facility, grouped by status">
+      {groups.map(g => (
+        <div role="listitem" class="w-min min-w-[8.5rem]">
+          <div class="flex gap-1.5">
+            {s.groups[g].map(f => (
+              <a
+                href={facilityUrl(f)}
+                class={`mark mark-lg mark-${g} hover:-translate-y-1 transition-transform`}
+                aria-label={`${f.name}: ${formatStatus(f.status)}`}
+                title={`${f.name} (${formatStatus(f.status)})`}
+              ></a>
             ))}
-          </ol>
-        </section>
-      )}
-
-    </main>
-
-    <footer class="border-t border-gray-200 mt-16">
-      <div class="max-w-5xl mx-auto px-4 py-6 flex flex-wrap items-center justify-between gap-4 text-sm text-gray-400">
-        <span>Africa AI Datacenter Tracker — open data, CC-BY 4.0</span>
-        <div class="flex gap-4">
-          <a href="/glossary" class="hover:text-gray-600">Glossary</a>
-          <a href="/methodology" class="hover:text-gray-600">Methodology</a>
-          <a href="https://github.com/tawandamoyo/africa-ai-data-tracker" class="hover:text-gray-600">GitHub ↗</a>
+          </div>
+          <p class="mt-2 text-sm"><span class="font-semibold num">{s.groups[g].length}</span> <span class="text-muted">{GROUP_LABEL[g].toLowerCase()}</span></p>
         </div>
+      ))}
+    </div>
+
+    <div class="mt-10 grid gap-6 border-t border-rule pt-6 text-sm sm:grid-cols-3 lg:grid-cols-1 xl:grid-cols-3">
+      <p>
+        <span class="block text-2xl font-semibold num">{s.liveMw} MW</span>
+        <span class="text-muted">IT load disclosed as running today</span>
+      </p>
+      <p>
+        <span class="block text-2xl font-semibold num">{s.plannedMw} MW</span>
+        <span class="text-muted">disclosed as planned or under expansion</span>
+      </p>
+      <p>
+        <span class="block text-2xl font-semibold num">{s.disclosing} of {s.total}</span>
+        <span class="text-muted">
+          facilities publish any IT-load figure, so these totals are a floor.
+          <a class="link" href="/glossary/#announced-mw">How to read capacity</a>
+        </span>
+      </p>
+    </div>
+    </div>
+    <Map facilities={facilities} tall label={`Map of ${s.total} tracked AI data centres in Africa`} />
+  </section>
+
+  <section id="facilities" class="scroll-mt-4" aria-labelledby="facilities-title">
+    <div class="mb-5 flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">
+      <h2 id="facilities-title" class="text-2xl font-bold tracking-tight">Every facility</h2>
+      <p class="text-sm text-muted">
+        Dataset version {SITE.version}. Records last verified up to {formatDate(s.lastVerified)}.
+      </p>
+    </div>
+    <FacilityTable facilities={facilities} controls caption="AI-relevant data centres tracked across Africa" />
+  </section>
+
+  <section class="mt-16 grid grid-cols-1 gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+    <div aria-labelledby="countries-title">
+      <h2 id="countries-title" class="text-2xl font-bold tracking-tight">By country</h2>
+      <ul class="mt-4 divide-y divide-rule border-y border-rule">
+        {byCountry.map(({ code, list }) => (
+          <li>
+            <a href={`/countries/${countrySlug(code)}/`} class="flex items-center justify-between gap-4 py-3 hover:bg-white">
+              <span class="font-medium">{countryName(code)}</span>
+              <span class="flex items-center gap-3">
+                <span class="flex gap-1" aria-hidden="true">
+                  {list.map(f => <span class={`mark mark-${statusGroup(f.status)}`}></span>)}
+                </span>
+                <span class="w-24 text-right text-sm text-muted num">{list.length} {list.length === 1 ? 'facility' : 'facilities'}</span>
+              </span>
+            </a>
+          </li>
+        ))}
+      </ul>
+      <p class="mt-3 text-sm text-muted">
+        Not yet tracked: Ghana, Ethiopia, Rwanda, Côte d'Ivoire, Tunisia and Senegal.
+        Absence means not yet recorded, not that nothing is being built.
+      </p>
+    </div>
+
+    <div aria-labelledby="recent-title">
+      <h2 id="recent-title" class="text-2xl font-bold tracking-tight">Recently verified</h2>
+      <ul class="mt-4 divide-y divide-rule border-y border-rule">
+        {recent.map(f => (
+          <li class="flex items-center justify-between gap-4 py-3">
+            <a href={facilityUrl(f)} class="min-w-0 truncate font-medium hover:underline">{f.name}</a>
+            <time class="shrink-0 text-sm text-muted" datetime={f.last_verified}>{formatDate(f.last_verified)}</time>
+          </li>
+        ))}
+      </ul>
+      <p class="mt-3 text-sm">
+        <a class="link" href="/changelog/">See what changed in each release</a>
+      </p>
+    </div>
+  </section>
+
+  <section class="mt-16 grid grid-cols-1 gap-8 rounded border border-rule bg-white p-6 sm:p-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)]" aria-labelledby="use-title">
+    <div>
+      <h2 id="use-title" class="text-2xl font-bold tracking-tight">Use the data</h2>
+      <p class="mt-3 text-muted">
+        Free to reuse under {SITE.license}. Download every record, or cite the dataset in your reporting or research.
+      </p>
+      <div class="mt-5 flex flex-wrap gap-3">
+        <a href="/data/facilities.csv" download class="rounded bg-ink px-4 py-2 text-sm font-medium text-white hover:bg-black">Download CSV</a>
+        <a href="/data/facilities.json" download class="rounded border border-ink px-4 py-2 text-sm font-medium hover:bg-ink hover:text-white">Download JSON</a>
+        <a href="/data/" class="px-1 py-2 text-sm link">Field guide and licence</a>
       </div>
-    </footer>
-
-    <script>
-      const filterBtns = document.querySelectorAll<HTMLButtonElement>('[data-filter]');
-      const cards = document.querySelectorAll<HTMLElement>('[data-card]');
-      const noResults = document.getElementById('no-results');
-
-      filterBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-          const filter = btn.dataset.filter!;
-
-          filterBtns.forEach(b => {
-            b.classList.remove('active-filter', 'border-gray-900', 'bg-gray-900', 'text-white');
-            b.classList.add('border-gray-200', 'bg-white', 'text-gray-600');
-          });
-          btn.classList.add('active-filter', 'border-gray-900', 'bg-gray-900', 'text-white');
-          btn.classList.remove('border-gray-200', 'bg-white', 'text-gray-600');
-
-          let visible = 0;
-          cards.forEach(card => {
-            const show = filter === 'all' || card.dataset.status === filter;
-            card.classList.toggle('hidden', !show);
-            if (show) visible++;
-          });
-
-          if (noResults) noResults.classList.toggle('hidden', visible > 0);
-        });
-      });
-    </script>
-
-  </body>
-</html>
+    </div>
+    <CiteBlock citation={datasetCitation()} />
+  </section>
+</Base>

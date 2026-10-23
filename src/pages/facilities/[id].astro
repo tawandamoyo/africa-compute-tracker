@@ -1,4 +1,7 @@
 ---
+import Base from '../../layouts/Base.astro';
+import StatusMark from '../../components/StatusMark.astro';
+import CiteBlock from '../../components/CiteBlock.astro';
 import SourceCitation from '../../components/SourceCitation.astro';
 import ClaimCard from '../../components/ClaimCard.astro';
 import ConstraintBadge from '../../components/ConstraintBadge.astro';
@@ -17,7 +20,9 @@ import {
   coolingAiLabel,
   coolingAiColor,
 } from '../../lib/formatters.js';
-import '../../styles/global.css';
+import { SITE, liveLoad, countryName, countrySlug, slugify, statusGroup, recordCitation, issueUrl, isPlaceholderUrl, absolute, facilityUrl } from '../../lib/site.js';
+import { renderNotes, plainExcerpt } from '../../lib/markdown.js';
+import { breadcrumbs, DATASET_ID } from '../../lib/jsonld.js';
 
 export function getStaticPaths() {
   const facilities = loadFacilities();
@@ -40,9 +45,17 @@ function sf(fieldPath: string): SFResult {
 }
 
 type RowData = { label: string; value: string; sourceInfo: any[]; confidence: string | null; note: string | null };
+// Schema enum values (e.g. `unknown`, `surface_water`) read as plain labels.
+function humanise(value: string): string {
+  if (value === 'unknown') return 'Not disclosed';
+  if (!/^[a-z]+(_[a-z]+)*$/.test(value)) return value;
+  const text = value.replace(/_/g, ' ');
+  return text[0].toUpperCase() + text.slice(1);
+}
+
 function row(label: string, value: string | string[] | null | undefined, fieldPath: string): RowData | null {
   if (value == null || value === '' || (Array.isArray(value) && value.length === 0)) return null;
-  const displayValue = Array.isArray(value) ? value.join(', ') : String(value);
+  const displayValue = Array.isArray(value) ? value.join(', ') : humanise(String(value));
   return { label, value: displayValue, ...sf(fieldPath) };
 }
 const isRow = (r: RowData | null): r is RowData => r !== null;
@@ -144,16 +157,17 @@ const govRows = [
 ].filter(isRow);
 
 const entitySf = sf('tenants');
-const locationStr = [facility.city, facility.region, facility.country].filter(Boolean).join(', ');
+const locationStr = [facility.city, facility.region, countryName(facility.country)].filter(Boolean).join(', ');
 const stale = isStale(facility.last_verified);
-const pwrCtx = powerContext(facility.capacity?.it_load_mw, facility.city, facility.country);
+// Household and grid comparisons use South African figures, so only show them for ZA.
+const pwrCtx = facility.country !== 'ZA' ? null : powerContext(facility.capacity?.it_load_mw, facility.city, facility.country);
 const carbonCtx = carbonContext(facility.power?.grid_carbon_intensity_gco2_per_kwh);
 const hasTimeline = facility.timeline?.construction_start || facility.timeline?.expected_operational || facility.timeline?.actual_operational;
 
 const coolingAiDesc = {
   inference_only: 'Standard cooling (<50 kW/rack). Suitable for inference workloads only; not suitable for dense GPU training.',
   ai_capable: 'Liquid cooling confirmed. Suitable for AI model training and high-density inference (50–200 kW/rack).',
-  frontier_training: 'High-density liquid cooling (200+ MW). Capable of frontier model training with latest-generation GPUs.',
+  frontier_training: 'High-density liquid cooling (200+ kW per rack). Capable of frontier model training with latest-generation GPUs.',
   unknown: 'Cooling adequacy for AI workloads has not been independently assessed for this facility.',
 };
 
@@ -168,556 +182,489 @@ const trustTierDefs = {
 };
 const tiersUsed: string[] = [...new Set(((facility.sources ?? []) as any[]).map((s: any) => s.trust_tier as string))];
 const trustTierDefsMap = trustTierDefs as Record<string, string>;
+
+// --- Page metadata -------------------------------------------------------------------------
+const country = countryName(facility.country);
+const place = [facility.city, country].filter(Boolean).join(', ');
+const operatorsStr = (facility.operators ?? []).join(' and ');
+const statusPhrase: Record<string, string> = {
+  operational: 'an operating',
+  expanded: 'an operating, expanding',
+  announced: 'an announced',
+  under_construction: 'an under-construction',
+  paused: 'a paused',
+  cancelled: 'a cancelled',
+};
+const mw = liveLoad(facility) ?? facility.capacity?.it_load_mw;
+const metaDescription = plainExcerpt(
+  `${facility.name} is ${statusPhrase[facility.status] ?? 'a'} AI-relevant data centre in ${place}` +
+    `${operatorsStr ? `, operated by ${operatorsStr}` : ''}.` +
+    `${mw != null ? ` ${mw} MW IT load disclosed.` : ''}` +
+    ` Sourced record with ${facility.sources?.length ?? 0} citations, last verified ${formatDate(facility.last_verified)}.`,
+  160
+);
+
+const crumbs: [string, string][] = [
+  ['Home', '/'],
+  [country, `/countries/${countrySlug(facility.country)}/`],
+  [facility.name, facilityUrl(facility)],
+];
+const placeNode = {
+  '@type': 'Place',
+  '@id': `${absolute(facilityUrl(facility))}#place`,
+  name: facility.name,
+  alternateName: facility.aliases,
+  description: plainExcerpt(facility.notes, 300) || metaDescription,
+  url: absolute(facilityUrl(facility)),
+  address: {
+    '@type': 'PostalAddress',
+    addressLocality: facility.city,
+    addressRegion: facility.region,
+    addressCountry: facility.country,
+  },
+  ...(facility.location?.lat != null && {
+    geo: { '@type': 'GeoCoordinates', latitude: facility.location.lat, longitude: facility.location.lng },
+  }),
+  subjectOf: { '@id': DATASET_ID },
+};
+const pageNode = {
+  '@type': 'WebPage',
+  '@id': absolute(facilityUrl(facility)),
+  url: absolute(facilityUrl(facility)),
+  name: `${facility.name}: status, capacity and sources`,
+  dateModified: facility.last_verified,
+  about: { '@id': placeNode['@id'] },
+  isPartOf: { '@id': `${SITE.url}/#website` },
+};
+
+// --- Key facts -------------------------------------------------------------------------------
+const group = statusGroup(facility.status);
+const live = liveLoad(facility);
+const planned = facility.capacity?.it_load_mw;
+const capacityFact =
+  live == null && planned == null
+    ? 'Not disclosed'
+    : [live != null ? `${live} MW running` : null, planned != null ? `${planned} MW planned` : null].filter(Boolean).join(', ');
+const dateFact = facility.timeline?.actual_operational
+  ? ['Operating since', formatDate(facility.timeline.actual_operational)]
+  : facility.timeline?.expected_operational
+    ? ['Expected online', formatDate(facility.timeline.expected_operational)]
+    : null;
+const placeholderCount = (facility.sources ?? []).filter((x: any) => isPlaceholderUrl(x.url)).length;
+
 ---
 
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{facility.name} — Africa AI Datacenter Tracker</title>
-    <meta
-      name="description"
-      content={`${facility.name} — ${formatStatus(facility.status)} datacenter in ${locationStr}`}
-    />
-  </head>
-  <body class="bg-gray-50 text-gray-900 font-sans">
+<Base
+  title={`${facility.name}, ${place}`}
+  description={metaDescription}
+  ogType="article"
+  ogImage={`/og/facilities/${facility.id}.png`}
+  schema={[pageNode, placeNode, breadcrumbs(crumbs)]}
+>
+  <nav aria-label="Breadcrumb" class="pt-6 text-sm text-muted">
+    <ol class="flex flex-wrap items-center gap-x-2">
+      <li><a href="/" class="hover:text-ink hover:underline">Home</a></li>
+      <li aria-hidden="true">/</li>
+      <li><a href={`/countries/${countrySlug(facility.country)}/`} class="hover:text-ink hover:underline">{country}</a></li>
+      <li aria-hidden="true">/</li>
+      <li><span aria-current="page" class="text-ink">{facility.name}</span></li>
+    </ol>
+  </nav>
 
-    <header class="bg-white border-b border-gray-200">
-      <div class="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between gap-4">
-        <a href="/" class="text-base font-bold tracking-tight hover:text-gray-600">
-          Africa AI Datacenter Tracker
-        </a>
-        <nav class="flex gap-4 text-sm text-gray-500">
-          <a href="/glossary" class="hover:text-gray-900">Glossary</a>
-          <a href="/methodology" class="hover:text-gray-900">Methodology</a>
-          <a href="https://github.com/tawandamoyo/africa-ai-data-tracker" class="hover:text-gray-900">GitHub ↗</a>
-        </nav>
-      </div>
-    </header>
+  {stale && (
+    <div class="mt-5 rounded border border-pipeline/40 bg-[#fff7e8] px-4 py-3 text-sm" role="note">
+      <strong>This record may be out of date.</strong> It was last verified on {formatDate(facility.last_verified)}.
+      If you know of a newer source, <a class="link" href={issueUrl('source-correction')}>send a correction</a>.
+    </div>
+  )}
 
-    <main class="max-w-5xl mx-auto px-4 py-8">
-
-      <!-- Stale banner -->
-      {stale && (
-        <div class="mb-6 flex items-start gap-3 px-4 py-3 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-800">
-          <span class="shrink-0 text-base leading-snug">⚠</span>
-          <p>
-            <strong>Stale record</strong> — last verified {formatDate(facility.last_verified)}.
-            Data may be outdated. If you have an updated source,{' '}
-            <a href="#report" class="underline hover:no-underline">suggest a correction</a>.
-          </p>
-        </div>
-      )}
-
-      <!-- Breadcrumb -->
-      <nav class="text-sm text-gray-400 mb-5">
-        <a href="/" class="hover:text-gray-600">Tracker</a>
-        <span class="mx-1.5">›</span>
-        <span class="text-gray-600">{facility.name}</span>
-      </nav>
-
-      <!-- Title row -->
-      <div class="flex flex-wrap items-start gap-2 mb-2">
-        <h1 class="text-2xl font-bold text-gray-900 leading-tight">{facility.name}</h1>
-        <span class={`text-sm px-2.5 py-1 rounded-full font-medium mt-0.5 ${statusColor(facility.status)}`}>
-          {formatStatus(facility.status)}
-        </span>
-        {facility.scale_tier && (
-          <span class={`text-sm px-2.5 py-1 rounded-full font-medium mt-0.5 ${scaleTierColor(facility.scale_tier)}`}>
-            {scaleTierLabel(facility.scale_tier)}
-          </span>
-        )}
-      </div>
-
+  <header class="mt-6 flex gap-5">
+    <StatusMark status={facility.status} label={false} size="lg" class="mt-1.5 hidden sm:inline-flex" />
+    <div class="min-w-0">
+      <h1 class="text-3xl font-bold leading-tight tracking-tight sm:text-4xl">{facility.name}</h1>
       {facility.aliases?.length > 0 && (
-        <p class="text-sm text-gray-400 mb-1">
-          Also known as: {facility.aliases.join(' · ')}
-        </p>
+        <p class="mt-2 text-muted">Also known as {facility.aliases.join(', ')}</p>
       )}
+    </div>
+  </header>
 
-      <!-- Meta row -->
-      <div class="flex flex-wrap items-center gap-x-5 gap-y-1 text-sm text-gray-500 mb-8">
-        <span>
-          {locationStr}
-          {facility.location?.precision && (
-            <span class="ml-1.5 text-xs px-1.5 py-0.5 bg-gray-100 text-gray-500 rounded">
-              {facility.location.precision} coords
-            </span>
-          )}
-        </span>
-        <span class={stale ? 'text-amber-600 font-medium' : ''}>
-          Last verified: {formatDate(facility.last_verified) ?? '—'}
-        </span>
-        <a href="#report" class="text-blue-500 hover:underline text-xs">Report a correction</a>
-      </div>
+  <dl class="mt-8 grid grid-cols-1 grid-cols-2 gap-px overflow-hidden rounded border border-rule bg-rule text-sm md:grid-cols-3 lg:grid-cols-6">
+    <div class="bg-white p-4">
+      <dt class="text-muted">Status</dt>
+      <dd class="mt-1 font-semibold"><StatusMark status={facility.status} /></dd>
+    </div>
+    <div class="bg-white p-4">
+      <dt class="text-muted">Location</dt>
+      <dd class="mt-1 font-semibold">{place}</dd>
+    </div>
+    <div class="bg-white p-4">
+      <dt class="text-muted">{facility.operators?.length > 1 ? 'Operators' : 'Operator'}</dt>
+      <dd class="mt-1 font-semibold">
+        {facility.operators?.length
+          ? facility.operators.map((op: string, i: number) => (
+              <>{i > 0 && ', '}<a class="hover:underline" href={`/operators/${slugify(op)}/`}>{op}</a></>
+            ))
+          : <span class="font-normal text-muted">Not disclosed</span>}
+      </dd>
+    </div>
+    <div class="bg-white p-4">
+      <dt class="text-muted">IT load</dt>
+      <dd class:list={['mt-1 num', capacityFact === 'Not disclosed' ? 'text-muted' : 'font-semibold']}>{capacityFact}</dd>
+    </div>
+    <div class="bg-white p-4">
+      <dt class="text-muted">{dateFact ? dateFact[0] : 'Timeline'}</dt>
+      <dd class:list={['mt-1', dateFact ? 'font-semibold' : 'text-muted']}>{dateFact ? dateFact[1] : 'Not disclosed'}</dd>
+    </div>
+    <div class="bg-white p-4">
+      <dt class="text-muted">Last verified</dt>
+      <dd class:list={['mt-1 font-semibold', stale && 'text-pipeline']}>
+        <time datetime={facility.last_verified}>{formatDate(facility.last_verified) ?? 'Unknown'}</time>
+      </dd>
+    </div>
+  </dl>
 
-      <!-- Significance bullets — why this matters, for journalists -->
-      {facility.analysis?.significance_summary?.length > 0 && (
-        <div class="mb-6 bg-amber-50 border border-amber-200 rounded-lg px-5 py-4">
-          <p class="text-xs font-semibold text-amber-700 uppercase tracking-widest mb-2">Why this matters</p>
-          <ul class="space-y-1.5">
-            {(facility.analysis.significance_summary as string[]).map((bullet: string) => (
-              <li class="flex items-start gap-2 text-sm text-amber-900">
-                <span class="shrink-0 mt-1.5 w-1.5 h-1.5 rounded-full bg-amber-500"></span>
-                <span>{bullet}</span>
-              </li>
-            ))}
-          </ul>
-          <p class="text-xs text-amber-600 mt-3 italic">
-            Editorial assessment — see full analysis below.
-          </p>
-        </div>
-      )}
+  {facility.analysis?.significance_summary?.length > 0 && (
+    <section class="mt-8 border-l-4 border-ink bg-white px-5 py-4" aria-labelledby="why-title">
+      <h2 id="why-title" class="font-semibold">Why this matters</h2>
+      <ul class="mt-2 list-disc space-y-1.5 pl-5">
+        {(facility.analysis.significance_summary as string[]).map((bullet: string) => <li>{bullet}</li>)}
+      </ul>
+      <p class="mt-3 text-sm text-muted">Editorial assessment by the maintainer, not a sourced fact. Full analysis below.</p>
+    </section>
+  )}
 
-      <div class="grid gap-6 lg:grid-cols-3">
+  <div class="mt-10 grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1fr)_300px]">
+    <div class="min-w-0 space-y-10">
 
-        <!-- Main content -->
-        <div class="lg:col-span-2 space-y-5">
-
-          {facility.notes && (
-            <section class="bg-white border border-gray-200 rounded-lg p-5">
-              <h2 class="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">Overview</h2>
-              <div class="text-sm text-gray-700 leading-relaxed whitespace-pre-line">
-                {facility.notes}
-              </div>
-            </section>
-          )}
-
-          {capacityRows.length > 0 && (
-            <section class="bg-white border border-gray-200 rounded-lg p-5">
-              <div class="flex items-center justify-between mb-1">
-                <h2 class="text-xs font-semibold text-gray-400 uppercase tracking-widest">Capacity</h2>
-                <a href="/glossary#it-load" class="text-xs text-gray-400 hover:text-blue-600">What is IT load? →</a>
-              </div>
-              <dl>
-                {capacityRows.map(r => <SourceCitation {...r} />)}
-              </dl>
-
-              <!-- Power in context callout -->
-              {pwrCtx && (
-                <div class="mt-4 bg-indigo-50 border border-indigo-100 rounded-lg p-4 text-sm text-indigo-900 space-y-1">
-                  <p class="text-xs font-semibold text-indigo-500 uppercase tracking-wide mb-2">Power in context</p>
-                  <p>
-                    <strong>{facility.capacity.it_load_mw} MW</strong> IT load ≈{' '}
-                    <strong>{pwrCtx.households} South African households</strong>
-                    <span class="text-indigo-600 text-xs ml-1">(avg 250 kWh/month)</span>
-                  </p>
-                  {pwrCtx.gridNote && (
-                    <p class="text-indigo-800">{pwrCtx.gridNote}</p>
-                  )}
-                  {pwrCtx.nationalGridNote && (
-                    <p class="text-indigo-700">{pwrCtx.nationalGridNote}</p>
-                  )}
-                  {pwrCtx.scaleNote && (
-                    <p class="text-indigo-600 text-xs italic">{pwrCtx.scaleNote}</p>
-                  )}
-                  <p class="text-xs text-indigo-400 pt-1">
-                    <a href="/glossary#it-load" class="underline hover:no-underline">About IT load</a>
-                    {' · '}
-                    <a href="/glossary#announced-mw" class="underline hover:no-underline">Announced vs operational MW</a>
-                  </p>
-                </div>
-              )}
-            </section>
-          )}
-
-          {(infraRows.length > 0 || facility.infrastructure?.cooling_adequacy_for_ai) && (
-            <section class="bg-white border border-gray-200 rounded-lg p-5">
-              <div class="flex items-center justify-between mb-1">
-                <h2 class="text-xs font-semibold text-gray-400 uppercase tracking-widest">Infrastructure</h2>
-                <a href="/glossary#tier" class="text-xs text-gray-400 hover:text-blue-600">Tier guide →</a>
-              </div>
-              <dl>
-                {infraRows.map(r => <SourceCitation {...r} />)}
-              </dl>
-
-              <!-- AI cooling readiness badge -->
-              {facility.infrastructure?.cooling_adequacy_for_ai && (
-                <div class="mt-4 pt-4 border-t border-gray-100">
-                  <dt class="text-xs font-medium text-gray-400 uppercase tracking-wide mb-2">AI cooling readiness</dt>
-                  <dd>
-                    <span class={`text-xs px-2.5 py-1 rounded-full font-medium ${coolingAiColor(facility.infrastructure.cooling_adequacy_for_ai)}`}>
-                      {coolingAiLabel(facility.infrastructure.cooling_adequacy_for_ai)}
-                    </span>
-                    <p class="text-xs text-gray-500 mt-2">
-                      {coolingAiDesc[facility.infrastructure.cooling_adequacy_for_ai]}
-                    </p>
-                    <p class="text-xs text-gray-400 mt-1">
-                      AI data centres require ~100 kW/rack (10× conventional). Liquid cooling at rack level is the key differentiator.
-                      <a href="/glossary#ai-training-inference" class="ml-1 underline hover:no-underline">Learn more →</a>
-                    </p>
-                  </dd>
-                </div>
-              )}
-            </section>
-          )}
-
-          {powerRows.length > 0 && (
-            <section class="bg-white border border-gray-200 rounded-lg p-5">
-              <div class="flex items-center justify-between mb-1">
-                <h2 class="text-xs font-semibold text-gray-400 uppercase tracking-widest">Power</h2>
-                <a href="/glossary#ppa" class="text-xs text-gray-400 hover:text-blue-600">PPAs &amp; wheeling →</a>
-              </div>
-              <dl>
-                {powerRows.map(r => <SourceCitation {...r} />)}
-              </dl>
-
-              <!-- Carbon intensity context -->
-              {carbonCtx && (
-                <div class="mt-4 bg-gray-50 border border-gray-200 rounded-lg p-4 text-sm space-y-1.5">
-                  <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Grid carbon context</p>
-                  <p>
-                    <strong class={carbonCtx.color}>{carbonCtx.gco2} g CO₂/kWh</strong>
-                    <span class="text-gray-600 ml-1.5">— {carbonCtx.label}</span>
-                  </p>
-                  <p class="text-gray-600">
-                    <strong class={carbonCtx.color}>{carbonCtx.multiple}×</strong> the global average
-                    ({carbonCtx.global_avg} g CO₂/kWh, IEA 2022).
-                    Compare: France ~60, UK ~175, US ~400 g CO₂/kWh.
-                  </p>
-                  <p class="text-xs text-gray-400 mt-1">
-                    Grid-level estimate. PPAs and on-site renewables may reduce the effective carbon footprint.
-                  </p>
-                </div>
-              )}
-            </section>
-          )}
-
-          {waterRows.length > 0 && (
-            <section class="bg-white border border-gray-200 rounded-lg p-5">
-              <div class="flex items-center justify-between mb-1">
-                <h2 class="text-xs font-semibold text-gray-400 uppercase tracking-widest">Water</h2>
-                <a href="/glossary#water-stress" class="text-xs text-gray-400 hover:text-blue-600">Water stress →</a>
-              </div>
-              <dl>
-                {waterRows.map(r => <SourceCitation {...r} />)}
-              </dl>
-            </section>
-          )}
-
-          {financialRows.length > 0 && (
-            <section class="bg-white border border-gray-200 rounded-lg p-5">
-              <h2 class="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-1">Financials</h2>
-              <dl>
-                {financialRows.map(r => <SourceCitation {...r} />)}
-              </dl>
-            </section>
-          )}
-
-          {govRows.length > 0 && (
-            <section class="bg-white border border-gray-200 rounded-lg p-5">
-              <div class="flex items-center justify-between mb-1">
-                <h2 class="text-xs font-semibold text-gray-400 uppercase tracking-widest">Governance</h2>
-                <a href="/glossary#data-residency" class="text-xs text-gray-400 hover:text-blue-600">Data residency →</a>
-              </div>
-              <dl>
-                {govRows.map(r => <SourceCitation {...r} />)}
-              </dl>
-            </section>
-          )}
-
-          {facility.workload_profile &&
-            Object.entries(facility.workload_profile).some(([k, v]) => k !== 'notes' && v === true) && (
-            <section class="bg-white border border-gray-200 rounded-lg p-5">
-              <div class="flex items-center justify-between mb-3">
-                <h2 class="text-xs font-semibold text-gray-400 uppercase tracking-widest">Workload Profile</h2>
-                <a href="/glossary#ai-training-inference" class="text-xs text-gray-400 hover:text-blue-600">Training vs inference →</a>
-              </div>
-              <div class="flex flex-wrap gap-2 mb-3">
-                {facility.workload_profile.ai_training && (
-                  <span class="text-xs px-2.5 py-1 bg-purple-50 text-purple-700 rounded-full">AI Training</span>
-                )}
-                {facility.workload_profile.ai_inference && (
-                  <span class="text-xs px-2.5 py-1 bg-indigo-50 text-indigo-700 rounded-full">AI Inference</span>
-                )}
-                {facility.workload_profile.general_cloud && (
-                  <span class="text-xs px-2.5 py-1 bg-blue-50 text-blue-700 rounded-full">General Cloud</span>
-                )}
-                {facility.workload_profile.colocation && (
-                  <span class="text-xs px-2.5 py-1 bg-gray-100 text-gray-600 rounded-full">Colocation</span>
-                )}
-              </div>
-              {facility.workload_profile.notes && (
-                <p class="text-sm text-gray-600">{facility.workload_profile.notes}</p>
-              )}
-            </section>
-          )}
-
-          <!-- Claims -->
-          {(facility.claims as any[])?.filter((c: any) => c).length > 0 && (
-            <section class="bg-white border border-gray-200 rounded-lg p-5">
-              <div class="flex items-center justify-between mb-1">
-                <h2 class="text-xs font-semibold text-gray-400 uppercase tracking-widest">Claims</h2>
-                <a href="/methodology#claims-model" class="text-xs text-gray-400 hover:text-blue-600">About claims →</a>
-              </div>
-              <p class="text-xs text-gray-400 mb-4">
-                Claims are tracked separately from sourced facts because their status is contested or evolving.
-                A disputed claim is not the same as a confirmed fact.
-              </p>
-              <div class="space-y-3">
-                {((facility.claims as any[]) ?? []).map((claim: any) => (
-                  <ClaimCard claim={claim} sourceMap={sourceMap} />
-                ))}
-              </div>
-            </section>
-          )}
-
-          <!-- Constraints -->
-          {(facility.constraints as any[])?.filter((c: any) => c).length > 0 && (
-            <section class="bg-white border border-gray-200 rounded-lg p-5">
-              <div class="flex items-center justify-between mb-1">
-                <h2 class="text-xs font-semibold text-gray-400 uppercase tracking-widest">Constraints</h2>
-                <a href="/methodology#constraints" class="text-xs text-gray-400 hover:text-blue-600">About constraints →</a>
-              </div>
-              <dl>
-                {((facility.constraints as any[]) ?? []).map((constraint: any) => (
-                  <ConstraintBadge constraint={constraint} sourceMap={sourceMap} />
-                ))}
-              </dl>
-            </section>
-          )}
-
-          <!-- Editorial analysis -->
-          {facility.analysis?.is_editorial && (
-            <AnalysisPanel analysis={facility.analysis as any} />
-          )}
-
-        </div>
-
-        <!-- Sidebar -->
-        <div class="space-y-4">
-
-          <!-- Entities -->
-          {(facility.operators?.length || facility.owners?.length || facility.tenants?.length) && (
-            <div class="bg-white border border-gray-200 rounded-lg p-4">
-              <h2 class="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">Entities</h2>
-              {facility.operators?.length > 0 && (
-                <div class="mb-3">
-                  <p class="text-xs text-gray-400 mb-1">Operator{facility.operators.length > 1 ? 's' : ''}</p>
-                  {facility.operators.map(op => (
-                    <p class="text-sm font-medium text-gray-900">{op}</p>
-                  ))}
-                </div>
-              )}
-              {facility.owners?.length > 0 && (
-                <div class="mb-3">
-                  <p class="text-xs text-gray-400 mb-1">Owner{facility.owners.length > 1 ? 's' : ''}</p>
-                  {facility.owners.map(ow => (
-                    <p class="text-sm font-medium text-gray-900">{ow}</p>
-                  ))}
-                </div>
-              )}
-              {facility.tenants?.length > 0 && (
-                <div>
-                  <p class="text-xs text-gray-400 mb-1 flex items-center gap-1.5">
-                    Known tenants
-                    {entitySf.confidence && (
-                      <span class="text-xs text-gray-400">({entitySf.confidence})</span>
-                    )}
-                  </p>
-                  {facility.tenants.map(t => (
-                    <p class="text-sm text-gray-700">{t}</p>
-                  ))}
-                  {entitySf.note && (
-                    <p class="text-xs text-gray-400 mt-1 italic">{entitySf.note}</p>
-                  )}
-                </div>
-              )}
-            </div>
-          )}
-
-          <!-- Location -->
-          {facility.location && (
-            <div class="bg-white border border-gray-200 rounded-lg p-4">
-              <h2 class="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">Location</h2>
-              <p class="text-sm text-gray-900">{locationStr}</p>
-              <p class="text-xs text-gray-400 mt-1 font-mono">
-                {facility.location.lat?.toFixed(4)}, {facility.location.lng?.toFixed(4)}
-              </p>
-              <span class="text-xs px-1.5 py-0.5 bg-gray-100 text-gray-500 rounded mt-1.5 inline-block">
-                {facility.location.precision} precision
-              </span>
-            </div>
-          )}
-
-          <!-- Timeline -->
-          {hasTimeline && (
-            <div class="bg-white border border-gray-200 rounded-lg p-4">
-              <h2 class="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">Timeline</h2>
-              <dl class="space-y-2.5">
-                {facility.timeline?.construction_start && (
-                  <div>
-                    <dt class="text-xs text-gray-400">Construction start</dt>
-                    <dd class="text-sm text-gray-900">{formatDate(facility.timeline.construction_start)}</dd>
-                  </div>
-                )}
-                {facility.timeline?.expected_operational && (
-                  <div>
-                    <dt class="text-xs text-gray-400">Expected operational</dt>
-                    <dd class="text-sm text-gray-900">{formatDate(facility.timeline.expected_operational)}</dd>
-                  </div>
-                )}
-                {facility.timeline?.actual_operational && (
-                  <div>
-                    <dt class="text-xs text-gray-400">Operational since</dt>
-                    <dd class="text-sm text-gray-900">{formatDate(facility.timeline.actual_operational)}</dd>
-                  </div>
-                )}
-              </dl>
-            </div>
-          )}
-
-          <!-- Status history -->
-          {facility.status_history?.length > 0 && (
-            <div class="bg-white border border-gray-200 rounded-lg p-4">
-              <h2 class="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">Status History</h2>
-              <ol class="space-y-3 relative border-l border-gray-200 ml-2">
-                {[...facility.status_history].reverse().map(h => (
-                  <li class="pl-4 relative">
-                    <span class="absolute -left-1.5 top-1 w-3 h-3 bg-gray-300 rounded-full"></span>
-                    <p class="text-sm font-medium text-gray-800 capitalize">
-                      {h.status.replace(/_/g, ' ')}
-                    </p>
-                    <p class="text-xs text-gray-400">{h.date}</p>
-                    {h.note && <p class="text-xs text-gray-500 mt-0.5">{h.note}</p>}
-                  </li>
-                ))}
-              </ol>
-            </div>
-          )}
-
-          <!-- Record metadata -->
-          <div class="bg-white border border-gray-200 rounded-lg p-4">
-            <h2 class="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">Record</h2>
-            <dl class="space-y-1.5 text-xs text-gray-600">
-              <div class="flex justify-between gap-2">
-                <dt class="text-gray-400">ID</dt>
-                <dd class="font-mono text-gray-600">{facility.id}</dd>
-              </div>
-              <div class="flex justify-between gap-2">
-                <dt class="text-gray-400">First tracked</dt>
-                <dd>{facility.first_tracked ?? '—'}</dd>
-              </div>
-              <div class="flex justify-between gap-2">
-                <dt class="text-gray-400">Last verified</dt>
-                <dd class={stale ? 'text-amber-600 font-medium' : ''}>{facility.last_verified ?? '—'}</dd>
-              </div>
-            </dl>
-          </div>
-
-        </div>
-      </div>
-
-      <!-- Claim history -->
-      {(facility.claim_history as any[])?.length > 0 && (
-        <section class="mt-8">
-          <details class="bg-white border border-gray-200 rounded-lg">
-            <summary class="px-5 py-4 cursor-pointer hover:bg-gray-50 select-none flex items-center justify-between">
-              <h2 class="text-xs font-semibold text-gray-400 uppercase tracking-widest">Field Change History</h2>
-              <span class="text-xs text-gray-400">
-                {(facility.claim_history as any[]).length} entr{(facility.claim_history as any[]).length === 1 ? 'y' : 'ies'}
-              </span>
-            </summary>
-            <div class="px-5 pb-5 pt-2">
-              <p class="text-xs text-gray-400 mb-4">
-                Prior values of structured fields, preserved when they changed. Most recent first.
-              </p>
-              <ol class="space-y-4 relative border-l border-gray-200 ml-2">
-                {([...(facility.claim_history as any[])].reverse()).map((entry: any) => (
-                  <li class="pl-4 relative text-sm">
-                    <span class="absolute -left-1.5 top-1 w-3 h-3 bg-gray-300 rounded-full"></span>
-                    <p class="font-mono text-xs text-gray-500 mb-0.5">{entry.field}</p>
-                    <p class="text-gray-800">
-                      Previously: <span class="font-medium">{String(entry.value)}</span>
-                    </p>
-                    <p class="text-xs text-gray-400 mt-0.5">Observed {entry.observed}
-                      {entry.superseded_on && ` · superseded ${entry.superseded_on}`}
-                    </p>
-                    {entry.reason && (
-                      <p class="text-xs text-gray-500 mt-0.5 italic">{entry.reason}</p>
-                    )}
-                  </li>
-                ))}
-              </ol>
-            </div>
-          </details>
+      {facility.notes && (
+        <section aria-labelledby="overview-title">
+          <h2 id="overview-title" class="text-xl font-semibold">Overview</h2>
+          <div class="prose-notes mt-3 max-w-prose leading-relaxed" set:html={renderNotes(facility.notes)} />
         </section>
       )}
 
-      <!-- Sources -->
-      {facility.sources?.length > 0 && (
-        <section class="mt-8 bg-white border border-gray-200 rounded-lg p-5">
-          <h2 class="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-4">Sources</h2>
-          <ol class="space-y-4">
-            {facility.sources.map(s => (
-              <li class="flex items-start gap-3 text-sm">
-                <span class="shrink-0 font-mono text-xs bg-gray-100 px-1.5 py-0.5 rounded text-gray-500 mt-0.5">
-                  {s.id}
-                </span>
-                <div>
-                  <a href={s.archived_url ?? s.url} target="_blank" rel="noopener noreferrer"
-                     class="text-blue-600 hover:underline font-medium">
-                    {s.title ?? s.url}
-                  </a>
-                  {s.publisher && <span class="text-gray-500"> — {s.publisher}</span>}
-                  <div class="flex flex-wrap items-center gap-2 mt-1">
-                    <span class={`text-xs px-1.5 py-0.5 rounded font-medium ${trustTierClasses(s.trust_tier)}`}>
-                      {s.trust_tier.replace(/_/g, ' ')}
-                    </span>
-                    <span class="text-xs text-gray-400">retrieved {s.retrieved}</span>
-                    {s.archived_url
-                      ? <span class="text-xs text-emerald-600">✓ archived</span>
-                      : <span class="text-xs text-amber-600">not yet archived</span>
-                    }
-                  </div>
-                </div>
-              </li>
+      {capacityRows.length > 0 && (
+        <section aria-labelledby="capacity-title">
+          <div class="flex flex-wrap items-baseline justify-between gap-2 border-b border-rule pb-2">
+            <h2 id="capacity-title" class="text-xl font-semibold">Capacity</h2>
+            <a href="/glossary/#it-load" class="text-sm link">What IT load means</a>
+          </div>
+          <dl>{capacityRows.map(r => <SourceCitation {...r} />)}</dl>
+
+          {pwrCtx && (
+            <div class="mt-4 rounded bg-white p-4 text-sm">
+              <p class="font-semibold">Power in context</p>
+              <p class="mt-1">
+                {facility.capacity.it_load_mw} MW of IT load is roughly the average demand of{' '}
+                <strong>{pwrCtx.households} South African households</strong> (at 250 kWh per month).
+              </p>
+              {pwrCtx.gridNote && <p class="mt-1">That is {pwrCtx.gridNote}.</p>}
+              {pwrCtx.nationalGridNote && <p class="mt-1">It is {pwrCtx.nationalGridNote}.</p>}
+              {pwrCtx.scaleNote && <p class="mt-1 text-muted">{pwrCtx.scaleNote}.</p>}
+              <p class="mt-2"><a href="/glossary/#announced-mw" class="link">Announced versus operating capacity</a></p>
+            </div>
+          )}
+        </section>
+      )}
+
+      {(infraRows.length > 0 || facility.infrastructure?.cooling_adequacy_for_ai) && (
+        <section aria-labelledby="infra-title">
+          <div class="flex flex-wrap items-baseline justify-between gap-2 border-b border-rule pb-2">
+            <h2 id="infra-title" class="text-xl font-semibold">Infrastructure</h2>
+            <a href="/glossary/#tier" class="text-sm link">Tier certification explained</a>
+          </div>
+          <dl>
+            {infraRows.map(r => <SourceCitation {...r} />)}
+            {facility.infrastructure?.cooling_adequacy_for_ai && (
+              <div class="py-3">
+                <dt class="text-sm text-muted">AI cooling readiness</dt>
+                <dd class="mt-1">
+                  <span class={`rounded px-2 py-0.5 text-sm font-medium ${coolingAiColor(facility.infrastructure.cooling_adequacy_for_ai)}`}>
+                    {coolingAiLabel(facility.infrastructure.cooling_adequacy_for_ai)}
+                  </span>
+                  <p class="mt-2 text-sm">{coolingAiDesc[facility.infrastructure.cooling_adequacy_for_ai as keyof typeof coolingAiDesc]}</p>
+                  <p class="mt-1 text-sm text-muted">
+                    AI racks draw around 100 kW each, about ten times a conventional rack, so rack-level liquid cooling is the key differentiator.{' '}
+                    <a href="/glossary/#ai-training-inference" class="link">Training versus inference</a>
+                  </p>
+                </dd>
+              </div>
+            )}
+          </dl>
+        </section>
+      )}
+
+      {powerRows.length > 0 && (
+        <section aria-labelledby="power-title">
+          <div class="flex flex-wrap items-baseline justify-between gap-2 border-b border-rule pb-2">
+            <h2 id="power-title" class="text-xl font-semibold">Power</h2>
+            <a href="/glossary/#ppa" class="text-sm link">PPAs and wheeling</a>
+          </div>
+          <dl>{powerRows.map(r => <SourceCitation {...r} />)}</dl>
+          {carbonCtx && (
+            <div class="mt-4 rounded bg-white p-4 text-sm">
+              <p class="font-semibold">Grid carbon in context</p>
+              <p class="mt-1">
+                <strong class={carbonCtx.color}>{carbonCtx.gco2} g CO₂/kWh</strong>: {carbonCtx.label.toLowerCase()}.
+                That is {carbonCtx.multiple} times the global average of {carbonCtx.global_avg} g (IEA, 2022).
+                For comparison, France is about 60, the UK about 175 and the US about 400.
+              </p>
+              <p class="mt-1 text-muted">Grid-level estimate. PPAs and on-site renewables may lower the effective footprint.</p>
+            </div>
+          )}
+        </section>
+      )}
+
+      {waterRows.length > 0 && (
+        <section aria-labelledby="water-title">
+          <div class="flex flex-wrap items-baseline justify-between gap-2 border-b border-rule pb-2">
+            <h2 id="water-title" class="text-xl font-semibold">Water</h2>
+            <a href="/glossary/#water-stress" class="text-sm link">Water stress explained</a>
+          </div>
+          <dl>{waterRows.map(r => <SourceCitation {...r} />)}</dl>
+        </section>
+      )}
+
+      {financialRows.length > 0 && (
+        <section aria-labelledby="fin-title">
+          <h2 id="fin-title" class="border-b border-rule pb-2 text-xl font-semibold">Financials</h2>
+          <dl>{financialRows.map(r => <SourceCitation {...r} />)}</dl>
+        </section>
+      )}
+
+      {govRows.length > 0 && (
+        <section aria-labelledby="gov-title">
+          <div class="flex flex-wrap items-baseline justify-between gap-2 border-b border-rule pb-2">
+            <h2 id="gov-title" class="text-xl font-semibold">Governance</h2>
+            <a href="/glossary/#data-residency" class="text-sm link">Data residency explained</a>
+          </div>
+          <dl>{govRows.map(r => <SourceCitation {...r} />)}</dl>
+        </section>
+      )}
+
+      {facility.workload_profile &&
+        Object.entries(facility.workload_profile).some(([k, v]) => k !== 'notes' && v === true) && (
+        <section aria-labelledby="workload-title">
+          <div class="flex flex-wrap items-baseline justify-between gap-2 border-b border-rule pb-2">
+            <h2 id="workload-title" class="text-xl font-semibold">Workloads</h2>
+            <a href="/glossary/#ai-training-inference" class="text-sm link">Training versus inference</a>
+          </div>
+          <ul class="mt-3 flex flex-wrap gap-2 text-sm">
+            {facility.workload_profile.ai_training && <li class="rounded bg-white px-2.5 py-1 border border-rule">AI training</li>}
+            {facility.workload_profile.ai_inference && <li class="rounded bg-white px-2.5 py-1 border border-rule">AI inference</li>}
+            {facility.workload_profile.general_cloud && <li class="rounded bg-white px-2.5 py-1 border border-rule">General cloud</li>}
+            {facility.workload_profile.colocation && <li class="rounded bg-white px-2.5 py-1 border border-rule">Colocation</li>}
+          </ul>
+          {facility.workload_profile.notes && <p class="mt-3 max-w-prose text-sm">{facility.workload_profile.notes}</p>}
+        </section>
+      )}
+
+      {(facility.claims as any[])?.filter((c: any) => c).length > 0 && (
+        <section aria-labelledby="claims-title">
+          <div class="flex flex-wrap items-baseline justify-between gap-2 border-b border-rule pb-2">
+            <h2 id="claims-title" class="text-xl font-semibold">Claims</h2>
+            <a href="/methodology/#claims-model" class="text-sm link">How claims work</a>
+          </div>
+          <p class="mt-3 max-w-prose text-sm text-muted">
+            Claims are contested or still-evolving assertions, kept apart from sourced facts. A disputed claim is not a confirmed fact.
+          </p>
+          <div class="mt-4 space-y-3">
+            {((facility.claims as any[]) ?? []).map((claim: any) => <ClaimCard claim={claim} sourceMap={sourceMap} />)}
+          </div>
+        </section>
+      )}
+
+      {(facility.constraints as any[])?.filter((c: any) => c).length > 0 && (
+        <section aria-labelledby="constraints-title">
+          <h2 id="constraints-title" class="border-b border-rule pb-2 text-xl font-semibold">Constraints</h2>
+          <dl>
+            {((facility.constraints as any[]) ?? []).map((constraint: any) => (
+              <ConstraintBadge constraint={constraint} sourceMap={sourceMap} />
             ))}
+          </dl>
+        </section>
+      )}
+
+      {facility.analysis?.is_editorial && <AnalysisPanel analysis={facility.analysis as any} />}
+
+      {(facility.claim_history as any[])?.length > 0 && (
+        <details class="rounded border border-rule bg-white">
+          <summary class="cursor-pointer px-5 py-4 font-semibold hover:bg-mist/60">
+            Field change history <span class="font-normal text-muted">({(facility.claim_history as any[]).length})</span>
+          </summary>
+          <div class="px-5 pb-5">
+            <p class="text-sm text-muted">Earlier values of structured fields, kept when they changed. Most recent first.</p>
+            <ol class="mt-4 space-y-4 border-l border-rule pl-4">
+              {([...(facility.claim_history as any[])].reverse()).map((entry: any) => (
+                <li class="text-sm">
+                  <p class="font-mono text-xs text-muted">{entry.field}</p>
+                  <p>Previously <span class="font-medium">{String(entry.value)}</span></p>
+                  <p class="text-muted">
+                    Observed {entry.observed}{entry.superseded_on && `, superseded ${entry.superseded_on}`}
+                  </p>
+                  {entry.reason && <p class="mt-0.5 italic text-muted">{entry.reason}</p>}
+                </li>
+              ))}
+            </ol>
+          </div>
+        </details>
+      )}
+
+      {facility.sources?.length > 0 && (
+        <section id="sources" aria-labelledby="sources-title">
+          <div class="flex flex-wrap items-baseline justify-between gap-2 border-b border-rule pb-2">
+            <h2 id="sources-title" class="text-xl font-semibold">Sources</h2>
+            <a href="/methodology/#trust-tiers" class="text-sm link">How sources are ranked</a>
+          </div>
+          {placeholderCount > 0 && (
+            <p class="mt-3 text-sm text-muted">
+              {placeholderCount === 1 ? 'One source has' : `${placeholderCount} sources have`} a known title and publisher but no confirmed link yet.
+              If you can find the original, <a class="link" href={issueUrl('source-correction')}>send it in</a>.
+            </p>
+          )}
+          <ol class="mt-2 divide-y divide-rule">
+            {facility.sources.map((src: any) => {
+              const pending = isPlaceholderUrl(src.url);
+              const href = src.archived_url ?? src.url;
+              return (
+                <li id={`source-${src.id}`} class="flex gap-3 py-3 text-sm scroll-mt-4">
+                  <span class="mt-0.5 shrink-0 font-mono text-xs text-muted">[{src.id}]</span>
+                  <div class="min-w-0">
+                    {pending
+                      ? <span class="font-medium">{src.title ?? 'Untitled source'}</span>
+                      : <a href={href} rel="noopener" class="font-medium link break-words">{src.title ?? src.url}</a>}{src.publisher && <span class="text-muted">, {src.publisher}</span>}
+                    <p class="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-muted">
+                      <span class={`rounded px-1.5 text-xs font-medium leading-5 ${trustTierClasses(src.trust_tier)}`}>
+                        {src.trust_tier.replace(/_/g, ' ')}
+                      </span>
+                      <span>Retrieved {formatDate(src.retrieved) ?? src.retrieved}</span>
+                      {pending
+                        ? <span class="text-pipeline">Link not yet confirmed</span>
+                        : src.archived_url
+                          ? <a class="link" href={src.archived_url}>Archived copy</a>
+                          : <span>Not yet archived</span>}
+                    </p>
+                  </div>
+                </li>
+              );
+            })}
           </ol>
 
           {tiersUsed.length > 0 && (
-            <details class="mt-5 text-xs text-gray-500 border-t border-gray-100 pt-4">
-              <summary class="cursor-pointer hover:text-gray-700 select-none font-medium">
-                About these source tiers
-              </summary>
+            <details class="mt-3 text-sm">
+              <summary class="cursor-pointer font-medium">What these source types mean</summary>
               <dl class="mt-3 space-y-2">
                 {tiersUsed.map(tier => (
                   <div class="flex items-start gap-2.5">
-                    <span class={`shrink-0 mt-0.5 px-1.5 py-0.5 rounded font-medium ${trustTierClasses(tier)}`}>
-                      {tier.replace(/_/g, ' ')}
-                    </span>
-                    <p class="text-gray-600">{trustTierDefsMap[tier] ?? ''}</p>
+                    <dt class={`shrink-0 rounded px-1.5 text-xs font-medium leading-5 ${trustTierClasses(tier)}`}>{tier.replace(/_/g, ' ')}</dt>
+                    <dd>{trustTierDefsMap[tier] ?? ''}</dd>
                   </div>
                 ))}
               </dl>
-              <p class="mt-3 text-gray-400">
-                Full ranking: <a href="/methodology" class="underline hover:text-gray-600">Methodology</a>
-                {' · '}
-                <a href="/glossary#trust-tier" class="underline hover:text-gray-600">Glossary</a>
-              </p>
             </details>
           )}
         </section>
       )}
+    </div>
 
-      <div id="report" class="mt-6 p-4 bg-gray-100 rounded-lg text-sm text-gray-600">
-        <strong>Found an error?</strong> Open an issue or pull request on <a href="https://github.com/tawandamoyo/africa-ai-data-tracker" class="underline hover:text-gray-800">GitHub</a>
-        with the corrected data and a source URL.
-      </div>
+    <aside class="space-y-8 text-sm" aria-label="Record details">
+      {(facility.operators?.length || facility.owners?.length || facility.tenants?.length) && (
+        <section aria-labelledby="entities-title">
+          <h2 id="entities-title" class="border-b border-rule pb-2 font-semibold">Who is involved</h2>
+          <dl class="mt-3 space-y-3">
+            {facility.operators?.length > 0 && (
+              <div>
+                <dt class="text-muted">{facility.operators.length > 1 ? 'Operators' : 'Operator'}</dt>
+                {facility.operators.map((op: string) => <dd><a class="hover:underline" href={`/operators/${slugify(op)}/`}>{op}</a></dd>)}
+              </div>
+            )}
+            {facility.owners?.length > 0 && (
+              <div>
+                <dt class="text-muted">{facility.owners.length > 1 ? 'Owners' : 'Owner'}</dt>
+                {facility.owners.map((ow: string) => <dd>{ow}</dd>)}
+              </div>
+            )}
+            {facility.tenants?.length > 0 && (
+              <div>
+                <dt class="text-muted">Known tenants{entitySf.confidence && ` (${entitySf.confidence})`}</dt>
+                {facility.tenants.map((t: string) => <dd>{t}</dd>)}
+                {entitySf.note && <dd class="mt-1 italic text-muted">{entitySf.note}</dd>}
+              </div>
+            )}
+          </dl>
+        </section>
+      )}
 
-    </main>
+      {facility.location && (
+        <section aria-labelledby="location-title">
+          <h2 id="location-title" class="border-b border-rule pb-2 font-semibold">Location</h2>
+          <p class="mt-3">{locationStr}</p>
+          {facility.location.lat != null && (
+            <p class="mt-1 num text-muted">
+              <a class="hover:underline" href={`https://www.openstreetmap.org/?mlat=${facility.location.lat}&mlon=${facility.location.lng}#map=12/${facility.location.lat}/${facility.location.lng}`}>
+                {facility.location.lat.toFixed(4)}, {facility.location.lng.toFixed(4)}
+              </a>
+            </p>
+          )}
+          {facility.location.precision && (
+            <p class="mt-1 text-muted">
+              {facility.location.precision === 'exact' ? 'Exact site coordinates.' : `Coordinates are ${facility.location.precision}-level, not the exact site.`}
+            </p>
+          )}
+        </section>
+      )}
 
-    <footer class="border-t border-gray-200 mt-16">
-      <div class="max-w-5xl mx-auto px-4 py-6 flex flex-wrap items-center justify-between gap-4 text-sm text-gray-400">
-        <span>Africa AI Datacenter Tracker — open data, CC-BY 4.0</span>
-        <div class="flex gap-4">
-          <a href="/glossary" class="hover:text-gray-600">Glossary</a>
-          <a href="/methodology" class="hover:text-gray-600">Methodology</a>
-          <a href="https://github.com/tawandamoyo/africa-ai-data-tracker" class="hover:text-gray-600">GitHub ↗</a>
-        </div>
-      </div>
-    </footer>
+      {hasTimeline && (
+        <section aria-labelledby="timeline-title">
+          <h2 id="timeline-title" class="border-b border-rule pb-2 font-semibold">Timeline</h2>
+          <dl class="mt-3 space-y-2">
+            {facility.timeline?.construction_start && (
+              <div><dt class="text-muted">Construction started</dt><dd>{formatDate(facility.timeline.construction_start)}</dd></div>
+            )}
+            {facility.timeline?.expected_operational && (
+              <div><dt class="text-muted">Expected online</dt><dd>{formatDate(facility.timeline.expected_operational)}</dd></div>
+            )}
+            {facility.timeline?.actual_operational && (
+              <div><dt class="text-muted">Operating since</dt><dd>{formatDate(facility.timeline.actual_operational)}</dd></div>
+            )}
+          </dl>
+        </section>
+      )}
 
-  </body>
-</html>
+      {facility.status_history?.length > 0 && (
+        <section aria-labelledby="history-title">
+          <h2 id="history-title" class="border-b border-rule pb-2 font-semibold">Status history</h2>
+          <ol class="mt-3 space-y-4">
+            {[...facility.status_history].reverse().map((h: any) => (
+              <li class="flex gap-3">
+                <StatusMark status={h.status} label={false} class="mt-1" />
+                <div>
+                  <p class="font-medium">{formatStatus(h.status)}, <time datetime={h.date}>{formatDate(h.date) ?? h.date}</time></p>
+                  {h.note && <p class="mt-0.5 text-muted">{h.note}</p>}
+                </div>
+              </li>
+            ))}
+          </ol>
+        </section>
+      )}
+
+      <section aria-labelledby="record-title">
+        <h2 id="record-title" class="border-b border-rule pb-2 font-semibold">Cite this record</h2>
+        <dl class="mt-3 grid grid-cols-1 grid-cols-[auto_1fr] gap-x-4 gap-y-1">
+          <dt class="text-muted">Record ID</dt><dd class="font-mono text-xs leading-5 break-all">{facility.id}</dd>
+          <dt class="text-muted">First tracked</dt><dd>{formatDate(facility.first_tracked) ?? 'Unknown'}</dd>
+          <dt class="text-muted">Last verified</dt><dd>{formatDate(facility.last_verified) ?? 'Unknown'}</dd>
+        </dl>
+        <div class="mt-3"><CiteBlock citation={recordCitation(facility)} /></div>
+      </section>
+
+      <section class="rounded border border-rule bg-white p-4" aria-labelledby="correct-title">
+        <h2 id="correct-title" class="font-semibold">Spotted an error?</h2>
+        <p class="mt-1 text-muted">Corrections are handled first. You don't need to be certain, just share what you found.</p>
+        <a class="mt-3 inline-block rounded bg-ink px-3 py-1.5 font-medium text-white hover:bg-black" href={issueUrl('source-correction')}>
+          Report a correction
+        </a>
+      </section>
+    </aside>
+  </div>
+</Base>

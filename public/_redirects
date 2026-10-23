@@ -1,0 +1,5 @@
+# The site launched on Netlify's default domain; send it and its links to the canonical domain.
+https://africadatacenters.netlify.app/*  https://africacomputetracker.org/:splat  301!
+
+# Conventional sitemap path, as on tawanda.dev.
+/sitemap.xml  /sitemap-index.xml  301

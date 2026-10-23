@@ -1,0 +1,74 @@
+---
+/**
+ * Shared body for country and operator collection pages: a generated summary, the status
+ * marks, a map and the facility table.
+ */
+import Map from './Map.astro';
+import FacilityTable from './FacilityTable.astro';
+import { summarise, countryName, facilityUrl, GROUP_LABEL } from '../lib/site.js';
+import { formatStatus, formatDate } from '../lib/formatters.js';
+
+interface Props {
+  title: string;
+  intro: string;
+  facilities: any[];
+  showCountry?: boolean;
+  crumbs: [string, string][];
+}
+
+const { title, intro, facilities, showCountry = true, crumbs } = Astro.props;
+const s = summarise(facilities);
+const groups = (['built', 'pipeline', 'stalled'] as const).filter(g => s.groups[g].length);
+---
+
+<nav aria-label="Breadcrumb" class="pt-6 text-sm text-muted">
+  <ol class="flex flex-wrap items-center gap-x-2">
+    {crumbs.map(([name, path], i) => (
+      <>
+        {i > 0 && <li aria-hidden="true">/</li>}
+        <li>
+          {i === crumbs.length - 1
+            ? <span aria-current="page" class="text-ink">{name}</span>
+            : <a href={path} class="hover:text-ink hover:underline">{name}</a>}
+        </li>
+      </>
+    ))}
+  </ol>
+</nav>
+
+<header class="mt-6 max-w-4xl">
+  <h1 class="text-3xl font-bold leading-tight tracking-tight sm:text-4xl">{title}</h1>
+  <p class="mt-4 max-w-prose text-lg text-muted">{intro}</p>
+</header>
+
+<div class="mt-8 flex flex-wrap items-end gap-x-10 gap-y-6" role="list" aria-label="Facilities grouped by status">
+  {groups.map(g => (
+    <div role="listitem">
+      <div class="flex gap-1.5">
+        {s.groups[g].map(f => (
+          <a href={facilityUrl(f)} class={`mark mark-lg mark-${g}`} aria-label={`${f.name}: ${formatStatus(f.status)}`} title={f.name}></a>
+        ))}
+      </div>
+      <p class="mt-2 text-sm"><span class="font-semibold num">{s.groups[g].length}</span> <span class="text-muted">{GROUP_LABEL[g].toLowerCase()}</span></p>
+    </div>
+  ))}
+  <p class="text-sm text-muted">
+    {s.disclosing === 0 ? (
+      <>{s.total === 1 ? 'This facility does not' : s.total === 2 ? 'Neither facility' : 'None of these facilities'} publish{s.total === 2 ? 'es' : ''} an IT-load figure.</>
+    ) : (
+      <>
+        IT load disclosed: <span class="font-semibold text-ink num">{s.liveMw} MW</span> running,
+        <span class="font-semibold text-ink num">{s.plannedMw} MW</span> planned.
+        {s.disclosing} of {s.total} publish a figure.
+      </>
+    )}
+  </p>
+</div>
+
+<section class="mt-10" aria-label="Facilities">
+  <Map facilities={facilities} class="mb-6" label={`Map of ${title.toLowerCase()}`} />
+  <FacilityTable facilities={facilities} showCountry={showCountry} caption={title} />
+  <p class="mt-3 text-sm text-muted">Records last verified up to {formatDate(s.lastVerified)}.</p>
+</section>
+
+<slot />

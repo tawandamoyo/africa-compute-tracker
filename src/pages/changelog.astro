@@ -1,0 +1,15 @@
+---
+import Base from '../layouts/Base.astro';
+import { Content } from '../../CHANGELOG.md';
+import { breadcrumbs } from '../lib/jsonld.js';
+---
+
+<Base
+  title="Changelog"
+  description="What changed in each release of the Africa Compute Tracker dataset: new records, status changes, corrections and scope updates."
+  schema={[breadcrumbs([['Home', '/'], ['Changelog', '/changelog/']])]}
+>
+  <article class="md md-page max-w-prose pt-10">
+    <Content />
+  </article>
+</Base>

@@ -1,0 +1,231 @@
+---
+import StatusMark from './StatusMark.astro';
+import { countryName, liveLoad, statusGroup, facilityUrl, GROUP_SHORT } from '../lib/site.js';
+import { formatDate } from '../lib/formatters.js';
+
+interface Props {
+  facilities: any[];
+  /** Show search, status and country controls (home page explorer). */
+  controls?: boolean;
+  caption: string;
+  /** Hide the country column on single-country pages. */
+  showCountry?: boolean;
+}
+
+const { facilities, controls = false, caption, showCountry = true } = Astro.props;
+
+const GROUP_ORDER = { built: 0, pipeline: 1, stalled: 2 };
+const counts = { built: 0, pipeline: 0, stalled: 0 };
+for (const f of facilities) counts[statusGroup(f.status)]++;
+const countries = [...new Set(facilities.map(f => f.country))].sort((a, b) =>
+  countryName(a).localeCompare(countryName(b))
+);
+const shortDate = (d: string) =>
+  d ? new Date(d + 'T00:00:00').toLocaleDateString('en-GB', { month: 'short', year: 'numeric' }) : '';
+---
+
+<div data-explorer class="not-prose">
+  {controls && (
+    <form class="mb-4 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between" role="search" onsubmit="return false">
+      <fieldset class="min-w-0">
+        <legend class="mb-1.5 text-sm font-medium">Status</legend>
+        <div class="flex flex-wrap gap-1.5">
+          {[['all', 'All', facilities.length], ...(['built', 'pipeline', 'stalled'] as const).map(g => [g, GROUP_SHORT[g], counts[g]])]
+            .filter(([, , n]) => (n as number) > 0)
+            .map(([value, label, n]) => (
+              <button
+                type="button"
+                data-group={value}
+                aria-pressed={value === 'all' ? 'true' : 'false'}
+                class="inline-flex items-center gap-2 rounded border border-rule bg-white px-3 py-1.5 text-sm hover:border-ink aria-pressed:border-ink aria-pressed:bg-ink aria-pressed:text-white"
+              >
+                {value !== 'all' && <span class={`mark mark-${value}`} aria-hidden="true"></span>}
+                {label}
+                <span class="num opacity-70">{n}</span>
+              </button>
+            ))}
+        </div>
+      </fieldset>
+      <div class="flex flex-col gap-3 sm:flex-row">
+        <label class="flex flex-col text-sm font-medium">
+          Country
+          <select data-country class="mt-1.5 rounded border border-rule bg-white px-3 py-2 font-normal">
+            <option value="">All countries</option>
+            {countries.map(c => <option value={c}>{countryName(c)}</option>)}
+          </select>
+        </label>
+        <label class="flex flex-col text-sm font-medium">
+          Search
+          <input
+            data-search
+            type="search"
+            placeholder="Name, city or operator"
+            autocomplete="off"
+            class="mt-1.5 w-full rounded border border-rule bg-white px-3 py-2 font-normal sm:w-64"
+          />
+        </label>
+      </div>
+    </form>
+  )}
+
+  <p data-count class="sr-only" aria-live="polite"></p>
+
+  <div class="overflow-hidden rounded border border-rule bg-white">
+    <table class="w-full text-left text-sm">
+      <caption class="sr-only">{caption}</caption>
+      <thead class="border-b border-rule bg-mist/60 text-muted">
+        <tr>
+          <th scope="col" aria-sort="ascending" class="px-4 py-2.5 font-medium">
+            <button type="button" data-sort="name" class="hover:text-ink">Facility</button>
+          </th>
+          {showCountry && (
+            <th scope="col" class="hidden px-4 py-2.5 font-medium md:table-cell">
+              <button type="button" data-sort="country" class="hover:text-ink">Country</button>
+            </th>
+          )}
+          <th scope="col" class="px-4 py-2.5 font-medium">
+            <button type="button" data-sort="status" class="hover:text-ink">Status</button>
+          </th>
+          <th scope="col" class="hidden px-4 py-2.5 text-right font-medium sm:table-cell">
+            <button type="button" data-sort="mw" class="hover:text-ink">IT load</button>
+          </th>
+          <th scope="col" class="hidden px-4 py-2.5 text-right font-medium lg:table-cell">
+            <button type="button" data-sort="verified" class="hover:text-ink">Verified</button>
+          </th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-rule">
+        {facilities.map(f => {
+          const live = liveLoad(f);
+          const planned = f.capacity?.it_load_mw;
+          const place = [f.city, showCountry ? null : f.region].filter(Boolean).join(', ');
+          const operators = (f.operators ?? []).join(', ');
+          return (
+            <tr
+              data-row
+              data-id={f.id}
+              data-group={statusGroup(f.status)}
+              data-country={f.country}
+              data-search={[f.name, ...(f.aliases ?? []), f.city, f.region, countryName(f.country), ...(f.operators ?? []), ...(f.owners ?? [])]
+                .filter(Boolean).join(' ').toLowerCase()}
+              data-sort-name={f.name.toLowerCase()}
+              data-sort-country={countryName(f.country)}
+              data-sort-status={GROUP_ORDER[statusGroup(f.status)]}
+              data-sort-mw={Math.max(live ?? -1, planned ?? -1)}
+              data-sort-verified={f.last_verified ?? ''}
+              class="group hover:bg-mist/70"
+            >
+              <td class="px-4 py-3 align-top">
+                <a href={facilityUrl(f)} class="font-semibold text-ink group-hover:underline">
+                  {f.name}
+                </a>
+                <p class="mt-0.5 text-muted">
+                  {place}{showCountry && <span class="md:hidden">{place ? ', ' : ''}{countryName(f.country)}</span>}
+                </p>
+                {operators && <p class="text-muted">{operators}</p>}
+              </td>
+              {showCountry && <td class="hidden px-4 py-3 align-top md:table-cell">{countryName(f.country)}</td>}
+              <td class="px-4 py-3 align-top whitespace-nowrap"><StatusMark status={f.status} /></td>
+              <td class="hidden px-4 py-3 text-right align-top num sm:table-cell">
+                {live == null && planned == null && <span class="text-muted">Not disclosed</span>}
+                {live != null && <span class="block">{live} MW <span class="text-muted">live</span></span>}
+                {planned != null && <span class="block">{planned} MW <span class="text-muted">planned</span></span>}
+              </td>
+              <td class="hidden px-4 py-3 text-right align-top text-muted lg:table-cell whitespace-nowrap">
+                <time datetime={f.last_verified} title={formatDate(f.last_verified) ?? ''}>{shortDate(f.last_verified)}</time>
+              </td>
+            </tr>
+          );
+        })}
+      </tbody>
+    </table>
+    <p data-empty hidden class="px-4 py-6 text-sm text-muted">
+      No facilities match these filters. <button type="button" data-reset class="link">Clear filters</button>
+    </p>
+  </div>
+</div>
+
+<script>
+  for (const root of document.querySelectorAll<HTMLElement>('[data-explorer]')) {
+    const tbody = root.querySelector('tbody')!;
+    const rows = [...root.querySelectorAll<HTMLTableRowElement>('[data-row]')];
+    const groupBtns = [...root.querySelectorAll<HTMLButtonElement>('button[data-group]')];
+    const countrySel = root.querySelector<HTMLSelectElement>('[data-country]');
+    const search = root.querySelector<HTMLInputElement>('[data-search]');
+    const count = root.querySelector<HTMLElement>('[data-count]')!;
+    const empty = root.querySelector<HTMLElement>('[data-empty]')!;
+    const hasControls = groupBtns.length > 0;
+
+    const state = { group: 'all', country: '', q: '', sort: 'name', dir: 1 };
+
+    if (hasControls) {
+      const params = new URLSearchParams(location.search);
+      state.group = params.get('status') ?? 'all';
+      state.country = params.get('country') ?? '';
+      state.q = params.get('q') ?? '';
+      if (countrySel) countrySel.value = state.country;
+      if (search) search.value = state.q;
+    }
+
+    function apply() {
+      const q = state.q.trim().toLowerCase();
+      let shown = 0;
+      const visibleIds: string[] = [];
+      for (const row of rows) {
+        const ok =
+          (state.group === 'all' || row.dataset.group === state.group) &&
+          (!state.country || row.dataset.country === state.country) &&
+          (!q || row.dataset.search!.includes(q));
+        row.hidden = !ok;
+        if (ok) { shown++; visibleIds.push(row.dataset.id!); }
+      }
+      for (const b of groupBtns) b.setAttribute('aria-pressed', String(b.dataset.group === state.group));
+      empty.hidden = shown > 0;
+      count.textContent = `Showing ${shown} of ${rows.length} facilities`;
+
+      if (hasControls) {
+        const params = new URLSearchParams();
+        if (state.group !== 'all') params.set('status', state.group);
+        if (state.country) params.set('country', state.country);
+        if (state.q) params.set('q', state.q);
+        const qs = params.toString();
+        history.replaceState(null, '', `${location.pathname}${qs ? `?${qs}` : ''}${location.hash}`);
+        (window as any).__facilityIds = visibleIds;
+        document.dispatchEvent(new CustomEvent('facilities:filter', { detail: { ids: visibleIds } }));
+      }
+    }
+
+    function sortBy(key: string) {
+      state.dir = state.sort === key ? -state.dir : key === 'mw' || key === 'verified' ? -1 : 1;
+      state.sort = key;
+      const val = (r: HTMLElement) => r.dataset[`sort${key[0].toUpperCase()}${key.slice(1)}`] ?? '';
+      const numeric = key === 'mw' || key === 'status';
+      rows.sort((a, b) => {
+        const [x, y] = [val(a), val(b)];
+        const c = numeric ? Number(x) - Number(y) : x.localeCompare(y);
+        return c * state.dir || a.dataset.sortName!.localeCompare(b.dataset.sortName!);
+      });
+      tbody.append(...rows);
+      for (const th of root.querySelectorAll('th')) {
+        const btn = th.querySelector<HTMLButtonElement>('[data-sort]');
+        if (btn?.dataset.sort === key) th.setAttribute('aria-sort', state.dir === 1 ? 'ascending' : 'descending');
+        else th.removeAttribute('aria-sort');
+      }
+    }
+
+    groupBtns.forEach(b => b.addEventListener('click', () => { state.group = b.dataset.group!; apply(); }));
+    countrySel?.addEventListener('change', () => { state.country = countrySel.value; apply(); });
+    search?.addEventListener('input', () => { state.q = search.value; apply(); });
+    root.querySelector('[data-reset]')?.addEventListener('click', () => {
+      Object.assign(state, { group: 'all', country: '', q: '' });
+      if (countrySel) countrySel.value = '';
+      if (search) search.value = '';
+      apply();
+    });
+    root.querySelectorAll<HTMLButtonElement>('[data-sort]').forEach(b =>
+      b.addEventListener('click', () => sortBy(b.dataset.sort!))
+    );
+
+    if (hasControls) apply();
+  }
+</script>
