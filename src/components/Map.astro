@@ -1,17 +1,31 @@
 ---
 import { statusGroup, countryName, facilityUrl } from '../lib/site.js';
 import { formatStatus } from '../lib/formatters.js';
+import { staticMap } from '../lib/staticMap.js';
 
 interface Props {
   facilities: any[];
   /** Accessible description of what the map shows. */
   label?: string;
-  /** Portrait frame for the home page hero; Africa is taller than it is wide. */
+  /** Portrait frame for the home page hero, framed on the whole continent. */
   tall?: boolean;
   class?: string;
 }
 
 const { facilities, label = 'Map of tracked facilities', tall = false, class: className } = Astro.props;
+
+// Default view: a static SVG drawn at build time (a few KB, no tiles, crawlable links).
+// The interactive MapLibre map loads into the same frame only when someone asks for it.
+const singleCountry = new Set(facilities.map(f => f.country)).size === 1;
+const svg = staticMap({
+  facilities,
+  width: tall ? 500 : 700,
+  height: tall ? 640 : 420,
+  frame: tall || !singleCountry ? 'africa' : 'fit',
+});
+const MARK = { w: 10, h: 17, gap: 3 };
+const rowWidth = (n: number) => n * MARK.w + (n - 1) * MARK.gap;
+const hatchId = 'map-hatch'; // one map per page
 
 // Many records use city-level coordinates, so several facilities share a point.
 // Spread exact duplicates on a small ring so each stays clickable when zoomed in.
@@ -55,17 +69,77 @@ const geojson = JSON.stringify({ type: 'FeatureCollection', features });
     role="region"
     aria-label={`${label}. The table below lists the same facilities.`}
     class:list={[
-      'w-full overflow-hidden rounded border border-rule bg-[#e9eef1]',
+      'relative w-full overflow-hidden rounded border border-rule bg-[#dfe6eb]',
       tall ? 'h-[420px] sm:h-[520px] lg:h-[640px]' : 'h-[360px] sm:h-[420px]',
     ]}
   >
-    <p data-map-placeholder class="flex h-full items-center justify-center text-sm text-muted">Loading map</p>
+    <svg
+      data-static-map
+      viewBox={`0 0 ${svg.width} ${svg.height}`}
+      preserveAspectRatio="xMidYMid meet"
+      class="absolute inset-0 h-full w-full"
+      aria-hidden="true"
+    >
+      <defs>
+        <pattern id={hatchId} width="4" height="4" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+          <rect width="4" height="4" fill="#fff" />
+          <rect width="1.6" height="4" fill="#65717C" />
+        </pattern>
+      </defs>
+      <g stroke="#fff" stroke-width="0.8" stroke-linejoin="round">
+        {svg.countries.map(c => <path d={c.d} fill={c.tracked ? '#c3ccd3' : '#eef1f3'} />)}
+      </g>
+      {svg.groups.map(g => {
+        const w = rowWidth(g.items.length);
+        const right = !g.labelLeft;
+        return (
+          <g transform={`translate(${g.x} ${g.y})`}>
+            <g data-pin>
+              <rect x={-w / 2 - 3} y={-MARK.h / 2 - 3} width={w + 6} height={MARK.h + 6} fill="#fff" rx="1.5" />
+              {g.items.map((it, i) => {
+                const x = -w / 2 + i * (MARK.w + MARK.gap);
+                const y = -MARK.h / 2;
+                return (
+                  <a href={it.url} tabindex="-1" data-id={it.id}>
+                    <title>{`${it.name}: ${it.status}, ${it.place}`}</title>
+                    {it.group === 'built' && <rect x={x} y={y} width={MARK.w} height={MARK.h} fill="#0B7A5F" />}
+                    {it.group === 'pipeline' && <rect x={x + 1} y={y + 1} width={MARK.w - 2} height={MARK.h - 2} fill="#fff" stroke="#A35F00" stroke-width="2" />}
+                    {it.group === 'stalled' && <rect x={x + 1} y={y + 1} width={MARK.w - 2} height={MARK.h - 2} fill={`url(#${hatchId})`} stroke="#65717C" stroke-width="2" />}
+                  </a>
+                );
+              })}
+              {g.label && (
+                <text
+                  x={right ? w / 2 + 7 : -w / 2 - 7}
+                  y="4"
+                  text-anchor={right ? 'start' : 'end'}
+                  font-size="12"
+                  fill="#15212C"
+                  stroke="#fff"
+                  stroke-width="3"
+                  paint-order="stroke"
+                  style="font-family: inherit"
+                >{g.label}</text>
+              )}
+            </g>
+          </g>
+        );
+      })}
+    </svg>
+    <button
+      type="button"
+      data-map-load
+      class="absolute bottom-3 right-3 rounded border border-rule bg-white px-3 py-1.5 text-sm font-medium text-ink shadow-sm hover:border-ink"
+    >
+      Explore interactive map
+    </button>
   </div>
   <figcaption class="mt-2 flex flex-wrap gap-x-5 gap-y-1 text-sm text-muted">
     <span class="inline-flex items-center gap-2"><span class="mark mark-built" aria-hidden="true"></span>Operating</span>
     <span class="inline-flex items-center gap-2"><span class="mark mark-pipeline" aria-hidden="true"></span>Announced or under construction</span>
     <span class="inline-flex items-center gap-2"><span class="mark mark-stalled" aria-hidden="true"></span>Paused or cancelled</span>
-    <span>Numbered circles group nearby sites; the green badge counts how many are operating. Most pins are placed at city level, not the exact site.</span>
+    <span data-caption-static>Nearby sites share a row. Most are placed at city level, not the exact site.</span>
+    <span data-caption-live hidden>Numbered circles group nearby sites; the green badge counts how many are operating. Most are placed at city level, not the exact site.</span>
   </figcaption>
 </figure>
 
@@ -108,13 +182,27 @@ const geojson = JSON.stringify({ type: 'FeatureCollection', features });
     return ctx.getImageData(0, 0, s, s);
   }
 
+  // The stylesheet is injected on demand: imported as plain CSS, Astro would link it in every page head.
+  import maplibreCss from 'maplibre-gl/dist/maplibre-gl.css?url';
+
+  function loadCss(href: string) {
+    return new Promise<void>((resolve, reject) => {
+      if (document.querySelector(`link[href="${href}"]`)) return resolve();
+      const link = Object.assign(document.createElement('link'), { rel: 'stylesheet', href });
+      link.onload = () => resolve();
+      link.onerror = reject;
+      document.head.append(link);
+    });
+  }
+
   async function init(el: HTMLElement) {
-    const [{ default: maplibregl }] = await Promise.all([
-      import('maplibre-gl'),
-      import('maplibre-gl/dist/maplibre-gl.css'),
-    ]);
+    const [{ default: maplibregl }] = await Promise.all([import('maplibre-gl'), loadCss(maplibreCss)]);
     const data = JSON.parse(el.dataset.geojson ?? '{"type":"FeatureCollection","features":[]}');
-    el.querySelector('[data-map-placeholder]')?.remove();
+    el.querySelector('[data-static-map]')?.remove();
+    el.querySelector('[data-map-load]')?.remove();
+    const figure = el.closest('figure');
+    figure?.querySelector<HTMLElement>('[data-caption-static]')?.setAttribute('hidden', '');
+    figure?.querySelector<HTMLElement>('[data-caption-live]')?.removeAttribute('hidden');
 
     const map = new maplibregl.Map({
       container: el,
@@ -253,19 +341,41 @@ const geojson = JSON.stringify({ type: 'FeatureCollection', features });
     });
   }
 
+  // Static map: keep marks a constant on-screen size whatever the frame's scale, and dim
+  // facilities hidden by the table filters.
+  function setupStatic(el: HTMLElement) {
+    const svg = el.querySelector<SVGSVGElement>('[data-static-map]');
+    if (!svg) return;
+    const pins = [...svg.querySelectorAll<SVGGElement>('[data-pin]')];
+    const rescale = () => {
+      const k = svg.getScreenCTM()?.a;
+      if (k) pins.forEach(p => p.setAttribute('transform', `scale(${1 / k})`));
+    };
+    rescale();
+    new ResizeObserver(rescale).observe(el);
+
+    const show = (list: string[]) => {
+      const ids = new Set(list);
+      svg.querySelectorAll<SVGAElement>('a[data-id]').forEach(a => {
+        a.style.opacity = ids.has(a.dataset.id!) ? '' : '0.15';
+      });
+    };
+    const initial = (window as any).__facilityIds as string[] | undefined;
+    if (initial) show(initial);
+    document.addEventListener('facilities:filter', (e: Event) => show((e as CustomEvent).detail.ids));
+  }
+
   for (const el of document.querySelectorAll<HTMLElement>('[data-map]')) {
-    const io = new IntersectionObserver(
-      entries => {
-        if (entries.some(e => e.isIntersecting)) {
-          io.disconnect();
-          init(el).catch(err => {
-            console.error('Map failed to load', err);
-            el.innerHTML = '<p class="flex h-full items-center justify-center p-4 text-sm text-muted">The map could not load. All facilities are listed in the table.</p>';
-          });
-        }
-      },
-      { rootMargin: '200px' }
-    );
-    io.observe(el);
+    setupStatic(el);
+    el.querySelector('[data-map-load]')?.addEventListener('click', e => {
+      const button = e.currentTarget as HTMLButtonElement;
+      button.disabled = true;
+      button.textContent = 'Loading map';
+      init(el).catch(err => {
+        console.error('Map failed to load', err);
+        button.disabled = false;
+        button.textContent = 'Map could not load. Try again';
+      });
+    });
   }
 </script>

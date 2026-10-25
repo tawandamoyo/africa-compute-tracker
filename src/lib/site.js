@@ -9,7 +9,7 @@ const cff = yaml.load(readFileSync(join(process.cwd(), 'CITATION.cff'), 'utf-8')
 export const SITE = {
   name: 'Africa Compute Tracker',
   url: 'https://africacomputetracker.org',
-  tagline: 'AI data centres across Africa, sourced and mapped',
+  tagline: 'AI data centres, built vs announced',
   description:
     'An open, citable dataset of AI-relevant data centres across Africa. Every figure has a source, a trust tier and a verification date, and announced projects are kept apart from what is actually running.',
   repo: 'https://github.com/tawandamoyo/africa-compute-tracker',
@@ -25,17 +25,17 @@ export const issueUrl = (template) =>
   `${SITE.repo}/issues/new${template ? `?template=${template}.yml` : '/choose'}`;
 
 export const COUNTRIES = {
-  ZA: { name: 'South Africa', slug: 'south-africa' },
-  KE: { name: 'Kenya', slug: 'kenya' },
-  NG: { name: 'Nigeria', slug: 'nigeria' },
-  EG: { name: 'Egypt', slug: 'egypt' },
-  MA: { name: 'Morocco', slug: 'morocco' },
-  GH: { name: 'Ghana', slug: 'ghana' },
-  ET: { name: 'Ethiopia', slug: 'ethiopia' },
-  RW: { name: 'Rwanda', slug: 'rwanda' },
-  CI: { name: "Côte d'Ivoire", slug: 'cote-divoire' },
-  TN: { name: 'Tunisia', slug: 'tunisia' },
-  SN: { name: 'Senegal', slug: 'senegal' },
+  ZA: { name: 'South Africa', slug: 'south-africa', iso: 710 },
+  KE: { name: 'Kenya', slug: 'kenya', iso: 404 },
+  NG: { name: 'Nigeria', slug: 'nigeria', iso: 566 },
+  EG: { name: 'Egypt', slug: 'egypt', iso: 818 },
+  MA: { name: 'Morocco', slug: 'morocco', iso: 504 },
+  GH: { name: 'Ghana', slug: 'ghana', iso: 288 },
+  ET: { name: 'Ethiopia', slug: 'ethiopia', iso: 231 },
+  RW: { name: 'Rwanda', slug: 'rwanda', iso: 646 },
+  CI: { name: "Côte d'Ivoire", slug: 'cote-divoire', iso: 384 },
+  TN: { name: 'Tunisia', slug: 'tunisia', iso: 788 },
+  SN: { name: 'Senegal', slug: 'senegal', iso: 686 },
 };
 
 export const countryName = (code) => COUNTRIES[code]?.name ?? code;

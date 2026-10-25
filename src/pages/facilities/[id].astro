@@ -186,6 +186,13 @@ const trustTierDefsMap = trustTierDefs as Record<string, string>;
 // --- Page metadata -------------------------------------------------------------------------
 const country = countryName(facility.country);
 const place = [facility.city, country].filter(Boolean).join(', ');
+// Search results cut titles at about 60 characters: skip place names the facility name already
+// carries, and drop the city if it still runs long (Base drops the site name after that).
+const titlePlace = [facility.city, country].filter(p => p && !facility.name.includes(p));
+const pageTitle =
+  [facility.name, ...titlePlace].join(', ').length + 25 <= 60
+    ? [facility.name, ...titlePlace].join(', ')
+    : [facility.name, ...titlePlace.filter(p => p === country)].join(', ');
 const operatorsStr = (facility.operators ?? []).join(' and ');
 const statusPhrase: Record<string, string> = {
   operational: 'an operating',
@@ -255,7 +262,7 @@ const placeholderCount = (facility.sources ?? []).filter((x: any) => isPlacehold
 ---
 
 <Base
-  title={`${facility.name}, ${place}`}
+  title={pageTitle}
   description={metaDescription}
   ogType="article"
   ogImage={`/og/facilities/${facility.id}.png`}
@@ -479,11 +486,11 @@ const placeholderCount = (facility.sources ?? []).filter((x: any) => isPlacehold
       {(facility.constraints as any[])?.filter((c: any) => c).length > 0 && (
         <section aria-labelledby="constraints-title">
           <h2 id="constraints-title" class="border-b border-rule pb-2 text-xl font-semibold">Constraints</h2>
-          <dl>
+          <div>
             {((facility.constraints as any[]) ?? []).map((constraint: any) => (
               <ConstraintBadge constraint={constraint} sourceMap={sourceMap} />
             ))}
-          </dl>
+          </div>
         </section>
       )}
 

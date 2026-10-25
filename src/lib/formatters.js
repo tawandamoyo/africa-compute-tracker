@@ -69,9 +69,9 @@ export function coolingAiColor(val) {
     inference_only: 'bg-gray-100 text-gray-600',
     ai_capable: 'bg-indigo-100 text-indigo-800',
     frontier_training: 'bg-purple-100 text-purple-800',
-    unknown: 'bg-gray-50 text-gray-400',
+    unknown: 'bg-gray-100 text-gray-600',
   };
-  return map[val] ?? 'bg-gray-50 text-gray-400';
+  return map[val] ?? 'bg-gray-100 text-gray-600';
 }
 
 export function confidenceClasses(confidence) {
